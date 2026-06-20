@@ -1,0 +1,46 @@
+// Mazza Advocacia brand overrides
+// Replaces Chatwoot blue (#2781F6) with Mazza gold (#D4AF37) across the design system.
+// These override the --blue-* CSS variables defined in _next-colors.scss.
+@layer base {
+  :root {
+    --blue-1: 254 252 245;
+    --blue-2: 253 248 225;
+    --blue-3: 251 240 190;
+    --blue-4: 248 228 150;
+    --blue-5: 243 215 110;
+    --blue-6: 236 199 80;
+    --blue-7: 225 185 70;
+    --blue-8: 212 168 52;
+    --blue-9: 212 175 55;
+    --blue-10: 190 155 40;
+    --blue-11: 155 120 15;
+    --blue-12: 70 50 5;
+
+    --border-blue-strong: 120 90 10;
+    --border-blue: 212, 175, 55, 0.5;
+    --solid-blue: 248 228 150;
+    --solid-blue-2: 254 252 245;
+    --text-blue: 50 35 2;
+  }
+
+  .dark {
+    --blue-1: 28 24 5;
+    --blue-2: 42 36 8;
+    --blue-3: 65 54 12;
+    --blue-4: 88 72 16;
+    --blue-5: 108 88 20;
+    --blue-6: 128 104 24;
+    --blue-7: 152 124 30;
+    --blue-8: 178 148 40;
+    --blue-9: 212 175 55;
+    --blue-10: 228 192 75;
+    --blue-11: 243 214 120;
+    --blue-12: 254 248 220;
+
+    --border-blue-strong: 230 200 100;
+    --border-blue: 212, 175, 55, 0.5;
+    --solid-blue: 88 72 16;
+    --solid-blue-2: 28 24 5;
+    --text-blue: 254 248 220;
+  }
+}
