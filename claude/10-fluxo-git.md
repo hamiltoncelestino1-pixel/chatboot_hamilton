@@ -27,6 +27,23 @@ develop  ●────●────●────────────�
 | **Pull Request (PR)** | Pedido de "juntar minha branch na develop" — onde o colega revisa |
 | **conflito** | Os dois editaram a MESMA linha do MESMO arquivo; um humano decide |
 
+## ✋ Antes de começar QUALQUER tarefa (checklist rápido)
+
+Hábito obrigatório — **sempre confira em que branch você está e parta da `develop`
+atualizada**, nunca comece a editar sem isso:
+
+```bash
+git branch --show-current      # 1. EM QUAL branch estou?
+git checkout develop           # 2. volto pro tronco
+git pull origin develop        # 3. atualizo (pego o que o colega já mergeou)
+git checkout -b feature/minha-tarefa   # 4. crio a branch da tarefa
+git branch --show-current      # 5. confirmo que estou na branch nova
+```
+
+Por que isso importa: se você começar a codar direto na `develop` (ou numa branch
+antiga/errada), corre o risco de commitar no lugar errado, misturar tarefas e gerar
+conflitos chatos. 30 segundos de verificação evitam horas de dor de cabeça.
+
 ## Fluxo do dia a dia
 
 ```bash
