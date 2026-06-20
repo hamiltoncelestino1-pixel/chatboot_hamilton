@@ -22,6 +22,19 @@ module SortHandler
       order(generate_sql_query("(waiting_since IS NULL), waiting_since #{sort_direction.to_s.upcase}, created_at ASC"))
     end
 
+    def sort_on_last_unread_message_at(sort_direction = :desc)
+      sql = <<~SQL.squish
+        CASE
+          WHEN conversations.agent_last_seen_at IS NULL
+            OR conversations.last_activity_at > conversations.agent_last_seen_at
+          THEN conversations.last_activity_at
+          ELSE NULL
+        END #{sort_direction.to_s.upcase} NULLS LAST,
+        conversations.last_activity_at DESC
+      SQL
+      order(generate_sql_query(sql))
+    end
+
     def last_messaged_conversations
       Message.except(:order).select(
         'DISTINCT ON (conversation_id) conversation_id, id, created_at, message_type'

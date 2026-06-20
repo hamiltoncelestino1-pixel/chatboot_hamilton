@@ -117,6 +117,8 @@ const SORT_OPTIONS = {
   waiting_since_asc: ['sortOnWaitingSince', 'asc'],
   waiting_since_desc: ['sortOnWaitingSince', 'desc'],
   priority_desc_created_at_asc: ['sortOnPriorityCreatedAt', 'desc'],
+  last_unread_message_at_desc: ['sortOnLastUnreadMessageAt', 'desc'],
+  last_unread_message_at_asc: ['sortOnLastUnreadMessageAt', 'asc'],
 };
 const sortAscending = (valueA, valueB) => valueA - valueB;
 const sortDescending = (valueA, valueB) => valueB - valueA;
@@ -158,6 +160,20 @@ const sortConfig = {
     }
 
     return sortFunc(a.waiting_since, b.waiting_since);
+  },
+
+  sortOnLastUnreadMessageAt: (a, b, sortDirection) => {
+    const aHasUnread =
+      !a.agent_last_seen_at || a.last_activity_at > a.agent_last_seen_at;
+    const bHasUnread =
+      !b.agent_last_seen_at || b.last_activity_at > b.agent_last_seen_at;
+
+    if (aHasUnread !== bHasUnread) return aHasUnread ? -1 : 1;
+
+    return getSortOrderFunction(sortDirection)(
+      a.last_activity_at,
+      b.last_activity_at
+    );
   },
 };
 
