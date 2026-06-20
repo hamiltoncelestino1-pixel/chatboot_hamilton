@@ -47,6 +47,23 @@ export const buildTemplateParameters = (template, hasMediaHeaderValue) => {
     });
   }
 
+  // Process header TEXT variables
+  if (
+    headerComponent?.format === 'TEXT' &&
+    headerComponent.text?.includes('{{')
+  ) {
+    const headerVars = [
+      ...new Set(headerComponent.text.match(/{{([^}]+)}}/g) || []),
+    ];
+    if (headerVars.length) {
+      allVariables.header = {};
+      headerVars.forEach(v => {
+        const key = v.replace(/{{|}}/g, '');
+        allVariables.header[key] = '';
+      });
+    }
+  }
+
   if (hasMediaHeaderValue) {
     if (!allVariables.header) allVariables.header = {};
     allVariables.header.media_url = '';

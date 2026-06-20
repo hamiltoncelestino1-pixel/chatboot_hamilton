@@ -41,7 +41,7 @@ class Whatsapp::TemplateProcessorService
     processed_params ||= template_params['processed_params']
     components = []
 
-    components.concat(process_header_components(processed_params))
+    components.concat(process_header_components(processed_params, template))
     components.concat(process_body_components(processed_params, template))
     components.concat(process_footer_components(processed_params))
     components.concat(process_button_components(processed_params))
@@ -49,14 +49,15 @@ class Whatsapp::TemplateProcessorService
     @template_params = components
   end
 
-  def process_header_components(processed_params)
+  def process_header_components(processed_params, template = nil)
     return [] if processed_params['header'].blank?
 
-    header_params = build_header_params(processed_params['header'])
+    header_params = build_header_params(processed_params['header'], template)
     header_params.present? ? [{ type: 'header', parameters: header_params }] : []
   end
 
-  def build_header_params(header_data)
+  def build_header_params(header_data, template = nil)
+    parameter_format = template&.dig('parameter_format')
     header_params = []
     header_data.each do |key, value|
       next if value.blank?
@@ -66,7 +67,11 @@ class Whatsapp::TemplateProcessorService
         media_param = parameter_builder.build_media_parameter(value, header_data['media_type'], media_name)
         header_params << media_param if media_param
       elsif key != 'media_type' && key != 'media_name'
-        header_params << parameter_builder.build_parameter(value)
+        if parameter_format == 'NAMED'
+          header_params << parameter_builder.build_named_parameter(key, value)
+        else
+          header_params << parameter_builder.build_parameter(value)
+        end
       end
     end
     header_params

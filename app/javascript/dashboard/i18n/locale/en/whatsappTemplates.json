@@ -41,7 +41,11 @@
       "COUPON_CODE": "Enter coupon code (max 15 chars)",
       "MEDIA_URL_LABEL": "Enter {type} URL",
       "DOCUMENT_NAME_PLACEHOLDER": "Enter document filename (e.g., Invoice_2025.pdf)",
-      "BUTTON_PARAMETER": "Enter button parameter"
+      "BUTTON_PARAMETER": "Enter button parameter",
+      "HEADER_VARIABLES": "Header variables",
+      "UPLOAD_FILE": "Click to upload file",
+      "UPLOADING": "Uploading...",
+      "OR": "or"
     }
   }
 }
