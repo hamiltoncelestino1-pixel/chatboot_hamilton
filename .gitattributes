@@ -1,0 +1,6 @@
+# Scripts executados dentro de containers Linux PRECISAM de fim de linha LF.
+# Sem isto, o core.autocrlf=true do Windows reconverte para CRLF no checkout
+# e quebra os entrypoints do Docker (shebang "#!/bin/sh\r": no such file or directory).
+*.sh                          text eol=lf
+docker/entrypoints/**         text eol=lf
+bin/*                         text eol=lf
