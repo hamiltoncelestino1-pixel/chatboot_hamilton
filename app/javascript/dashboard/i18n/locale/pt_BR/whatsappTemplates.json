@@ -41,7 +41,11 @@
       "COUPON_CODE": "Digite o código do cupom (máx. 15 caracteres)",
       "MEDIA_URL_LABEL": "Digite a URL {type}",
       "DOCUMENT_NAME_PLACEHOLDER": "Informe o nome do arquivo do documento (ex.: Comprovante_2025.pdf)",
-      "BUTTON_PARAMETER": "Insira o parâmetro do botão"
+      "BUTTON_PARAMETER": "Insira o parâmetro do botão",
+      "HEADER_VARIABLES": "Variáveis do cabeçalho",
+      "UPLOAD_FILE": "Clique para enviar arquivo",
+      "UPLOADING": "Enviando...",
+      "OR": "ou"
     }
   }
 }

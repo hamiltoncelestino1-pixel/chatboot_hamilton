@@ -14,6 +14,7 @@ import { requiredIf } from '@vuelidate/validators';
 import { useI18n } from 'vue-i18n';
 
 import Input from 'dashboard/components-next/input/Input.vue';
+import { uploadFile } from 'dashboard/helper/uploadHelper';
 import {
   buildTemplateParameters,
   allKeysRequired,
@@ -42,6 +43,7 @@ const emit = defineEmits(['sendMessage', 'resetTemplate', 'back']);
 const { t } = useI18n();
 
 const processedParams = ref({});
+const isUploading = ref(false);
 
 const languageLabel = computed(() => {
   return `${t('WHATSAPP_TEMPLATES.PARSER.LANGUAGE')}: ${props.template.language || DEFAULT_LANGUAGE}`;
@@ -76,8 +78,29 @@ const isDocumentTemplate = computed(() => {
   return headerComponent.value?.format?.toLowerCase() === 'document';
 });
 
+const acceptedMediaTypes = computed(() => {
+  const format = headerComponent.value?.format;
+  if (format === 'IMAGE') return 'image/*';
+  if (format === 'VIDEO') return 'video/*';
+  if (format === 'DOCUMENT') return '.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx';
+  return '*';
+});
+
 const hasVariables = computed(() => {
-  return bodyText.value?.match(/{{([^}]+)}}/g) !== null;
+  const bodyHasVars = bodyText.value?.match(/{{([^}]+)}}/g) !== null;
+  const headerHasVars =
+    headerComponent.value?.format === 'TEXT' &&
+    !!headerComponent.value?.text?.match(/{{([^}]+)}}/g);
+  return bodyHasVars || headerHasVars;
+});
+
+const renderedHeader = computed(() => {
+  const text = headerComponent.value?.text;
+  if (!text) return '';
+  return text.replace(/{{([^}]+)}}/g, (match, variable) => {
+    const key = variable.replace(/{{|}}/g, '');
+    return processedParams.value.header?.[key] || `{{${variable}}}`;
+  });
 });
 
 const renderedTemplate = computed(() => {
@@ -97,6 +120,13 @@ const isFormInvalid = computed(() => {
     );
     if (hasEmptyBodyVariable) return true;
   }
+
+  const headerTextVars = processedParams.value.header;
+  const hasUnfilledHeaderVars =
+    headerTextVars &&
+    !hasMediaHeader.value &&
+    Object.values(headerTextVars).some(v => !v);
+  if (hasUnfilledHeaderVars) return true;
 
   if (processedParams.value.buttons) {
     const hasEmptyButtonParameter = processedParams.value.buttons.some(
@@ -125,9 +155,25 @@ const initializeTemplateParameters = () => {
   );
 };
 
+const updateHeaderVariable = (key, value) => {
+  processedParams.value.header[key] = value;
+};
+
 const updateMediaUrl = value => {
   processedParams.value.header ??= {};
   processedParams.value.header.media_url = value;
+};
+
+const handleMediaUpload = async event => {
+  const file = event.target.files[0];
+  if (!file) return;
+  isUploading.value = true;
+  try {
+    const { fileUrl } = await uploadFile(file);
+    updateMediaUrl(fileUrl);
+  } finally {
+    isUploading.value = false;
+  }
 };
 
 const updateMediaName = value => {
@@ -179,8 +225,10 @@ defineExpose({
   hasMediaHeader,
   isDocumentTemplate,
   headerComponent,
+  renderedHeader,
   renderedTemplate,
   v$,
+  updateHeaderVariable,
   updateMediaUrl,
   updateMediaName,
   sendMessage,
@@ -203,6 +251,12 @@ defineExpose({
 
       <div class="flex flex-col gap-2">
         <div class="rounded-md">
+          <div
+            v-if="renderedHeader"
+            class="text-sm font-semibold whitespace-pre-wrap text-n-slate-12 mb-1"
+          >
+            {{ renderedHeader }}
+          </div>
           <div class="text-sm whitespace-pre-wrap text-n-slate-12">
             {{ renderedTemplate }}
           </div>
@@ -223,6 +277,32 @@ defineExpose({
             }) || `${formatType} Header`
           }}
         </p>
+
+        <!-- Upload direto -->
+        <label
+          class="flex items-center justify-center w-full p-3 mb-2.5 border-2 border-dashed rounded-lg cursor-pointer border-slate-300 hover:border-woot-500 transition-colors"
+        >
+          <input
+            type="file"
+            class="hidden"
+            :accept="acceptedMediaTypes"
+            @change="handleMediaUpload"
+          />
+          <span class="text-sm text-n-slate-11">
+            {{
+              isUploading
+                ? $t('WHATSAPP_TEMPLATES.PARSER.UPLOADING')
+                : $t('WHATSAPP_TEMPLATES.PARSER.UPLOAD_FILE')
+            }}
+          </span>
+        </label>
+
+        <!-- Separador -->
+        <p class="text-xs text-center text-n-slate-11 mb-2.5">
+          {{ $t('WHATSAPP_TEMPLATES.PARSER.OR') }}
+        </p>
+
+        <!-- URL manual -->
         <div class="flex items-center mb-2.5">
           <Input
             :model-value="processedParams.header?.media_url || ''"
@@ -236,6 +316,14 @@ defineExpose({
             @update:model-value="updateMediaUrl"
           />
         </div>
+
+        <!-- Preview da URL definida -->
+        <p
+          v-if="processedParams.header?.media_url"
+          class="text-xs text-n-slate-11 truncate mb-2.5"
+        >
+          {{ processedParams.header.media_url }}
+        </p>
         <div v-if="isDocumentTemplate" class="flex items-center mb-2.5">
           <Input
             :model-value="processedParams.header?.media_name || ''"
@@ -245,6 +333,30 @@ defineExpose({
               t('WHATSAPP_TEMPLATES.PARSER.DOCUMENT_NAME_PLACEHOLDER')
             "
             @update:model-value="updateMediaName"
+          />
+        </div>
+      </div>
+
+      <!-- Header TEXT Variables Section -->
+      <div v-if="!hasMediaHeader && processedParams.header" class="mb-4">
+        <p class="mb-2.5 text-sm font-semibold">
+          {{ $t('WHATSAPP_TEMPLATES.PARSER.HEADER_VARIABLES') }}
+        </p>
+        <div
+          v-for="(value, key) in processedParams.header"
+          :key="`header-${key}`"
+          class="flex items-center mb-2.5"
+        >
+          <Input
+            :model-value="value"
+            type="text"
+            class="flex-1"
+            :placeholder="
+              t('WHATSAPP_TEMPLATES.PARSER.VARIABLE_PLACEHOLDER', {
+                variable: key,
+              })
+            "
+            @update:model-value="updateHeaderVariable(key, $event)"
           />
         </div>
       </div>
