@@ -24,8 +24,14 @@ class FilterService
   def filter_operation(query_hash, current_index)
     case query_hash[:filter_operator]
     when 'equal_to', 'not_equal_to'
-      @filter_values["value_#{current_index}"] = filter_values(query_hash)
-      equals_to_filter_string(query_hash[:filter_operator], current_index)
+      attribute_data_type = standard_attribute_data_type(query_hash['attribute_key'])
+      if attribute_data_type == 'date'
+        @filter_values["value_#{current_index}"] = Date.iso8601(query_hash['values'][0].to_s)
+        query_hash[:filter_operator] == 'equal_to' ? "= :value_#{current_index}" : "!= :value_#{current_index}"
+      else
+        @filter_values["value_#{current_index}"] = filter_values(query_hash)
+        equals_to_filter_string(query_hash[:filter_operator], current_index)
+      end
     when 'contains', 'does_not_contain'
       @filter_values["value_#{current_index}"] = values_for_ilike(query_hash)
       ilike_filter_string(query_hash[:filter_operator], current_index)

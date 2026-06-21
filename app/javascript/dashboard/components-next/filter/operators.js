@@ -123,6 +123,7 @@ export function useOperators() {
 
   /** @type {import('vue').ComputedRef<Array<Operator>>} */
   const dateOperators = computed(() => [
+    operators.value[FILTER_OPS.EQUAL_TO],
     operators.value[FILTER_OPS.IS_GREATER_THAN],
     operators.value[FILTER_OPS.IS_LESS_THAN],
     operators.value[FILTER_OPS.DAYS_BEFORE],
