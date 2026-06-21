@@ -62,7 +62,8 @@
       "CUSTOM_ATTRIBUTE_LINK": "Link",
       "CUSTOM_ATTRIBUTE_CHECKBOX": "Checkbox",
       "CREATED_AT": "Criado em",
-      "LAST_ACTIVITY": "Última atividade"
+      "LAST_ACTIVITY": "Última atividade",
+      "HAS_UNREAD_MESSAGES": "Tem mensagens não lidas"
     },
     "ERRORS": {
       "VALUE_REQUIRED": "Valor obrigatório",

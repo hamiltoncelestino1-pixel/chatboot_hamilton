@@ -247,6 +247,16 @@ export function useConversationFilterContext() {
       filterOperators: dateOperators.value,
       attributeModel: 'standard',
     },
+    {
+      attributeKey: CONVERSATION_ATTRIBUTES.HAS_UNREAD_MESSAGES,
+      value: CONVERSATION_ATTRIBUTES.HAS_UNREAD_MESSAGES,
+      attributeName: t('FILTER.ATTRIBUTES.HAS_UNREAD_MESSAGES'),
+      label: t('FILTER.ATTRIBUTES.HAS_UNREAD_MESSAGES'),
+      inputType: 'booleanSelect',
+      dataType: 'text',
+      filterOperators: equalityOperators.value,
+      attributeModel: 'standard',
+    },
     ...customFilterTypes.value,
   ]);
 

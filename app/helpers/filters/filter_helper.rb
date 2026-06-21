@@ -67,6 +67,8 @@ module Filters::FilterHelper
       tag_filter_query(query_hash, current_index)
     when 'text_case_insensitive'
       text_case_insensitive_filter(query_hash, filter_operator_value)
+    when 'boolean_virtual'
+      virtual_boolean_filter(query_hash)
     else
       default_filter(query_hash, filter_operator_value)
     end
@@ -84,6 +86,22 @@ module Filters::FilterHelper
 
   def default_filter(query_hash, filter_operator_value)
     "#{filter_config[:table_name]}.#{query_hash[:attribute_key]} #{filter_operator_value} #{query_hash[:query_operator]}"
+  end
+
+  def virtual_boolean_filter(query_hash)
+    is_true = query_hash['values'].first.to_s == 'true'
+    negate = query_hash[:filter_operator] == 'not_equal_to'
+    has_unread = is_true ^ negate
+
+    if has_unread
+      "(conversations.agent_last_seen_at IS NULL " \
+        "OR conversations.last_activity_at > conversations.agent_last_seen_at) " \
+        "#{query_hash[:query_operator]}"
+    else
+      "(conversations.agent_last_seen_at IS NOT NULL " \
+        "AND conversations.last_activity_at <= conversations.agent_last_seen_at) " \
+        "#{query_hash[:query_operator]}"
+    end
   end
 
   def validate_single_condition(condition)

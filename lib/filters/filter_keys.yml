@@ -110,6 +110,11 @@ conversations:
       - "is_greater_than"
       - "is_less_than"
       - "days_before"
+  has_unread_messages:
+    attribute_type: "standard"
+    data_type: "boolean_virtual"
+    filter_operators:
+      - "equal_to"
   mail_subject:
     attribute_type: "additional_attributes"
     data_type: "text"

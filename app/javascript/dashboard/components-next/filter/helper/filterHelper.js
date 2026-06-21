@@ -14,6 +14,7 @@ export const CONVERSATION_ATTRIBUTES = {
   REFERER: 'referer',
   CREATED_AT: 'created_at',
   LAST_ACTIVITY_AT: 'last_activity_at',
+  HAS_UNREAD_MESSAGES: 'has_unread_messages',
 };
 
 export const CONTACT_ATTRIBUTES = {
