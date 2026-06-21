@@ -201,12 +201,56 @@ const matchesCondition = (conversationValue, filter) => {
     ? values.map(resolveValue)
     : resolveValue(values);
 
-  switch (filterOperator) {
-    case 'equal_to':
-      return equalTo(filterValue, conversationValue);
+  const DATE_ATTRIBUTE_KEYS = ['created_at', 'last_activity_at'];
 
-    case 'not_equal_to':
+  switch (filterOperator) {
+    case 'equal_to': {
+      if (DATE_ATTRIBUTE_KEYS.includes(filter.attribute_key)) {
+        const convDate = coerceToDate(conversationValue);
+        if (convDate === null) return false;
+        const convDateStr = convDate.toISOString().slice(0, 10);
+        const rawFilter = Array.isArray(filterValue)
+          ? filterValue[0]
+          : filterValue;
+        // For YYYY-MM-DD strings, compare directly against UTC date string.
+        // Avoids coerceToDate's setHours(0,0,0,0) which shifts the date by one day in UTC-3.
+        if (
+          typeof rawFilter === 'string' &&
+          /^\d{4}-\d{2}-\d{2}$/.test(rawFilter)
+        ) {
+          return convDateStr === rawFilter;
+        }
+        const filterDate = coerceToDate(rawFilter);
+        return (
+          filterDate !== null &&
+          convDateStr === filterDate.toISOString().slice(0, 10)
+        );
+      }
+      return equalTo(filterValue, conversationValue);
+    }
+
+    case 'not_equal_to': {
+      if (DATE_ATTRIBUTE_KEYS.includes(filter.attribute_key)) {
+        const convDate = coerceToDate(conversationValue);
+        if (convDate === null) return false;
+        const convDateStr = convDate.toISOString().slice(0, 10);
+        const rawFilter = Array.isArray(filterValue)
+          ? filterValue[0]
+          : filterValue;
+        if (
+          typeof rawFilter === 'string' &&
+          /^\d{4}-\d{2}-\d{2}$/.test(rawFilter)
+        ) {
+          return convDateStr !== rawFilter;
+        }
+        const filterDate = coerceToDate(rawFilter);
+        return (
+          filterDate !== null &&
+          convDateStr !== filterDate.toISOString().slice(0, 10)
+        );
+      }
       return !equalTo(filterValue, conversationValue);
+    }
 
     case 'contains':
       return contains(filterValue, conversationValue);
