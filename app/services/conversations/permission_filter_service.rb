@@ -16,7 +16,16 @@ class Conversations::PermissionFilterService
   private
 
   def accessible_conversations
-    conversations.where(inbox: user.inboxes.where(account_id: account.id))
+    if account.enforce_team_based_access
+      team_scoped_conversations
+    else
+      conversations.where(inbox: user.inboxes.where(account_id: account.id))
+    end
+  end
+
+  def team_scoped_conversations
+    team_ids = user.teams.where(account_id: account.id).pluck(:id)
+    conversations.where(team_id: team_ids)
   end
 
   def account_user

@@ -104,6 +104,14 @@
           "ERROR": "Falha ao atualizar configuração de transcrição de áudio"
         }
       },
+      "RESTRICT_AGENTS_BY_TEAM": {
+        "TITLE": "Restringir agentes por time",
+        "NOTE": "Quando ativado, agentes visualizam apenas conversas atribuídas aos seus times. Conversas sem time são visíveis somente para administradores.",
+        "API": {
+          "SUCCESS": "Restrição de acesso por time atualizada com sucesso.",
+          "ERROR": "Falha ao atualizar restrição de acesso por time."
+        }
+      },
       "AUTO_RESOLVE_DURATION": {
         "LABEL": "Tempo de inatividade para resolução",
         "HELP": "Tempo de inatividade após o qual a conversa deve ser encerrada automaticamente",

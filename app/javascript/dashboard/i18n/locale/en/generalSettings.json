@@ -104,6 +104,14 @@
           "ERROR": "Failed to update audio transcription setting"
         }
       },
+      "RESTRICT_AGENTS_BY_TEAM": {
+        "TITLE": "Restrict agents by team",
+        "NOTE": "When enabled, agents can only view conversations assigned to their teams. Conversations without a team are only visible to administrators.",
+        "API": {
+          "SUCCESS": "Team access restriction updated successfully.",
+          "ERROR": "Failed to update team access restriction."
+        }
+      },
       "AUTO_RESOLVE_DURATION": {
         "LABEL": "Inactivity duration for resolution",
         "HELP": "Duration after a conversation should auto resolve if there is no activity",
