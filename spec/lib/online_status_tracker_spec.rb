@@ -23,7 +23,8 @@ describe OnlineStatusTracker do
     end
 
     it 'returns the availability from the db if it is not present in redis and set it in redis' do
-      user2.account_users.find_by(account_id: account.id).update!(availability: 'offline')
+      # user2 needs to be an administrator, otherwise the offline status is coerced to online while connected
+      user2.account_users.find_by(account_id: account.id).update!(role: :administrator, availability: 'offline')
       # clear the redis cache to ensure values are fetched from db
       Redis::Alfred.delete(format(Redis::Alfred::ONLINE_STATUS, account_id: account.id))
       expect(described_class.get_available_users(account.id)[user1.id.to_s]).to eq('online')
@@ -31,6 +32,22 @@ describe OnlineStatusTracker do
       # ensure online status is also set
       expect(Redis::Alfred.hmget(format(Redis::Alfred::ONLINE_STATUS, account_id: account.id),
                                  [user1.id.to_s, user2.id.to_s])).to eq(%w[online offline])
+    end
+
+    it 'coerces a connected non-admin (agent) with offline status to online' do
+      user2.account_users.find_by(account_id: account.id).update!(availability: 'offline')
+      expect(described_class.get_available_users(account.id)[user2.id.to_s]).to eq('online')
+    end
+
+    it 'keeps an administrator offline even while connected' do
+      user2.account_users.find_by(account_id: account.id).update!(role: :administrator, availability: 'offline')
+      expect(described_class.get_available_users(account.id)[user2.id.to_s]).to eq('offline')
+    end
+
+    it 'does not coerce a disconnected agent with auto_offline false' do
+      # user3 has no presence; auto_offline false keeps it in the available users list
+      user3.account_users.find_by(account_id: account.id).update!(auto_offline: false, availability: 'offline')
+      expect(described_class.get_available_users(account.id)[user3.id.to_s]).to eq('offline')
     end
   end
 

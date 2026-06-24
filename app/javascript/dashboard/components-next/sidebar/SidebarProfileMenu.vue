@@ -3,6 +3,7 @@ import { computed } from 'vue';
 import Auth from 'dashboard/api/auth';
 import { useMapGetter } from 'dashboard/composables/store';
 import { useI18n } from 'vue-i18n';
+import { useAdmin } from 'dashboard/composables/useAdmin';
 import Avatar from 'next/avatar/Avatar.vue';
 import SidebarProfileMenuStatus from './SidebarProfileMenuStatus.vue';
 import { FEATURE_FLAGS } from 'dashboard/featureFlags';
@@ -26,6 +27,7 @@ defineOptions({
 });
 
 const { t } = useI18n();
+const { isAdmin } = useAdmin();
 
 const currentUser = useMapGetter('getCurrentUser');
 const currentUserAvailability = useMapGetter('getCurrentUserAvailability');
@@ -158,8 +160,11 @@ const allowedMenuItems = computed(() => {
       </button>
     </template>
     <DropdownBody class="bottom-12 z-50 mb-2 w-80 ltr:left-0 rtl:right-0">
-      <SidebarProfileMenuStatus />
-      <DropdownSeparator />
+      <!-- Only administrators can manage availability. -->
+      <template v-if="isAdmin">
+        <SidebarProfileMenuStatus />
+        <DropdownSeparator />
+      </template>
       <template v-for="item in allowedMenuItems" :key="item.label">
         <CustomBrandPolicyWrapper
           :show-on-custom-branded-instance="item.showOnCustomBrandedInstance"
