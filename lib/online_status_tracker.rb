@@ -59,8 +59,17 @@ class OnlineStatusTracker
 
     return {} if user_ids.blank?
 
+    account = Account.find(account_id)
+    # Non-admins can't be offline while connected, so coerce their status to online.
+    agent_ids = account.account_users.agent.pluck(:user_id).map(&:to_s).to_set
+    connected_ids = connected_user_ids(account_id).to_set
+
     user_availabilities = ::Redis::Alfred.hmget(status_key(account_id), user_ids)
-    user_ids.map.with_index { |id, index| [id, (user_availabilities[index] || get_availability_from_db(account_id, id))] }.to_h
+    user_ids.map.with_index do |id, index|
+      status = user_availabilities[index] || get_availability_from_db(account_id, id)
+      status = 'online' if status == 'offline' && agent_ids.include?(id) && connected_ids.include?(id)
+      [id, status]
+    end.to_h
   end
 
   def self.get_availability_from_db(account_id, user_id)
@@ -69,10 +78,15 @@ class OnlineStatusTracker
     availability
   end
 
+  # user ids that are actually connected (present in the presence sorted set)
+  def self.connected_user_ids(account_id)
+    range_start = (Time.zone.now - PRESENCE_DURATION).to_i
+    ::Redis::Alfred.zrangebyscore(presence_key(account_id, 'User'), range_start, '+inf')
+  end
+
   def self.get_available_user_ids(account_id)
     account = Account.find(account_id)
-    range_start = (Time.zone.now - PRESENCE_DURATION).to_i
-    user_ids = ::Redis::Alfred.zrangebyscore(presence_key(account_id, 'User'), range_start, '+inf')
+    user_ids = connected_user_ids(account_id)
     # since we are dealing with redis items as string, casting to string
     user_ids += account.account_users.where(auto_offline: false)&.map(&:user_id)&.map(&:to_s)
     user_ids.uniq

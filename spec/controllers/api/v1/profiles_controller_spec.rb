@@ -213,15 +213,36 @@ RSpec.describe 'Profile API', type: :request do
 
     context 'when it is an authenticated user' do
       let(:agent) { create(:user, password: 'Test123!', account: account, role: :agent) }
+      let(:administrator) { create(:user, password: 'Test123!', account: account, role: :administrator) }
 
-      it 'updates the availability status' do
+      it 'updates the availability status for an administrator' do
         post '/api/v1/profile/availability',
              params: { profile: { availability: 'busy', account_id: account.id } },
-             headers: agent.create_new_auth_token,
+             headers: administrator.create_new_auth_token,
              as: :json
 
         expect(response).to have_http_status(:success)
-        expect(OnlineStatusTracker.get_status(account.id, agent.id)).to eq('busy')
+        expect(OnlineStatusTracker.get_status(account.id, administrator.id)).to eq('busy')
+      end
+
+      it 'allows an administrator to set themselves offline' do
+        post '/api/v1/profile/availability',
+             params: { profile: { availability: 'offline', account_id: account.id } },
+             headers: administrator.create_new_auth_token,
+             as: :json
+
+        expect(response).to have_http_status(:success)
+        expect(administrator.account_users.find_by(account_id: account.id).availability).to eq('offline')
+      end
+
+      it 'does not allow a non-admin user to change their availability' do
+        post '/api/v1/profile/availability',
+             params: { profile: { availability: 'offline', account_id: account.id } },
+             headers: agent.create_new_auth_token,
+             as: :json
+
+        expect(response).to have_http_status(:unprocessable_entity)
+        expect(agent.account_users.find_by(account_id: account.id).availability).not_to eq('offline')
       end
     end
   end
@@ -236,16 +257,26 @@ RSpec.describe 'Profile API', type: :request do
 
     context 'when it is an authenticated user' do
       let(:agent) { create(:user, password: 'Test123!', account: account, role: :agent) }
+      let(:administrator) { create(:user, password: 'Test123!', account: account, role: :administrator) }
 
-      it 'updates the auto offline status' do
+      it 'updates the auto offline status for an administrator' do
         post '/api/v1/profile/auto_offline',
              params: { profile: { auto_offline: false, account_id: account.id } },
-             headers: agent.create_new_auth_token,
+             headers: administrator.create_new_auth_token,
              as: :json
 
         expect(response).to have_http_status(:success)
         json_response = response.parsed_body
         expect(json_response['accounts'].first['auto_offline']).to be(false)
+      end
+
+      it 'does not allow a non-admin user to change auto offline' do
+        post '/api/v1/profile/auto_offline',
+             params: { profile: { auto_offline: false, account_id: account.id } },
+             headers: agent.create_new_auth_token,
+             as: :json
+
+        expect(response).to have_http_status(:unprocessable_entity)
       end
     end
   end

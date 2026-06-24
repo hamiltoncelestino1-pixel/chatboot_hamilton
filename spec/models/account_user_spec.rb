@@ -28,6 +28,44 @@ RSpec.describe AccountUser do
     end
   end
 
+  describe 'availability_status' do
+    let(:agent_account_user) { create(:account_user, role: :agent) }
+    let(:admin_account_user) { create(:account_user, role: :administrator) }
+
+    context 'when auto_offline is enabled' do
+      it 'coerces a connected agent with offline status to online' do
+        allow(agent_account_user).to receive(:online_presence?).and_return(true)
+        allow(OnlineStatusTracker).to receive(:get_status).and_return('offline')
+        expect(agent_account_user.availability_status).to eq('online')
+      end
+
+      it 'returns offline for a disconnected agent' do
+        allow(agent_account_user).to receive(:online_presence?).and_return(false)
+        expect(agent_account_user.availability_status).to eq('offline')
+      end
+
+      it 'keeps a connected administrator offline' do
+        allow(admin_account_user).to receive(:online_presence?).and_return(true)
+        allow(OnlineStatusTracker).to receive(:get_status).and_return('offline')
+        expect(admin_account_user.availability_status).to eq('offline')
+      end
+    end
+
+    context 'when auto_offline is disabled' do
+      it 'coerces a connected agent stored as offline to online' do
+        agent_account_user.update!(auto_offline: false, availability: 'offline')
+        allow(agent_account_user).to receive(:online_presence?).and_return(true)
+        expect(agent_account_user.availability_status).to eq('online')
+      end
+
+      it 'keeps a connected administrator offline' do
+        admin_account_user.update!(auto_offline: false, availability: 'offline')
+        allow(admin_account_user).to receive(:online_presence?).and_return(true)
+        expect(admin_account_user.availability_status).to eq('offline')
+      end
+    end
+  end
+
   describe 'destroy call agent::destroy service' do
     it 'gets created with the right default settings' do
       create(:conversation, account: account_user.account, assignee: account_user.user, inbox: inbox)

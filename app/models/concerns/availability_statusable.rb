@@ -21,10 +21,20 @@ module AvailabilityStatusable
   end
 
   def user_availability_status
-    # we are not considering presence in this case. Just returns the availability
-    return availability unless auto_offline
+    connected = online_presence?
+    status =
+      if auto_offline
+        # availability as a fallback in case the status is not present in redis
+        connected ? (::OnlineStatusTracker.get_status(account_id, user_id) || availability) : 'offline'
+      else
+        # we are not considering presence in this case. Just returns the availability
+        availability
+      end
 
-    # availability as a fallback in case the status is not present in redis
-    online_presence? ? (::OnlineStatusTracker.get_status(account_id, user_id) || availability) : 'offline'
+    # Non-admins can't mark themselves offline, so while they're actually connected
+    # they always appear online (covers legacy data and freshly invited agents).
+    return 'online' if status == 'offline' && connected && respond_to?(:agent?) && agent?
+
+    status
   end
 end
