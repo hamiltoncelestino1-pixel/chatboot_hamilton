@@ -63,8 +63,16 @@ class Whatsapp::TemplateProcessorService
       next if value.blank?
 
       if media_url_with_type?(key, header_data)
-        media_name = header_data['media_name']
-        media_param = parameter_builder.build_media_parameter(value, header_data['media_type'], media_name)
+        media_name  = header_data['media_name']
+        media_type  = header_data['media_type']
+        media_param = nil
+
+        if our_storage_url?(value) && cloud_provider?
+          media_id = upload_media_to_meta(value, media_type)
+          media_param = parameter_builder.build_media_id_parameter(media_id, media_type, media_name) if media_id
+        end
+
+        media_param ||= parameter_builder.build_media_parameter(value, media_type, media_name)
         header_params << media_param if media_param
       elsif key != 'media_type' && key != 'media_name'
         if parameter_format == 'NAMED'
@@ -79,6 +87,23 @@ class Whatsapp::TemplateProcessorService
 
   def media_url_with_type?(key, header_data)
     key == 'media_url' && header_data['media_type'].present?
+  end
+
+  def our_storage_url?(url)
+    url.include?('/rails/active_storage/')
+  end
+
+  def cloud_provider?
+    channel.provider == 'whatsapp_cloud'
+  end
+
+  def upload_media_to_meta(url, media_type)
+    Whatsapp::MediaUploadService.new(channel).upload(url, media_type)
+  rescue ArgumentError => e
+    raise e
+  rescue StandardError => e
+    Rails.logger.error "WhatsApp media pre-upload failed: #{e.message}"
+    nil
   end
 
   def process_body_components(processed_params, template)
