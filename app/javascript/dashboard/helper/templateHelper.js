@@ -20,11 +20,26 @@ export const allKeysRequired = value => {
   return keys.every(key => value[key]);
 };
 
+// WhatsApp template bodies sometimes arrive with escaped sequences (literal "\n",
+// "\r\n" or "\t") instead of real line breaks. Markdown rendering does not turn the
+// literal "\n" into a line break, so the message shows up as a single block in the
+// Chatwoot conversation. Convert those escapes back into real characters.
+export const normalizeTemplateText = text => {
+  if (!text) return '';
+  return text
+    .replace(/\\r\\n/g, '\n')
+    .replace(/\\n/g, '\n')
+    .replace(/\\t/g, '\t');
+};
+
 export const replaceTemplateVariables = (templateText, processedParams) => {
-  return templateText.replace(/{{([^}]+)}}/g, (match, variable) => {
-    const variableKey = processVariable(variable);
-    return processedParams.body?.[variableKey] || `{{${variable}}}`;
-  });
+  return normalizeTemplateText(templateText).replace(
+    /{{([^}]+)}}/g,
+    (match, variable) => {
+      const variableKey = processVariable(variable);
+      return processedParams.body?.[variableKey] || `{{${variable}}}`;
+    }
+  );
 };
 
 export const buildTemplateParameters = (template, hasMediaHeaderValue) => {

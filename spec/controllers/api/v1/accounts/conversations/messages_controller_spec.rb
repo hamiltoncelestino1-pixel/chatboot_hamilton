@@ -82,6 +82,31 @@ RSpec.describe 'Conversation Messages API', type: :request do
         expect(conversation.messages.last.attachments.first.file_type).to eq('image')
       end
 
+      it 'returns the attached document when sending a whatsapp template with a media header' do
+        blob = ActiveStorage::Blob.create_and_upload!(
+          io: Rails.root.join('spec/assets/sample.pdf').open, filename: 'sample.pdf', content_type: 'application/pdf'
+        )
+        params = {
+          content: 'Template message',
+          template_params: {
+            name: 'sample_shipping_confirmation',
+            language: 'en_US',
+            processed_params: { header: { media_url: '/x', media_type: 'document', media_name: 'sample.pdf', media_blob_id: blob.signed_id } }
+          }
+        }
+
+        post api_v1_account_conversation_messages_url(account_id: account.id, conversation_id: conversation.display_id),
+             params: params,
+             headers: agent.create_new_auth_token,
+             as: :json
+
+        expect(response).to have_http_status(:success)
+        expect(conversation.messages.last.attachments.first.file_type).to eq('file')
+        # the sender (agent) gets the attachment back in the API response
+        expect(response.parsed_body['attachments']).to be_present
+        expect(response.parsed_body['attachments'].first['file_type']).to eq('file')
+      end
+
       context 'when api inbox' do
         let(:api_channel) { create(:channel_api, account: account) }
         let(:api_inbox) { create(:inbox, channel: api_channel, account: account) }

@@ -23,6 +23,7 @@ class Messages::MessageBuilder
   def perform
     @message = @conversation.messages.build(message_params)
     process_attachments
+    process_template_media_attachment
     process_emails
     # When the message has no quoted content, it will just be rendered as a regular message
     # The frontend is equipped to handle this case
@@ -64,6 +65,41 @@ class Messages::MessageBuilder
                                file_type(uploaded_attachment&.content_type)
                              end
     end
+  end
+
+  # When sending a WhatsApp template with a media/document header, the media is uploaded to Meta
+  # but no attachment is created on the Chatwoot message, so the sender (agent) never sees the
+  # document in the conversation. Here we attach the same uploaded file (or its external URL) to
+  # the message so it shows up for the agent too.
+  def process_template_media_attachment
+    header = template_params_hash.dig('processed_params', 'header')
+    return if header.blank?
+
+    blob_id = header['media_blob_id']
+    media_url = header['media_url']
+    return if blob_id.blank? && media_url.blank?
+
+    if blob_id.present?
+      # reuse the same mechanism as process_attachments: attach the already-stored blob
+      attachment = @message.attachments.build(account_id: @message.account_id, file: blob_id)
+      attachment.file_type = file_type_by_signed_id(blob_id)
+    else
+      # fallback for a manually entered URL (no uploaded blob): keep an external reference
+      @message.attachments.build(
+        account_id: @message.account_id,
+        file_type: template_media_file_type(header['media_type']),
+        external_url: media_url,
+        fallback_title: header['media_name']
+      )
+    end
+  end
+
+  def template_params_hash
+    @template_params_hash ||= @params[:template_params].present? ? JSON.parse(@params[:template_params].to_json) : {}
+  end
+
+  def template_media_file_type(media_type)
+    { 'image' => :image, 'video' => :video, 'audio' => :audio, 'document' => :file }.fetch(media_type, :file)
   end
 
   def process_emails

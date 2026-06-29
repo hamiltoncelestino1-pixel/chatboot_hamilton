@@ -149,6 +149,99 @@ describe Messages::MessageBuilder do
       end
     end
 
+    context 'when whatsapp template has a media header' do
+      def template_media_params(header:, content: 'Template message')
+        ActionController::Parameters.new(
+          content: content,
+          template_params: {
+            name: 'sample_shipping_confirmation',
+            language: 'en_US',
+            processed_params: { header: header }
+          }
+        )
+      end
+
+      context 'when the header references an uploaded document blob' do
+        let(:blob) { get_blob_for('spec/assets/sample.pdf', 'application/pdf') }
+        let(:params) do
+          template_media_params(header: { media_url: '/rails/active_storage/x', media_type: 'document',
+                                          media_name: 'sample.pdf', media_blob_id: blob.signed_id })
+        end
+
+        it 'attaches the uploaded document so the sender sees it' do
+          message = described_class.new(user, conversation, params).perform
+          expect(message.attachments.count).to eq 1
+          attachment = message.attachments.first
+          expect(attachment.file_type).to eq 'file'
+          expect(attachment.file).to be_attached
+          expect(attachment.file.filename.to_s).to eq 'sample.pdf'
+        end
+
+        it 'still stores the template_params in additional_attributes' do
+          message = described_class.new(user, conversation, params).perform
+          expect(message.additional_attributes['template_params']['name']).to eq 'sample_shipping_confirmation'
+        end
+      end
+
+      context 'when the header references an uploaded image blob' do
+        let(:blob) { get_blob_for('spec/assets/sample.png', 'image/png') }
+        let(:params) { template_media_params(header: { media_url: '/x', media_type: 'image', media_blob_id: blob.signed_id }) }
+
+        it 'attaches as an image' do
+          message = described_class.new(user, conversation, params).perform
+          expect(message.attachments.first.file_type).to eq 'image'
+        end
+      end
+
+      context 'when the header references an uploaded video blob' do
+        let(:blob) { get_blob_for('spec/assets/sample.mp4', 'video/mp4') }
+        let(:params) { template_media_params(header: { media_url: '/x', media_type: 'video', media_blob_id: blob.signed_id }) }
+
+        it 'attaches as a video' do
+          message = described_class.new(user, conversation, params).perform
+          expect(message.attachments.first.file_type).to eq 'video'
+        end
+      end
+
+      context 'when the header has only an external media_url (manual URL, no blob)' do
+        let(:params) do
+          template_media_params(header: { media_url: 'https://example.com/file.pdf', media_type: 'document', media_name: 'external.pdf' })
+        end
+
+        it 'creates an attachment referencing the external url' do
+          message = described_class.new(user, conversation, params).perform
+          attachment = message.attachments.first
+          expect(attachment.external_url).to eq 'https://example.com/file.pdf'
+          expect(attachment.fallback_title).to eq 'external.pdf'
+          expect(attachment.file).not_to be_attached
+          expect(attachment.file_type).to eq 'file'
+        end
+      end
+
+      context 'when the template has no media header' do
+        let(:params) do
+          ActionController::Parameters.new(
+            content: 'Template message',
+            template_params: { name: 'sample_shipping_confirmation', language: 'en_US', processed_params: { body: { '1' => '3' } } }
+          )
+        end
+
+        it 'does not create any attachment' do
+          message = described_class.new(user, conversation, params).perform
+          expect(message.attachments.count).to eq 0
+        end
+      end
+
+      context 'when there are no template_params' do
+        let(:params) { ActionController::Parameters.new(content: 'plain message') }
+
+        it 'does not create any attachment' do
+          message = described_class.new(user, conversation, params).perform
+          expect(message.attachments.count).to eq 0
+        end
+      end
+    end
+
     context 'when email channel messages' do
       let!(:channel_email) { create(:channel_email, account: account) }
       let(:inbox_member) { create(:inbox_member, inbox: channel_email.inbox) }

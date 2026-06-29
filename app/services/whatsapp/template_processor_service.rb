@@ -74,7 +74,7 @@ class Whatsapp::TemplateProcessorService
 
         media_param ||= parameter_builder.build_media_parameter(value, media_type, media_name)
         header_params << media_param if media_param
-      elsif key != 'media_type' && key != 'media_name'
+      elsif key != 'media_type' && key != 'media_name' && key != 'media_blob_id'
         if parameter_format == 'NAMED'
           header_params << parameter_builder.build_named_parameter(key, value)
         else

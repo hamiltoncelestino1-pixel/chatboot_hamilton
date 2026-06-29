@@ -3,6 +3,7 @@ import {
   buildTemplateParameters,
   processVariable,
   allKeysRequired,
+  normalizeTemplateText,
 } from '../templateHelper';
 import { templates } from '../../store/modules/specs/inboxes/templateFixtures';
 
@@ -73,6 +74,43 @@ describe('templateHelper', () => {
     it('should handle empty processedParams', () => {
       const result = replaceTemplateVariables(templateText, {});
       expect(result).toBe(templateText);
+    });
+
+    it('should convert escaped newlines in the body into real line breaks', () => {
+      const escapedBody =
+        '{{1}}, your order was delivered on {{2}}.\\n\\nThank you for your purchase.\\n';
+      const processedParams = { body: { 1: 'John', 2: 'Jan 1, 2024' } };
+
+      const result = replaceTemplateVariables(escapedBody, processedParams);
+      expect(result).toBe(
+        'John, your order was delivered on Jan 1, 2024.\n\nThank you for your purchase.\n'
+      );
+    });
+
+    it('should only normalize the body, not the substituted variable values', () => {
+      // A value that itself contains a literal "\n" must be inserted as-is,
+      // otherwise we would mutate user-provided content.
+      const result = replaceTemplateVariables('Note: {{1}}', {
+        body: { 1: 'a\\nb' },
+      });
+      expect(result).toBe('Note: a\\nb');
+    });
+  });
+
+  describe('normalizeTemplateText', () => {
+    it('converts escaped newlines and tabs into real characters', () => {
+      expect(normalizeTemplateText('line1\\nline2')).toBe('line1\nline2');
+      expect(normalizeTemplateText('line1\\r\\nline2')).toBe('line1\nline2');
+      expect(normalizeTemplateText('col1\\tcol2')).toBe('col1\tcol2');
+    });
+
+    it('leaves real line breaks untouched', () => {
+      expect(normalizeTemplateText('line1\nline2')).toBe('line1\nline2');
+    });
+
+    it('returns an empty string for falsy input', () => {
+      expect(normalizeTemplateText('')).toBe('');
+      expect(normalizeTemplateText(undefined)).toBe('');
     });
   });
 
