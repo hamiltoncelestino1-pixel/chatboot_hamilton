@@ -162,6 +162,13 @@ const updateHeaderVariable = (key, value) => {
 const updateMediaUrl = value => {
   processedParams.value.header ??= {};
   processedParams.value.header.media_url = value;
+  // A manually typed URL has no uploaded blob; drop any stale blob reference.
+  delete processedParams.value.header.media_blob_id;
+};
+
+const updateMediaName = value => {
+  processedParams.value.header ??= {};
+  processedParams.value.header.media_name = value;
 };
 
 const handleMediaUpload = async event => {
@@ -169,16 +176,17 @@ const handleMediaUpload = async event => {
   if (!file) return;
   isUploading.value = true;
   try {
-    const { fileUrl } = await uploadFile(file);
+    const { fileUrl, blobId } = await uploadFile(file);
     updateMediaUrl(fileUrl);
+    // Keep the blob reference so the backend can attach the same file to the
+    // message, making the sent document visible to the agent in the conversation.
+    processedParams.value.header.media_blob_id = blobId;
+    if (isDocumentTemplate.value && !processedParams.value.header.media_name) {
+      updateMediaName(file.name);
+    }
   } finally {
     isUploading.value = false;
   }
-};
-
-const updateMediaName = value => {
-  processedParams.value.header ??= {};
-  processedParams.value.header.media_name = value;
 };
 
 const sendMessage = () => {
