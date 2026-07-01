@@ -13,5 +13,15 @@ class Api::V1::Accounts::Contacts::ConversationsController < Api::V1::Accounts::
     ).perform
 
     @conversations = conversations.order(last_activity_at: :desc).limit(20)
+  rescue StandardError => e
+    # [DEBUG TEMPORÁRIO] Remover após diagnóstico do 500
+    Rails.logger.error "[DEBUG] ContactConversations#index falhou para contact_id=#{params[:contact_id]}: #{e.class}: #{e.message}"
+    Rails.logger.error e.backtrace.first(10).join("\n")
+    render json: {
+      debug: true,
+      error: e.class.to_s,
+      message: e.message,
+      backtrace: e.backtrace.first(5)
+    }, status: :internal_server_error
   end
 end
