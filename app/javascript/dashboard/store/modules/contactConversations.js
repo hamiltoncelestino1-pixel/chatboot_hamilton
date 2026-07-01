@@ -124,6 +124,16 @@ export const actions = {
         isFetching: false,
       });
     } catch (error) {
+      // [DEBUG TEMPORÁRIO] Remover após diagnóstico do 500
+      // eslint-disable-next-line no-console
+      console.error('[DEBUG] contactConversations/get falhou:', {
+        contactId,
+        status: error?.response?.status,
+        errorClass: error?.response?.data?.error,
+        message: error?.response?.data?.message,
+        backtrace: error?.response?.data?.backtrace,
+        rawError: error,
+      });
       commit(types.default.SET_CONTACT_CONVERSATIONS_UI_FLAG, {
         isFetching: false,
       });
