@@ -10,7 +10,8 @@
     "NO_RESULTS": "Nenhum atributo encontrado correspondente à sua busca",
     "ATTRIBUTE_MODELS": {
       "CONVERSATION": "Conversas",
-      "CONTACT": "Contato"
+      "CONTACT": "Contato",
+      "PIPELINE_ITEM": "Oportunidade"
     },
     "ATTRIBUTE_TYPES": {
       "TEXT": "Texto",
@@ -67,6 +68,9 @@
         "ENABLE_REGEX": {
           "LABEL": "Habilitar validação do regex"
         },
+        "DISPLAY_ON_CARD": {
+          "LABEL": "Exibir sempre no card"
+        },
         "BADGES": {
           "PRE_CHAT": "Pré-chat",
           "RESOLUTION": "Resolução"
@@ -108,7 +112,8 @@
     "TABS": {
       "HEADER": "Atributos Personalizados",
       "CONVERSATION": "Conversas",
-      "CONTACT": "Contato"
+      "CONTACT": "Contato",
+      "PIPELINE_ITEM": "Oportunidades"
     },
     "LIST": {
       "TABLE_HEADER": {

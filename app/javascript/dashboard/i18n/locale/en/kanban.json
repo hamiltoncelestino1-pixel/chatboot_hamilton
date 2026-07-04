@@ -1,0 +1,87 @@
+{
+  "KANBAN": {
+    "TITLE": "Pipeline",
+    "EMPTY_STATE": {
+      "TITLE": "No pipelines yet",
+      "DESCRIPTION": "Create your first pipeline to organize and manage your opportunities.",
+      "BUTTON": "Manage pipelines in Settings"
+    },
+    "PIPELINE": {
+      "CREATE": "Create Pipeline",
+      "EDIT": "Edit Pipeline",
+      "DELETE": "Delete Pipeline",
+      "NAME_LABEL": "Pipeline name",
+      "NAME_PLACEHOLDER": "e.g. Sales Funnel",
+      "DESCRIPTION_LABEL": "Description",
+      "DESCRIPTION_PLACEHOLDER": "Describe the purpose of this pipeline",
+      "API": {
+        "CREATE_SUCCESS": "Pipeline created successfully.",
+        "UPDATE_SUCCESS": "Pipeline updated successfully.",
+        "DELETE_SUCCESS": "Pipeline deleted successfully.",
+        "ERROR": "Something went wrong. Please try again."
+      }
+    },
+    "STAGE": {
+      "ADD": "Add stage",
+      "EDIT": "Edit stage",
+      "DELETE": "Remove stage",
+      "NAME_LABEL": "Stage name",
+      "NAME_PLACEHOLDER": "e.g. Qualified",
+      "COLOR_LABEL": "Color",
+      "ADD_PLACEHOLDER": "Stage name",
+      "API": {
+        "CREATE_SUCCESS": "Stage added successfully.",
+        "UPDATE_SUCCESS": "Stage updated successfully.",
+        "DELETE_SUCCESS": "Stage removed successfully.",
+        "ERROR": "Something went wrong. Please try again."
+      }
+    },
+    "ITEM": {
+      "ADD": "Add card",
+      "EDIT": "Edit card",
+      "DELETE": "Delete card",
+      "MOVE": "Move to stage",
+      "CONTACT_LABEL": "Contact",
+      "CONTACT_PLACEHOLDER": "Search contact...",
+      "TITLE_LABEL": "Title",
+      "TITLE_PLACEHOLDER": "Card title (optional)",
+      "VALUE_LABEL": "Deal value",
+      "VALUE_PLACEHOLDER": "0.00",
+      "NOTES_LABEL": "Notes",
+      "NOTES_PLACEHOLDER": "Add notes about this opportunity...",
+      "LINKED_CONVERSATION": "Linked conversation",
+      "CONTACT": {
+        "VIEW_PROFILE": "View contact profile"
+      },
+      "CONVERSATION": {
+        "SEARCH_PLACEHOLDER": "Link a conversation...",
+        "CLEAR": "Unlink conversation"
+      },
+      "MOVE_ERROR": "Failed to move card. Please try again.",
+      "ASSIGNEE_LABEL": "Assignee",
+      "ASSIGNEE_PLACEHOLDER": "Assign an agent",
+      "ASSIGNEE_NONE": "None",
+      "TEAM_LABEL": "Team",
+      "TEAM_PLACEHOLDER": "Assign a team",
+      "TEAM_NONE": "None",
+      "UNASSIGNED": "Unassigned",
+      "LABELS_TITLE": "Labels",
+      "LABELS_ADD": "Add",
+      "PIPELINE_LABEL": "Pipeline",
+      "STAGE_LABEL": "Stage",
+      "CUSTOM_ATTRIBUTES_TITLE": "Custom attributes",
+      "ASSIGN_TO_ME": "Assign to me",
+      "CANCEL": "Cancel",
+      "SAVE": "Save",
+      "ERRORS": {
+        "ASSIGNEE_NOT_MEMBER": "This agent is not a member of the pipeline."
+      },
+      "API": {
+        "CREATE_SUCCESS": "Card added successfully.",
+        "UPDATE_SUCCESS": "Card updated successfully.",
+        "DELETE_SUCCESS": "Card deleted successfully.",
+        "ERROR": "Something went wrong. Please try again."
+      }
+    }
+  }
+}

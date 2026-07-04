@@ -70,6 +70,12 @@ platform_account:
   $ref: ./resource/platform_account.yml
 team:
   $ref: ./resource/team.yml
+pipeline:
+  $ref: ./resource/pipeline.yml
+pipeline_stage:
+  $ref: ./resource/pipeline_stage.yml
+pipeline_item:
+  $ref: ./resource/pipeline_item.yml
 label:
   $ref: ./resource/label.yml
 integrations_app:
@@ -133,6 +139,18 @@ contact_create_payload:
   $ref: ./request/contact/create_payload.yml
 contact_update_payload:
   $ref: ./request/contact/update_payload.yml
+
+## Pipeline
+pipeline_create_update_payload:
+  $ref: ./request/pipeline/create_update_payload.yml
+pipeline_stage_create_update_payload:
+  $ref: ./request/pipeline_stage/create_update_payload.yml
+pipeline_stage_reorder_payload:
+  $ref: ./request/pipeline_stage/reorder_payload.yml
+pipeline_item_create_update_payload:
+  $ref: ./request/pipeline_item/create_update_payload.yml
+pipeline_item_reorder_payload:
+  $ref: ./request/pipeline_item/reorder_payload.yml
 
 ## Conversation
 conversation_create_payload:

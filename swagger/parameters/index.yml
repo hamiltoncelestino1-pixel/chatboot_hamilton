@@ -7,6 +7,15 @@ agent_bot_id:
 team_id:
   $ref: ./team_id.yml
 
+pipeline_id:
+  $ref: ./pipeline_id.yml
+
+pipeline_stage_id:
+  $ref: ./pipeline_stage_id.yml
+
+pipeline_item_id:
+  $ref: ./pipeline_item_id.yml
+
 inbox_id:
   $ref: ./inbox_id.yml
 

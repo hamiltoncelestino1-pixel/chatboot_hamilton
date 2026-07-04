@@ -1,0 +1,31 @@
+type: object
+properties:
+  id:
+    type: number
+    description: The ID of the stage
+  name:
+    type: string
+    description: The name of the stage
+  color:
+    type: string
+    description: The hex color code for the stage
+  position:
+    type: number
+    description: The display order position of the stage within the pipeline
+  pipeline_id:
+    type: number
+    description: The ID of the parent pipeline
+  account_id:
+    type: number
+    description: The ID of the account
+  items_count:
+    type: number
+    description: Number of items in this stage
+  created_at:
+    type: string
+    format: date-time
+    description: The date and time when the stage was created
+  updated_at:
+    type: string
+    format: date-time
+    description: The date and time when the stage was last updated

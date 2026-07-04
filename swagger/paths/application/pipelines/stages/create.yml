@@ -1,0 +1,26 @@
+tags:
+  - Pipelines
+operationId: create-a-pipeline-stage
+summary: Create a pipeline stage
+security:
+  - userApiKey: []
+description: Add a new stage to a pipeline
+requestBody:
+  required: true
+  content:
+    application/json:
+      schema:
+        $ref: '#/components/schemas/pipeline_stage_create_update_payload'
+responses:
+  '200':
+    description: Success
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/pipeline_stage'
+  '401':
+    description: Unauthorized
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/bad_request_error'

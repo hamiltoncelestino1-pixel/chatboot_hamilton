@@ -1,0 +1,86 @@
+{
+  "PIPELINE_MGMT": {
+    "HEADER": "Pipelines",
+    "DESCRIPTION": "Manage your CRM pipelines, stages, labels and assigned agents.",
+    "HEADER_BTN_TXT": "Add pipeline",
+    "SEARCH_PLACEHOLDER": "Search pipelines",
+    "LOADING": "Loading pipelines...",
+    "BACK": "Back",
+    "FORM": {
+      "EDIT": "Edit",
+      "DELETE": "Delete",
+      "SAVE": "Save",
+      "CANCEL": "Cancel"
+    },
+    "LIST": {
+      "404": "No pipelines found.",
+      "TABLE_HEADER": {
+        "NAME": "Name",
+        "STAGES": "Stages",
+        "ACTION": "Actions"
+      }
+    },
+    "ADD": {
+      "TITLE": "Add pipeline",
+      "FORM": {
+        "NAME": { "LABEL": "Name", "PLACEHOLDER": "e.g. Sales" },
+        "DESCRIPTION": { "LABEL": "Description" }
+      },
+      "CANCEL": "Cancel",
+      "SUBMIT": "Create",
+      "API": {
+        "SUCCESS": "Pipeline created successfully.",
+        "ERROR": "Something went wrong. Please try again."
+      }
+    },
+    "DELETE": {
+      "CONFIRM": {
+        "TITLE": "Delete pipeline",
+        "MESSAGE": "Are you sure you want to delete",
+        "CASCADE_WARNING": "This will also delete {stages} stage(s) and all its opportunities.",
+        "YES": "Yes, delete",
+        "NO": "No, keep it"
+      },
+      "API": {
+        "SUCCESS": "Pipeline deleted successfully.",
+        "ERROR": "Something went wrong. Please try again."
+      }
+    },
+    "DETAIL": {
+      "TABS": {
+        "STAGES": "Stages",
+        "LABELS": "Labels",
+        "AGENTS": "Agents"
+      }
+    },
+    "STAGE": {
+      "ADD": "Add stage",
+      "NAME_PLACEHOLDER": "Stage name",
+      "DELETE": {
+        "TITLE": "Delete stage",
+        "MESSAGE": "Are you sure you want to delete",
+        "CASCADE_WARNING": "This will also delete {items} opportunity(ies) in this stage.",
+        "LOCKED": "This stage is required and cannot be deleted"
+      },
+      "API": {
+        "DELETE_SUCCESS": "Stage deleted successfully.",
+        "ERROR": "Something went wrong. Please try again."
+      }
+    },
+    "AGENTS": {
+      "DESCRIPTION": "Add agents who can be assigned to opportunities in this pipeline.",
+      "UPDATE": "Update agents",
+      "SEARCH_PLACEHOLDER": "Search agents...",
+      "AUTO_ASSIGNMENT": {
+        "TITLE": "Automatic assignment",
+        "DESCRIPTION": "Automatically assign new opportunities to pipeline agents",
+        "MAX_LIMIT_LABEL": "Maximum opportunities per agent",
+        "MAX_LIMIT_HELP": "0 means unlimited"
+      },
+      "API": {
+        "SUCCESS": "Agents updated successfully.",
+        "ERROR": "Something went wrong. Please try again."
+      }
+    }
+  }
+}

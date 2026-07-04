@@ -1,0 +1,86 @@
+{
+  "PIPELINE_MGMT": {
+    "HEADER": "Pipelines",
+    "DESCRIPTION": "Gerencie seus pipelines de CRM, etapas, etiquetas e agentes atribuídos.",
+    "HEADER_BTN_TXT": "Adicionar pipeline",
+    "SEARCH_PLACEHOLDER": "Pesquisar pipelines",
+    "LOADING": "Carregando pipelines...",
+    "BACK": "Voltar",
+    "FORM": {
+      "EDIT": "Editar",
+      "DELETE": "Excluir",
+      "SAVE": "Salvar",
+      "CANCEL": "Cancelar"
+    },
+    "LIST": {
+      "404": "Nenhum pipeline encontrado.",
+      "TABLE_HEADER": {
+        "NAME": "Nome",
+        "STAGES": "Etapas",
+        "ACTION": "Ações"
+      }
+    },
+    "ADD": {
+      "TITLE": "Adicionar pipeline",
+      "FORM": {
+        "NAME": { "LABEL": "Nome", "PLACEHOLDER": "ex: Vendas" },
+        "DESCRIPTION": { "LABEL": "Descrição" }
+      },
+      "CANCEL": "Cancelar",
+      "SUBMIT": "Criar",
+      "API": {
+        "SUCCESS": "Pipeline criado com sucesso.",
+        "ERROR": "Algo deu errado. Tente novamente."
+      }
+    },
+    "DELETE": {
+      "CONFIRM": {
+        "TITLE": "Excluir pipeline",
+        "MESSAGE": "Tem certeza que deseja excluir",
+        "CASCADE_WARNING": "Isso também excluirá {stages} etapa(s) e todas as suas oportunidades.",
+        "YES": "Sim, excluir",
+        "NO": "Não, manter"
+      },
+      "API": {
+        "SUCCESS": "Pipeline excluído com sucesso.",
+        "ERROR": "Algo deu errado. Tente novamente."
+      }
+    },
+    "DETAIL": {
+      "TABS": {
+        "STAGES": "Etapas",
+        "LABELS": "Etiquetas",
+        "AGENTS": "Agentes"
+      }
+    },
+    "STAGE": {
+      "ADD": "Adicionar etapa",
+      "NAME_PLACEHOLDER": "Nome da etapa",
+      "DELETE": {
+        "TITLE": "Excluir etapa",
+        "MESSAGE": "Tem certeza que deseja excluir",
+        "CASCADE_WARNING": "Isso também excluirá {items} oportunidade(s) nesta etapa.",
+        "LOCKED": "Esta etapa é obrigatória e não pode ser excluída"
+      },
+      "API": {
+        "DELETE_SUCCESS": "Etapa excluída com sucesso.",
+        "ERROR": "Algo deu errado. Tente novamente."
+      }
+    },
+    "AGENTS": {
+      "DESCRIPTION": "Adicione agentes que podem ser atribuídos às oportunidades neste pipeline.",
+      "UPDATE": "Atualizar agentes",
+      "SEARCH_PLACEHOLDER": "Buscar agentes...",
+      "AUTO_ASSIGNMENT": {
+        "TITLE": "Atribuição automática",
+        "DESCRIPTION": "Atribuir automaticamente novas oportunidades aos agentes do pipeline",
+        "MAX_LIMIT_LABEL": "Quantidade máxima de oportunidades por agente",
+        "MAX_LIMIT_HELP": "0 significa ilimitado"
+      },
+      "API": {
+        "SUCCESS": "Agentes atualizados com sucesso.",
+        "ERROR": "Algo deu errado. Tente novamente."
+      }
+    }
+  }
+}

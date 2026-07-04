@@ -23,6 +23,7 @@ import ShopifyOrdersList from 'dashboard/components/widgets/conversation/Shopify
 import SidebarActionsHeader from 'dashboard/components-next/SidebarActionsHeader.vue';
 import LinearIssuesList from 'dashboard/components/widgets/conversation/linear/IssuesList.vue';
 import LinearSetupCTA from 'dashboard/components/widgets/conversation/linear/LinearSetupCTA.vue';
+import ConversationOpportunities from 'dashboard/components-next/Conversation/ConversationOpportunities.vue';
 
 const props = defineProps({
   conversationId: {
@@ -232,6 +233,22 @@ onMounted(() => {
               "
             >
               <ContactConversations
+                :contact-id="contact.id"
+                :conversation-id="conversationId"
+              />
+            </AccordionItem>
+          </div>
+          <div v-else-if="element.name === 'opportunities'">
+            <AccordionItem
+              v-if="contact.id"
+              :title="$t('CONVERSATION_SIDEBAR.ACCORDION.OPPORTUNITIES')"
+              :is-open="isContactSidebarItemOpen('is_opportunities_open')"
+              compact
+              @toggle="
+                value => toggleSidebarUIState('is_opportunities_open', value)
+              "
+            >
+              <ConversationOpportunities
                 :contact-id="contact.id"
                 :conversation-id="conversationId"
               />

@@ -1,5 +1,9 @@
 {
   "LABEL_MGMT": {
+    "TABS": {
+      "GENERAL": "Gerais",
+      "PIPELINE": "Pipeline"
+    },
     "HEADER": "Etiquetas",
     "HEADER_BTN_TXT": "Adicionar etiqueta",
     "LOADING": "Buscando etiquetas",

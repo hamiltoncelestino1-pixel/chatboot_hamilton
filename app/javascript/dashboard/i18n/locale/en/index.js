@@ -41,6 +41,8 @@ import contentTemplates from './contentTemplates.json';
 import mfa from './mfa.json';
 import onboarding from './onboarding.json';
 import yearInReview from './yearInReview.json';
+import kanban from './kanban.json';
+import pipelineMgmt from './pipelineMgmt.json';
 
 export default {
   ...advancedFilters,
@@ -86,4 +88,6 @@ export default {
   ...mfa,
   ...onboarding,
   ...yearInReview,
+  ...kanban,
+  ...pipelineMgmt,
 };

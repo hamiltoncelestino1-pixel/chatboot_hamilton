@@ -46,6 +46,7 @@ export default {
       values: [],
       show: true,
       tagInputTouched: false,
+      displayOnCard: false,
     };
   },
 
@@ -145,6 +146,7 @@ export default {
           attribute_values: this.attributeListValues,
           regex_pattern: normalizeRegexPattern(this.regexPattern),
           regex_cue: this.regexCue,
+          display_on_card: this.displayOnCard,
         });
         this.alertMessage = this.$t('ATTRIBUTES_MGMT.ADD.API.SUCCESS_MESSAGE');
         this.onClose();
@@ -225,6 +227,16 @@ export default {
               {{ $t('ATTRIBUTES_MGMT.ADD.FORM.TYPE.ERROR') }}
             </span>
           </label>
+          <div v-if="attributeModel === 2" class="mb-4">
+            <input
+              id="display-on-card"
+              v-model="displayOnCard"
+              type="checkbox"
+            />
+            <label for="display-on-card" class="inline ml-1">
+              {{ $t('ATTRIBUTES_MGMT.ADD.FORM.DISPLAY_ON_CARD.LABEL') }}
+            </label>
+          </div>
           <div v-if="isAttributeTypeList" class="mb-4">
             <label class="mb-1 block">
               {{ $t('ATTRIBUTES_MGMT.ADD.FORM.TYPE.LIST.LABEL') }}

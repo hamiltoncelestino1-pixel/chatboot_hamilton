@@ -1,0 +1,50 @@
+tags:
+  - Pipelines
+operationId: add-agent-to-pipeline
+summary: Add Agent to Pipeline
+description: Add one or more agents to a pipeline
+security:
+  - userApiKey: []
+requestBody:
+  required: true
+  content:
+    application/json:
+      schema:
+        type: object
+        required:
+          - user_ids
+        properties:
+          user_ids:
+            type: array
+            items:
+              type: integer
+            description: IDs of users to be added to the pipeline
+            example: [1, 2]
+responses:
+  '200':
+    description: Success
+    content:
+      application/json:
+        schema:
+          type: array
+          description: 'Array of newly added agents'
+          items:
+            $ref: '#/components/schemas/agent'
+  '401':
+    description: Unauthorized
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/bad_request_error'
+  '403':
+    description: Access denied
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/bad_request_error'
+  '404':
+    description: Pipeline not found
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/bad_request_error'

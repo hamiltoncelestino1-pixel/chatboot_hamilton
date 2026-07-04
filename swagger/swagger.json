@@ -7484,6 +7484,1263 @@
         }
       }
     },
+    "/api/v1/accounts/{account_id}/pipelines": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/account_id"
+        }
+      ],
+      "get": {
+        "tags": [
+          "Pipelines"
+        ],
+        "operationId": "list-all-pipelines",
+        "summary": "List all pipelines",
+        "security": [
+          {
+            "userApiKey": []
+          }
+        ],
+        "description": "List all pipelines available in the current account",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "description": "Array of pipelines with their stages",
+                  "items": {
+                    "$ref": "#/components/schemas/pipeline"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/bad_request_error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Pipelines"
+        ],
+        "operationId": "create-a-pipeline",
+        "summary": "Create a pipeline",
+        "security": [
+          {
+            "userApiKey": []
+          }
+        ],
+        "description": "Create a pipeline in the account",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/account_id"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/pipeline_create_update_payload"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/pipeline"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/bad_request_error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/accounts/{account_id}/pipelines/{pipeline_id}": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/account_id"
+        },
+        {
+          "$ref": "#/components/parameters/pipeline_id"
+        }
+      ],
+      "get": {
+        "tags": [
+          "Pipelines"
+        ],
+        "operationId": "get-details-of-a-pipeline",
+        "summary": "Get a pipeline",
+        "security": [
+          {
+            "userApiKey": []
+          }
+        ],
+        "description": "Get the details of a pipeline in the account",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/pipeline"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/bad_request_error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Pipeline not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/bad_request_error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Pipelines"
+        ],
+        "operationId": "update-a-pipeline",
+        "summary": "Update a pipeline",
+        "security": [
+          {
+            "userApiKey": []
+          }
+        ],
+        "description": "Update a pipeline's details",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/pipeline_create_update_payload"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/pipeline"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/bad_request_error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Pipeline not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/bad_request_error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Pipelines"
+        ],
+        "operationId": "delete-a-pipeline",
+        "summary": "Delete a pipeline",
+        "security": [
+          {
+            "userApiKey": []
+          }
+        ],
+        "description": "Delete a pipeline and all its stages and items",
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/bad_request_error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Pipeline not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/bad_request_error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/accounts/{account_id}/pipelines/{pipeline_id}/pipeline_stages": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/account_id"
+        },
+        {
+          "$ref": "#/components/parameters/pipeline_id"
+        }
+      ],
+      "get": {
+        "tags": [
+          "Pipelines"
+        ],
+        "operationId": "list-pipeline-stages",
+        "summary": "List pipeline stages",
+        "security": [
+          {
+            "userApiKey": []
+          }
+        ],
+        "description": "List all stages for a given pipeline",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/pipeline_stage"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/bad_request_error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Pipelines"
+        ],
+        "operationId": "create-a-pipeline-stage",
+        "summary": "Create a pipeline stage",
+        "security": [
+          {
+            "userApiKey": []
+          }
+        ],
+        "description": "Add a new stage to a pipeline",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/pipeline_stage_create_update_payload"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/pipeline_stage"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/bad_request_error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/accounts/{account_id}/pipelines/{pipeline_id}/pipeline_stages/{pipeline_stage_id}": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/account_id"
+        },
+        {
+          "$ref": "#/components/parameters/pipeline_id"
+        },
+        {
+          "$ref": "#/components/parameters/pipeline_stage_id"
+        }
+      ],
+      "get": {
+        "tags": [
+          "Pipelines"
+        ],
+        "operationId": "list-pipeline-stages",
+        "summary": "List pipeline stages",
+        "security": [
+          {
+            "userApiKey": []
+          }
+        ],
+        "description": "List all stages for a given pipeline",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/pipeline_stage"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/bad_request_error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Pipelines"
+        ],
+        "operationId": "update-a-pipeline-stage",
+        "summary": "Update a pipeline stage",
+        "security": [
+          {
+            "userApiKey": []
+          }
+        ],
+        "description": "Update a stage's name, color or position",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/pipeline_stage_create_update_payload"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/pipeline_stage"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/bad_request_error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Pipelines"
+        ],
+        "operationId": "delete-a-pipeline-stage",
+        "summary": "Delete a pipeline stage",
+        "security": [
+          {
+            "userApiKey": []
+          }
+        ],
+        "description": "Remove a stage and all its items from a pipeline",
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/bad_request_error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/accounts/{account_id}/pipelines/{pipeline_id}/pipeline_stages/reorder": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/account_id"
+        },
+        {
+          "$ref": "#/components/parameters/pipeline_id"
+        }
+      ],
+      "post": {
+        "tags": [
+          "Pipelines"
+        ],
+        "operationId": "reorder-pipeline-stages",
+        "summary": "Reorder pipeline stages",
+        "security": [
+          {
+            "userApiKey": []
+          }
+        ],
+        "description": "Update the display order of stages within a pipeline",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/pipeline_stage_reorder_payload"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/bad_request_error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/accounts/{account_id}/pipelines/{pipeline_id}/pipeline_items": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/account_id"
+        },
+        {
+          "$ref": "#/components/parameters/pipeline_id"
+        }
+      ],
+      "get": {
+        "tags": [
+          "Pipelines"
+        ],
+        "operationId": "list-pipeline-items",
+        "summary": "List pipeline items",
+        "security": [
+          {
+            "userApiKey": []
+          }
+        ],
+        "description": "List all items for a given pipeline. Pass ?stage_id=X to filter by stage.",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/pipeline_item"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/bad_request_error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/accounts/{account_id}/pipeline_items": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/account_id"
+        }
+      ],
+      "post": {
+        "tags": [
+          "Pipelines"
+        ],
+        "operationId": "create-a-pipeline-item",
+        "summary": "Create a pipeline item",
+        "security": [
+          {
+            "userApiKey": []
+          }
+        ],
+        "description": "Create a new card/item in a pipeline stage",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/pipeline_item_create_update_payload"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/pipeline_item"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/bad_request_error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/accounts/{account_id}/pipeline_items/{pipeline_item_id}": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/account_id"
+        },
+        {
+          "$ref": "#/components/parameters/pipeline_item_id"
+        }
+      ],
+      "get": {
+        "tags": [
+          "Pipelines"
+        ],
+        "operationId": "list-pipeline-items",
+        "summary": "List pipeline items",
+        "security": [
+          {
+            "userApiKey": []
+          }
+        ],
+        "description": "List all items for a given pipeline. Pass ?stage_id=X to filter by stage.",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/pipeline_item"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/bad_request_error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Pipelines"
+        ],
+        "operationId": "update-a-pipeline-item",
+        "summary": "Update a pipeline item",
+        "security": [
+          {
+            "userApiKey": []
+          }
+        ],
+        "description": "Update a pipeline item's details or move it to a different stage",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/pipeline_item_create_update_payload"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/pipeline_item"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/bad_request_error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Pipelines"
+        ],
+        "operationId": "delete-a-pipeline-item",
+        "summary": "Delete a pipeline item",
+        "security": [
+          {
+            "userApiKey": []
+          }
+        ],
+        "description": "Remove a card/item from a pipeline",
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/bad_request_error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/accounts/{account_id}/pipeline_items/reorder": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/account_id"
+        }
+      ],
+      "post": {
+        "tags": [
+          "Pipelines"
+        ],
+        "operationId": "reorder-pipeline-items",
+        "summary": "Reorder pipeline items",
+        "security": [
+          {
+            "userApiKey": []
+          }
+        ],
+        "description": "Update the display order of items within a pipeline stage",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/pipeline_item_reorder_payload"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/bad_request_error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/accounts/{account_id}/pipeline_items/{pipeline_item_id}/labels": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/account_id"
+        },
+        {
+          "$ref": "#/components/parameters/pipeline_item_id"
+        }
+      ],
+      "get": {
+        "tags": [
+          "Pipelines"
+        ],
+        "operationId": "get-pipeline-item-labels",
+        "summary": "Get Pipeline Item Labels",
+        "description": "Returns the list of labels applied to a pipeline item",
+        "security": [
+          {
+            "userApiKey": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "payload": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      },
+                      "example": [
+                        "hot-lead",
+                        "follow-up"
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/bad_request_error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Pipeline item not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/bad_request_error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Pipelines"
+        ],
+        "operationId": "update-pipeline-item-labels",
+        "summary": "Update Pipeline Item Labels",
+        "description": "Replaces the full list of labels on a pipeline item. Only pipeline_label type labels are allowed.",
+        "security": [
+          {
+            "userApiKey": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "labels"
+                ],
+                "properties": {
+                  "labels": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "Full list of label titles to apply (replaces existing)",
+                    "example": [
+                      "hot-lead",
+                      "follow-up"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "payload": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      },
+                      "example": [
+                        "hot-lead",
+                        "follow-up"
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/bad_request_error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Invalid labels (non-pipeline label type used)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/bad_request_error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Pipeline item not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/bad_request_error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/accounts/{account_id}/pipelines/{pipeline_id}/pipeline_members": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/account_id"
+        },
+        {
+          "$ref": "#/components/parameters/pipeline_id"
+        }
+      ],
+      "get": {
+        "tags": [
+          "Pipelines"
+        ],
+        "operationId": "list-pipeline-members",
+        "summary": "List Pipeline Members",
+        "description": "Get all agents assigned to a pipeline",
+        "security": [
+          {
+            "userApiKey": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "description": "Array of all agents in the pipeline",
+                  "items": {
+                    "$ref": "#/components/schemas/agent"
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Access denied",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/bad_request_error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Pipeline not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/bad_request_error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Pipelines"
+        ],
+        "operationId": "add-agent-to-pipeline",
+        "summary": "Add Agent to Pipeline",
+        "description": "Add one or more agents to a pipeline",
+        "security": [
+          {
+            "userApiKey": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "user_ids"
+                ],
+                "properties": {
+                  "user_ids": {
+                    "type": "array",
+                    "items": {
+                      "type": "integer"
+                    },
+                    "description": "IDs of users to be added to the pipeline",
+                    "example": [
+                      1,
+                      2
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "description": "Array of newly added agents",
+                  "items": {
+                    "$ref": "#/components/schemas/agent"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/bad_request_error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Access denied",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/bad_request_error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Pipeline not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/bad_request_error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/accounts/{account_id}/pipelines/{pipeline_id}/pipeline_members/update": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/account_id"
+        },
+        {
+          "$ref": "#/components/parameters/pipeline_id"
+        }
+      ],
+      "patch": {
+        "tags": [
+          "Pipelines"
+        ],
+        "operationId": "update-pipeline-members",
+        "summary": "Update Pipeline Members",
+        "description": "Replace the full list of agents assigned to a pipeline. Agents not included in user_ids will be removed.",
+        "security": [
+          {
+            "userApiKey": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "user_ids"
+                ],
+                "properties": {
+                  "user_ids": {
+                    "type": "array",
+                    "items": {
+                      "type": "integer"
+                    },
+                    "description": "IDs of users that should be members of the pipeline",
+                    "example": [
+                      1,
+                      2
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "description": "Array of all current pipeline members",
+                  "items": {
+                    "$ref": "#/components/schemas/agent"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/bad_request_error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Access denied",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/bad_request_error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Pipeline not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/bad_request_error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/accounts/{account_id}/pipelines/{pipeline_id}/pipeline_members/destroy": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/account_id"
+        },
+        {
+          "$ref": "#/components/parameters/pipeline_id"
+        }
+      ],
+      "delete": {
+        "tags": [
+          "Pipelines"
+        ],
+        "operationId": "remove-agent-from-pipeline",
+        "summary": "Remove Agent from Pipeline",
+        "description": "Remove one or more agents from a pipeline",
+        "security": [
+          {
+            "userApiKey": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "user_ids"
+                ],
+                "properties": {
+                  "user_ids": {
+                    "type": "array",
+                    "items": {
+                      "type": "integer"
+                    },
+                    "description": "IDs of users to be removed from the pipeline",
+                    "example": [
+                      1
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/bad_request_error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Access denied",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/bad_request_error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Pipeline not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/bad_request_error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/accounts/{account_id}/custom_filters": {
       "parameters": [
         {
@@ -10564,6 +11821,189 @@
           }
         }
       },
+      "pipeline": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number",
+            "description": "The ID of the pipeline"
+          },
+          "name": {
+            "type": "string",
+            "description": "The name of the pipeline"
+          },
+          "description": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "The description of the pipeline"
+          },
+          "position": {
+            "type": "number",
+            "description": "The display order position of the pipeline"
+          },
+          "account_id": {
+            "type": "number",
+            "description": "The ID of the account"
+          },
+          "stages_count": {
+            "type": "number",
+            "description": "Number of stages in this pipeline"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The date and time when the pipeline was created"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The date and time when the pipeline was last updated"
+          }
+        }
+      },
+      "pipeline_stage": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number",
+            "description": "The ID of the stage"
+          },
+          "name": {
+            "type": "string",
+            "description": "The name of the stage"
+          },
+          "color": {
+            "type": "string",
+            "description": "The hex color code for the stage"
+          },
+          "position": {
+            "type": "number",
+            "description": "The display order position of the stage within the pipeline"
+          },
+          "pipeline_id": {
+            "type": "number",
+            "description": "The ID of the parent pipeline"
+          },
+          "account_id": {
+            "type": "number",
+            "description": "The ID of the account"
+          },
+          "items_count": {
+            "type": "number",
+            "description": "Number of items in this stage"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The date and time when the stage was created"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The date and time when the stage was last updated"
+          }
+        }
+      },
+      "pipeline_item": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number",
+            "description": "The ID of the pipeline item"
+          },
+          "title": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "The title of the item (card)"
+          },
+          "value": {
+            "type": "number",
+            "description": "The monetary value associated with this deal"
+          },
+          "notes": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Additional notes about the item"
+          },
+          "position": {
+            "type": "number",
+            "description": "The display order position within the stage"
+          },
+          "pipeline_stage_id": {
+            "type": "number",
+            "description": "The ID of the stage this item belongs to"
+          },
+          "conversation_id": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "description": "The ID of the linked conversation, if any"
+          },
+          "contact": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "number"
+              },
+              "name": {
+                "type": "string"
+              },
+              "email": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "phone_number": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "avatar_url": {
+                "type": "string"
+              }
+            }
+          },
+          "assignee_id": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "description": "The ID of the agent assigned to this item"
+          },
+          "team_id": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "description": "The ID of the team assigned to this item"
+          },
+          "assignee": {
+            "$ref": "#/components/schemas/agent"
+          },
+          "team": {
+            "$ref": "#/components/schemas/team"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The date and time when the item was created"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The date and time when the item was last updated"
+          }
+        }
+      },
       "label": {
         "type": "object",
         "properties": {
@@ -11757,6 +13197,114 @@
             "example": {}
           }
         }
+      },
+      "pipeline_create_update_payload": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "The name of the pipeline"
+          },
+          "description": {
+            "type": "string",
+            "description": "An optional description for the pipeline"
+          },
+          "position": {
+            "type": "number",
+            "description": "Display order position"
+          }
+        },
+        "required": [
+          "name"
+        ]
+      },
+      "pipeline_stage_create_update_payload": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "The name of the stage"
+          },
+          "color": {
+            "type": "string",
+            "description": "Hex color code for the stage (e.g. '#1f93ff')"
+          },
+          "position": {
+            "type": "number",
+            "description": "Display order position within the pipeline"
+          }
+        },
+        "required": [
+          "name"
+        ]
+      },
+      "pipeline_stage_reorder_payload": {
+        "type": "object",
+        "properties": {
+          "ordered_ids": {
+            "type": "array",
+            "description": "Array of stage IDs in the desired display order",
+            "items": {
+              "type": "number"
+            }
+          }
+        },
+        "required": [
+          "ordered_ids"
+        ]
+      },
+      "pipeline_item_create_update_payload": {
+        "type": "object",
+        "properties": {
+          "pipeline_stage_id": {
+            "type": "number",
+            "description": "The ID of the stage this item belongs to"
+          },
+          "contact_id": {
+            "type": "number",
+            "description": "The ID of the contact associated with this item"
+          },
+          "conversation_id": {
+            "type": "number",
+            "description": "The ID of an optional linked conversation"
+          },
+          "title": {
+            "type": "string",
+            "description": "The title of the item (card)"
+          },
+          "value": {
+            "type": "number",
+            "description": "The monetary value of the deal"
+          },
+          "notes": {
+            "type": "string",
+            "description": "Additional notes about the item"
+          },
+          "position": {
+            "type": "number",
+            "description": "Display order position within the stage"
+          }
+        }
+      },
+      "pipeline_item_reorder_payload": {
+        "type": "object",
+        "properties": {
+          "stage_id": {
+            "type": "number",
+            "description": "The ID of the stage containing the items to reorder"
+          },
+          "ordered_ids": {
+            "type": "array",
+            "description": "Array of item IDs in the desired display order",
+            "items": {
+              "type": "number"
+            }
+          }
+        },
+        "required": [
+          "stage_id",
+          "ordered_ids"
+        ]
       },
       "conversation_create_payload": {
         "type": "object",
@@ -14518,6 +16066,33 @@
         "required": true,
         "description": "The ID of the team to be updated"
       },
+      "pipeline_id": {
+        "in": "path",
+        "name": "pipeline_id",
+        "schema": {
+          "type": "integer"
+        },
+        "required": true,
+        "description": "The ID of the pipeline"
+      },
+      "pipeline_stage_id": {
+        "in": "path",
+        "name": "pipeline_stage_id",
+        "schema": {
+          "type": "integer"
+        },
+        "required": true,
+        "description": "The ID of the pipeline stage"
+      },
+      "pipeline_item_id": {
+        "in": "path",
+        "name": "pipeline_item_id",
+        "schema": {
+          "type": "integer"
+        },
+        "required": true,
+        "description": "The ID of the pipeline item"
+      },
       "inbox_id": {
         "in": "path",
         "name": "inbox_id",
@@ -14792,6 +16367,10 @@
       "description": "Analytics and reporting APIs"
     },
     {
+      "name": "Pipelines",
+      "description": "CRM Pipeline (Kanban) management APIs"
+    },
+    {
       "name": "Teams",
       "description": "Team management APIs"
     },
@@ -14854,6 +16433,7 @@
         "Labels",
         "Messages",
         "Profile",
+        "Pipelines",
         "Reports",
         "Teams",
         "Webhooks",

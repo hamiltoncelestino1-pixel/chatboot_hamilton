@@ -1751,6 +1751,189 @@
           }
         }
       },
+      "pipeline": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number",
+            "description": "The ID of the pipeline"
+          },
+          "name": {
+            "type": "string",
+            "description": "The name of the pipeline"
+          },
+          "description": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "The description of the pipeline"
+          },
+          "position": {
+            "type": "number",
+            "description": "The display order position of the pipeline"
+          },
+          "account_id": {
+            "type": "number",
+            "description": "The ID of the account"
+          },
+          "stages_count": {
+            "type": "number",
+            "description": "Number of stages in this pipeline"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The date and time when the pipeline was created"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The date and time when the pipeline was last updated"
+          }
+        }
+      },
+      "pipeline_stage": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number",
+            "description": "The ID of the stage"
+          },
+          "name": {
+            "type": "string",
+            "description": "The name of the stage"
+          },
+          "color": {
+            "type": "string",
+            "description": "The hex color code for the stage"
+          },
+          "position": {
+            "type": "number",
+            "description": "The display order position of the stage within the pipeline"
+          },
+          "pipeline_id": {
+            "type": "number",
+            "description": "The ID of the parent pipeline"
+          },
+          "account_id": {
+            "type": "number",
+            "description": "The ID of the account"
+          },
+          "items_count": {
+            "type": "number",
+            "description": "Number of items in this stage"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The date and time when the stage was created"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The date and time when the stage was last updated"
+          }
+        }
+      },
+      "pipeline_item": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number",
+            "description": "The ID of the pipeline item"
+          },
+          "title": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "The title of the item (card)"
+          },
+          "value": {
+            "type": "number",
+            "description": "The monetary value associated with this deal"
+          },
+          "notes": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Additional notes about the item"
+          },
+          "position": {
+            "type": "number",
+            "description": "The display order position within the stage"
+          },
+          "pipeline_stage_id": {
+            "type": "number",
+            "description": "The ID of the stage this item belongs to"
+          },
+          "conversation_id": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "description": "The ID of the linked conversation, if any"
+          },
+          "contact": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "number"
+              },
+              "name": {
+                "type": "string"
+              },
+              "email": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "phone_number": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "avatar_url": {
+                "type": "string"
+              }
+            }
+          },
+          "assignee_id": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "description": "The ID of the agent assigned to this item"
+          },
+          "team_id": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "description": "The ID of the team assigned to this item"
+          },
+          "assignee": {
+            "$ref": "#/components/schemas/agent"
+          },
+          "team": {
+            "$ref": "#/components/schemas/team"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The date and time when the item was created"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The date and time when the item was last updated"
+          }
+        }
+      },
       "label": {
         "type": "object",
         "properties": {
@@ -2944,6 +3127,114 @@
             "example": {}
           }
         }
+      },
+      "pipeline_create_update_payload": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "The name of the pipeline"
+          },
+          "description": {
+            "type": "string",
+            "description": "An optional description for the pipeline"
+          },
+          "position": {
+            "type": "number",
+            "description": "Display order position"
+          }
+        },
+        "required": [
+          "name"
+        ]
+      },
+      "pipeline_stage_create_update_payload": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "The name of the stage"
+          },
+          "color": {
+            "type": "string",
+            "description": "Hex color code for the stage (e.g. '#1f93ff')"
+          },
+          "position": {
+            "type": "number",
+            "description": "Display order position within the pipeline"
+          }
+        },
+        "required": [
+          "name"
+        ]
+      },
+      "pipeline_stage_reorder_payload": {
+        "type": "object",
+        "properties": {
+          "ordered_ids": {
+            "type": "array",
+            "description": "Array of stage IDs in the desired display order",
+            "items": {
+              "type": "number"
+            }
+          }
+        },
+        "required": [
+          "ordered_ids"
+        ]
+      },
+      "pipeline_item_create_update_payload": {
+        "type": "object",
+        "properties": {
+          "pipeline_stage_id": {
+            "type": "number",
+            "description": "The ID of the stage this item belongs to"
+          },
+          "contact_id": {
+            "type": "number",
+            "description": "The ID of the contact associated with this item"
+          },
+          "conversation_id": {
+            "type": "number",
+            "description": "The ID of an optional linked conversation"
+          },
+          "title": {
+            "type": "string",
+            "description": "The title of the item (card)"
+          },
+          "value": {
+            "type": "number",
+            "description": "The monetary value of the deal"
+          },
+          "notes": {
+            "type": "string",
+            "description": "Additional notes about the item"
+          },
+          "position": {
+            "type": "number",
+            "description": "Display order position within the stage"
+          }
+        }
+      },
+      "pipeline_item_reorder_payload": {
+        "type": "object",
+        "properties": {
+          "stage_id": {
+            "type": "number",
+            "description": "The ID of the stage containing the items to reorder"
+          },
+          "ordered_ids": {
+            "type": "array",
+            "description": "Array of item IDs in the desired display order",
+            "items": {
+              "type": "number"
+            }
+          }
+        },
+        "required": [
+          "stage_id",
+          "ordered_ids"
+        ]
       },
       "conversation_create_payload": {
         "type": "object",
@@ -5705,6 +5996,33 @@
         "required": true,
         "description": "The ID of the team to be updated"
       },
+      "pipeline_id": {
+        "in": "path",
+        "name": "pipeline_id",
+        "schema": {
+          "type": "integer"
+        },
+        "required": true,
+        "description": "The ID of the pipeline"
+      },
+      "pipeline_stage_id": {
+        "in": "path",
+        "name": "pipeline_stage_id",
+        "schema": {
+          "type": "integer"
+        },
+        "required": true,
+        "description": "The ID of the pipeline stage"
+      },
+      "pipeline_item_id": {
+        "in": "path",
+        "name": "pipeline_item_id",
+        "schema": {
+          "type": "integer"
+        },
+        "required": true,
+        "description": "The ID of the pipeline item"
+      },
       "inbox_id": {
         "in": "path",
         "name": "inbox_id",
@@ -5933,6 +6251,7 @@
         "Labels",
         "Messages",
         "Profile",
+        "Pipelines",
         "Reports",
         "Teams",
         "Webhooks",

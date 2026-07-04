@@ -1,0 +1,87 @@
+{
+  "KANBAN": {
+    "TITLE": "Pipeline",
+    "EMPTY_STATE": {
+      "TITLE": "Nenhum pipeline ainda",
+      "DESCRIPTION": "Crie seu primeiro pipeline para organizar e gerenciar suas oportunidades.",
+      "BUTTON": "Gerenciar pipelines em Configurações"
+    },
+    "PIPELINE": {
+      "CREATE": "Criar Pipeline",
+      "EDIT": "Editar Pipeline",
+      "DELETE": "Excluir Pipeline",
+      "NAME_LABEL": "Nome do pipeline",
+      "NAME_PLACEHOLDER": "ex: Funil de Vendas",
+      "DESCRIPTION_LABEL": "Descrição",
+      "DESCRIPTION_PLACEHOLDER": "Descreva o objetivo deste pipeline",
+      "API": {
+        "CREATE_SUCCESS": "Pipeline criado com sucesso.",
+        "UPDATE_SUCCESS": "Pipeline atualizado com sucesso.",
+        "DELETE_SUCCESS": "Pipeline excluído com sucesso.",
+        "ERROR": "Algo deu errado. Tente novamente."
+      }
+    },
+    "STAGE": {
+      "ADD": "Adicionar etapa",
+      "EDIT": "Editar etapa",
+      "DELETE": "Remover etapa",
+      "NAME_LABEL": "Nome da etapa",
+      "NAME_PLACEHOLDER": "ex: Qualificado",
+      "COLOR_LABEL": "Cor",
+      "ADD_PLACEHOLDER": "Nome da etapa",
+      "API": {
+        "CREATE_SUCCESS": "Etapa adicionada com sucesso.",
+        "UPDATE_SUCCESS": "Etapa atualizada com sucesso.",
+        "DELETE_SUCCESS": "Etapa removida com sucesso.",
+        "ERROR": "Algo deu errado. Tente novamente."
+      }
+    },
+    "ITEM": {
+      "ADD": "Adicionar card",
+      "EDIT": "Editar card",
+      "DELETE": "Excluir card",
+      "MOVE": "Mover para etapa",
+      "CONTACT_LABEL": "Contato",
+      "CONTACT_PLACEHOLDER": "Buscar contato...",
+      "TITLE_LABEL": "Título",
+      "TITLE_PLACEHOLDER": "Título do card (opcional)",
+      "VALUE_LABEL": "Valor do negócio",
+      "VALUE_PLACEHOLDER": "0,00",
+      "NOTES_LABEL": "Observações",
+      "NOTES_PLACEHOLDER": "Adicione notas sobre esta oportunidade...",
+      "LINKED_CONVERSATION": "Conversa vinculada",
+      "CONTACT": {
+        "VIEW_PROFILE": "Ver perfil do contato"
+      },
+      "CONVERSATION": {
+        "SEARCH_PLACEHOLDER": "Vincular uma conversa...",
+        "CLEAR": "Desvincular conversa"
+      },
+      "MOVE_ERROR": "Falha ao mover card. Tente novamente.",
+      "ASSIGNEE_LABEL": "Responsável",
+      "ASSIGNEE_PLACEHOLDER": "Atribuir um agente",
+      "ASSIGNEE_NONE": "Nenhum",
+      "TEAM_LABEL": "Time",
+      "TEAM_PLACEHOLDER": "Atribuir um time",
+      "TEAM_NONE": "Nenhum",
+      "UNASSIGNED": "Não atribuído",
+      "LABELS_TITLE": "Etiquetas",
+      "LABELS_ADD": "Adicionar",
+      "PIPELINE_LABEL": "Pipeline",
+      "STAGE_LABEL": "Etapa",
+      "CUSTOM_ATTRIBUTES_TITLE": "Campos personalizados",
+      "ASSIGN_TO_ME": "Atribuir a mim",
+      "CANCEL": "Cancelar",
+      "SAVE": "Salvar",
+      "ERRORS": {
+        "ASSIGNEE_NOT_MEMBER": "Este agente não é membro do pipeline."
+      },
+      "API": {
+        "CREATE_SUCCESS": "Card adicionado com sucesso.",
+        "UPDATE_SUCCESS": "Card atualizado com sucesso.",
+        "DELETE_SUCCESS": "Card excluído com sucesso.",
+        "ERROR": "Algo deu errado. Tente novamente."
+      }
+    }
+  }
+}

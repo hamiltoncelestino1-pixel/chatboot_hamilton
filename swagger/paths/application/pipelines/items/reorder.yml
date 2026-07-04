@@ -1,0 +1,22 @@
+tags:
+  - Pipelines
+operationId: reorder-pipeline-items
+summary: Reorder pipeline items
+security:
+  - userApiKey: []
+description: Update the display order of items within a pipeline stage
+requestBody:
+  required: true
+  content:
+    application/json:
+      schema:
+        $ref: '#/components/schemas/pipeline_item_reorder_payload'
+responses:
+  '200':
+    description: Success
+  '401':
+    description: Unauthorized
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/bad_request_error'

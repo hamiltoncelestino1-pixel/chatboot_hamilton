@@ -1,0 +1,23 @@
+type: object
+properties:
+  pipeline_stage_id:
+    type: number
+    description: The ID of the stage this item belongs to
+  contact_id:
+    type: number
+    description: The ID of the contact associated with this item
+  conversation_id:
+    type: number
+    description: The ID of an optional linked conversation
+  title:
+    type: string
+    description: The title of the item (card)
+  value:
+    type: number
+    description: The monetary value of the deal
+  notes:
+    type: string
+    description: Additional notes about the item
+  position:
+    type: number
+    description: Display order position within the stage

@@ -1,0 +1,53 @@
+tags:
+  - Pipelines
+operationId: update-pipeline-item-labels
+summary: Update Pipeline Item Labels
+description: Replaces the full list of labels on a pipeline item. Only pipeline_label type labels are allowed.
+security:
+  - userApiKey: []
+requestBody:
+  required: true
+  content:
+    application/json:
+      schema:
+        type: object
+        required:
+          - labels
+        properties:
+          labels:
+            type: array
+            items:
+              type: string
+            description: Full list of label titles to apply (replaces existing)
+            example: ["hot-lead", "follow-up"]
+responses:
+  '200':
+    description: Success
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            payload:
+              type: array
+              items:
+                type: string
+              example: ["hot-lead", "follow-up"]
+  '401':
+    description: Unauthorized
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/bad_request_error'
+  '422':
+    description: Invalid labels (non-pipeline label type used)
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/bad_request_error'
+  '404':
+    description: Pipeline item not found
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/bad_request_error'

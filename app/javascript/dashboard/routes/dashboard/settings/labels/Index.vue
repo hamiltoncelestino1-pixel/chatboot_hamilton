@@ -2,7 +2,11 @@
 import { useAlert } from 'dashboard/composables';
 import { computed, onBeforeMount, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { useStoreGetters, useStore } from 'dashboard/composables/store';
+import {
+  useStoreGetters,
+  useStore,
+  useMapGetter,
+} from 'dashboard/composables/store';
 import { picoSearch } from '@scmmishra/pico-search';
 
 import AddLabel from './AddLabel.vue';
@@ -10,6 +14,7 @@ import EditLabel from './EditLabel.vue';
 import BaseSettingsHeader from '../components/BaseSettingsHeader.vue';
 import SettingsLayout from '../SettingsLayout.vue';
 import Button from 'dashboard/components-next/button/Button.vue';
+import TabBar from 'dashboard/components-next/tabbar/TabBar.vue';
 import {
   BaseTable,
   BaseTableRow,
@@ -26,8 +31,30 @@ const showEditPopup = ref(false);
 const showDeleteConfirmationPopup = ref(false);
 const selectedLabel = ref({});
 const searchQuery = ref('');
+const selectedTabIndex = ref(0);
 
-const records = computed(() => getters['labels/getLabels'].value);
+const labelType = computed(() =>
+  selectedTabIndex.value === 1 ? 'pipeline_label' : 'general_label'
+);
+
+const tabsForTabBar = computed(() => [
+  { key: 0, label: t('LABEL_MGMT.TABS.GENERAL') },
+  { key: 1, label: t('LABEL_MGMT.TABS.PIPELINE') },
+]);
+
+const onClickTabChange = tab => {
+  selectedTabIndex.value = tab.key;
+  searchQuery.value = '';
+};
+
+const generalLabels = useMapGetter('labels/getGeneralLabels');
+const pipelineLabels = useMapGetter('labels/getPipelineLabels');
+
+const records = computed(() =>
+  labelType.value === 'pipeline_label'
+    ? pipelineLabels.value
+    : generalLabels.value
+);
 
 const filteredRecords = computed(() => {
   const query = searchQuery.value.trim();
@@ -92,8 +119,9 @@ const tableHeaders = computed(() => {
   ];
 });
 
-onBeforeMount(() => {
-  store.dispatch('labels/get');
+onBeforeMount(async () => {
+  await store.dispatch('labels/get');
+  store.dispatch('labels/refetch');
 });
 </script>
 
@@ -117,6 +145,13 @@ onBeforeMount(() => {
           <span class="text-body-main text-n-slate-11">
             {{ $t('LABEL_MGMT.COUNT', { n: records.length }) }}
           </span>
+        </template>
+        <template #tabs>
+          <TabBar
+            :tabs="tabsForTabBar"
+            :initial-active-tab="selectedTabIndex"
+            @tab-changed="onClickTabChange"
+          />
         </template>
         <template #actions>
           <Button
@@ -190,7 +225,7 @@ onBeforeMount(() => {
     </template>
 
     <woot-modal v-model:show="showAddPopup" :on-close="hideAddPopup">
-      <AddLabel @close="hideAddPopup" />
+      <AddLabel :fixed-label-type="labelType" @close="hideAddPopup" />
     </woot-modal>
 
     <woot-modal v-model:show="showEditPopup" :on-close="hideEditPopup">

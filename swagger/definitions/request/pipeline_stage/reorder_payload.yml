@@ -1,0 +1,9 @@
+type: object
+properties:
+  ordered_ids:
+    type: array
+    description: Array of stage IDs in the desired display order
+    items:
+      type: number
+required:
+  - ordered_ids

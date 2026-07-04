@@ -1,0 +1,68 @@
+type: object
+properties:
+  id:
+    type: number
+    description: The ID of the pipeline item
+  title:
+    type:
+      - string
+      - 'null'
+    description: The title of the item (card)
+  value:
+    type: number
+    description: The monetary value associated with this deal
+  notes:
+    type:
+      - string
+      - 'null'
+    description: Additional notes about the item
+  position:
+    type: number
+    description: The display order position within the stage
+  pipeline_stage_id:
+    type: number
+    description: The ID of the stage this item belongs to
+  conversation_id:
+    type:
+      - number
+      - 'null'
+    description: The ID of the linked conversation, if any
+  contact:
+    type: object
+    properties:
+      id:
+        type: number
+      name:
+        type: string
+      email:
+        type:
+          - string
+          - 'null'
+      phone_number:
+        type:
+          - string
+          - 'null'
+      avatar_url:
+        type: string
+  assignee_id:
+    type:
+      - integer
+      - 'null'
+    description: The ID of the agent assigned to this item
+  team_id:
+    type:
+      - integer
+      - 'null'
+    description: The ID of the team assigned to this item
+  assignee:
+    $ref: '#/components/schemas/agent'
+  team:
+    $ref: '#/components/schemas/team'
+  created_at:
+    type: string
+    format: date-time
+    description: The date and time when the item was created
+  updated_at:
+    type: string
+    format: date-time
+    description: The date and time when the item was last updated

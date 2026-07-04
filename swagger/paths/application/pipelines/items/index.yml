@@ -1,0 +1,22 @@
+tags:
+  - Pipelines
+operationId: list-pipeline-items
+summary: List pipeline items
+security:
+  - userApiKey: []
+description: List all items for a given pipeline. Pass ?stage_id=X to filter by stage.
+responses:
+  '200':
+    description: Success
+    content:
+      application/json:
+        schema:
+          type: array
+          items:
+            $ref: '#/components/schemas/pipeline_item'
+  '401':
+    description: Unauthorized
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/bad_request_error'

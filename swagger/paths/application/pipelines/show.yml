@@ -1,0 +1,26 @@
+tags:
+  - Pipelines
+operationId: get-details-of-a-pipeline
+summary: Get a pipeline
+security:
+  - userApiKey: []
+description: Get the details of a pipeline in the account
+responses:
+  '200':
+    description: Success
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/pipeline'
+  '401':
+    description: Unauthorized
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/bad_request_error'
+  '404':
+    description: Pipeline not found
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/bad_request_error'
