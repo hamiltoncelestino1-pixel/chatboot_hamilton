@@ -1,0 +1,22 @@
+tags:
+  - Pipelines
+operationId: list-pipeline-stages
+summary: List pipeline stages
+security:
+  - userApiKey: []
+description: List all stages for a given pipeline
+responses:
+  '200':
+    description: Success
+    content:
+      application/json:
+        schema:
+          type: array
+          items:
+            $ref: '#/components/schemas/pipeline_stage'
+  '401':
+    description: Unauthorized
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/bad_request_error'

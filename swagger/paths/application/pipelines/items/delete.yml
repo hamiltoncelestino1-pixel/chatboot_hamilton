@@ -1,0 +1,16 @@
+tags:
+  - Pipelines
+operationId: delete-a-pipeline-item
+summary: Delete a pipeline item
+security:
+  - userApiKey: []
+description: Remove a card/item from a pipeline
+responses:
+  '200':
+    description: Success
+  '401':
+    description: Unauthorized
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/bad_request_error'

@@ -110,6 +110,8 @@ class User < ApplicationRecord
   has_many :notifications, dependent: :destroy_async
   has_many :team_members, dependent: :destroy_async
   has_many :teams, through: :team_members
+  has_many :pipeline_members, dependent: :destroy_async
+  has_many :pipelines, through: :pipeline_members
   has_many :articles, foreign_key: 'author_id', dependent: :nullify, inverse_of: :author
   # rubocop:disable Rails/HasManyOrHasOneDependent
   # we are handling this in `remove_macros` callback
@@ -135,6 +137,10 @@ class User < ApplicationRecord
 
   def assigned_inboxes
     administrator? ? Current.account.inboxes : inboxes.where(account_id: Current.account.id)
+  end
+
+  def assigned_pipelines
+    administrator? ? Current.account.pipelines : pipelines.where(account_id: Current.account.id)
   end
 
   def serializable_hash(options = nil)

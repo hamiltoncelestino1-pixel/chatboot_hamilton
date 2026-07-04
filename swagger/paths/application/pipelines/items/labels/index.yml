@@ -1,0 +1,32 @@
+tags:
+  - Pipelines
+operationId: get-pipeline-item-labels
+summary: Get Pipeline Item Labels
+description: Returns the list of labels applied to a pipeline item
+security:
+  - userApiKey: []
+responses:
+  '200':
+    description: Success
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            payload:
+              type: array
+              items:
+                type: string
+              example: ["hot-lead", "follow-up"]
+  '401':
+    description: Unauthorized
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/bad_request_error'
+  '404':
+    description: Pipeline item not found
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/bad_request_error'

@@ -1,0 +1,32 @@
+tags:
+  - Pipelines
+operationId: update-a-pipeline
+summary: Update a pipeline
+security:
+  - userApiKey: []
+description: Update a pipeline's details
+requestBody:
+  required: true
+  content:
+    application/json:
+      schema:
+        $ref: '#/components/schemas/pipeline_create_update_payload'
+responses:
+  '200':
+    description: Success
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/pipeline'
+  '401':
+    description: Unauthorized
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/bad_request_error'
+  '404':
+    description: Pipeline not found
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/bad_request_error'

@@ -1,0 +1,28 @@
+tags:
+  - Pipelines
+operationId: create-a-pipeline
+summary: Create a pipeline
+security:
+  - userApiKey: []
+description: Create a pipeline in the account
+parameters:
+  - $ref: '#/components/parameters/account_id'
+requestBody:
+  required: true
+  content:
+    application/json:
+      schema:
+        $ref: '#/components/schemas/pipeline_create_update_payload'
+responses:
+  '200':
+    description: Success
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/pipeline'
+  '401':
+    description: Unauthorized
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/bad_request_error'

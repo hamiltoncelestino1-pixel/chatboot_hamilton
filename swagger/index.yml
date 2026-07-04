@@ -75,6 +75,8 @@ tags:
     description: User profile APIs
   - name: Reports
     description: Analytics and reporting APIs
+  - name: Pipelines
+    description: CRM Pipeline (Kanban) management APIs
   - name: Teams
     description: Team management APIs
   - name: Webhooks
@@ -117,6 +119,7 @@ x-tagGroups:
       - Labels
       - Messages
       - Profile
+      - Pipelines
       - Reports
       - Teams
       - Webhooks

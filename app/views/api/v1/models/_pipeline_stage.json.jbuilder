@@ -1,0 +1,10 @@
+json.id resource.id
+json.name resource.name
+json.color resource.color
+json.position resource.position
+json.stage_type resource.stage_type
+json.pipeline_id resource.pipeline_id
+json.account_id resource.account_id
+json.items_count resource.pipeline_items.size
+json.created_at resource.created_at
+json.updated_at resource.updated_at

@@ -29,6 +29,10 @@ export const getters = {
   getLabelById: _state => id => {
     return _state.records.find(record => record.id === Number(id)) || {};
   },
+  getGeneralLabels: _state =>
+    _state.records.filter(l => l.label_type === 'general_label'),
+  getPipelineLabels: _state =>
+    _state.records.filter(l => l.label_type === 'pipeline_label'),
 };
 
 export const actions = {
@@ -39,6 +43,18 @@ export const actions = {
         const response = await LabelsAPI.refetchAndCommit(newKey);
         commit(types.SET_LABELS, response.data.payload);
       }
+    } catch (error) {
+      // Ignore error
+    }
+  },
+
+  refetch: async function refetchLabels({ commit }) {
+    try {
+      const response = await LabelsAPI.get(false);
+      const sortedLabels = response.data.payload.sort((a, b) =>
+        a.title.localeCompare(b.title)
+      );
+      commit(types.SET_LABELS, sortedLabels);
     } catch (error) {
       // Ignore error
     }

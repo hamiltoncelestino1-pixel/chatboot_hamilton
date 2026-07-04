@@ -1,5 +1,9 @@
 {
   "LABEL_MGMT": {
+    "TABS": {
+      "GENERAL": "General",
+      "PIPELINE": "Pipeline"
+    },
     "HEADER": "Labels",
     "HEADER_BTN_TXT": "Add label",
     "LOADING": "Fetching labels",

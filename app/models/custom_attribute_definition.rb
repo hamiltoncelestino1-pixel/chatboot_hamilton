@@ -10,6 +10,7 @@
 #  attribute_model        :integer          default("conversation_attribute")
 #  attribute_values       :jsonb
 #  default_value          :integer
+#  display_on_card        :boolean          default(FALSE), not null
 #  regex_cue              :string
 #  regex_pattern          :string
 #  created_at             :datetime         not null
@@ -25,7 +26,8 @@ class CustomAttributeDefinition < ApplicationRecord
   STANDARD_ATTRIBUTES = {
     :conversation => %w[status priority assignee_id inbox_id team_id display_id campaign_id labels browser_language country_code referer created_at
                         last_activity_at],
-    :contact => %w[name email phone_number identifier country_code city company_name created_at last_activity_at referer blocked]
+    :contact => %w[name email phone_number identifier country_code city company_name created_at last_activity_at referer blocked],
+    :pipeline_item => %w[title value notes position pipeline_stage_id contact_id conversation_id assignee_id team_id labels created_at]
   }.freeze
 
   scope :with_attribute_model, ->(attribute_model) { attribute_model.presence && where(attribute_model: attribute_model) }
@@ -41,7 +43,7 @@ class CustomAttributeDefinition < ApplicationRecord
   validates :attribute_model, presence: true
   validate :attribute_must_not_conflict, on: :create
 
-  enum attribute_model: { conversation_attribute: 0, contact_attribute: 1 }
+  enum attribute_model: { conversation_attribute: 0, contact_attribute: 1, pipeline_item_attribute: 2 }
   enum attribute_display_type: { text: 0, number: 1, currency: 2, percent: 3, link: 4, date: 5, list: 6, checkbox: 7 }
 
   belongs_to :account
@@ -64,7 +66,7 @@ class CustomAttributeDefinition < ApplicationRecord
   end
 
   def attribute_must_not_conflict
-    model_keys = attribute_model.to_sym == :conversation_attribute ? :conversation : :contact
+    model_keys = { 'conversation_attribute' => :conversation, 'contact_attribute' => :contact, 'pipeline_item_attribute' => :pipeline_item }[attribute_model]
     return unless attribute_key.in?(STANDARD_ATTRIBUTES[model_keys])
 
     errors.add(:attribute_key, I18n.t('errors.custom_attribute_definition.key_conflict'))

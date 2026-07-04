@@ -1,0 +1,43 @@
+tags:
+  - Pipelines
+operationId: remove-agent-from-pipeline
+summary: Remove Agent from Pipeline
+description: Remove one or more agents from a pipeline
+security:
+  - userApiKey: []
+requestBody:
+  required: true
+  content:
+    application/json:
+      schema:
+        type: object
+        required:
+          - user_ids
+        properties:
+          user_ids:
+            type: array
+            items:
+              type: integer
+            description: IDs of users to be removed from the pipeline
+            example: [1]
+responses:
+  '200':
+    description: Success
+  '401':
+    description: Unauthorized
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/bad_request_error'
+  '403':
+    description: Access denied
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/bad_request_error'
+  '404':
+    description: Pipeline not found
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/bad_request_error'

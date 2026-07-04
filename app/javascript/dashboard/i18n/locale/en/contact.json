@@ -508,8 +508,14 @@
       "TABS": {
         "ATTRIBUTES": "Attributes",
         "HISTORY": "History",
+        "OPPORTUNITIES": "Opportunities",
         "NOTES": "Notes",
         "MERGE": "Merge"
+      },
+      "OPPORTUNITIES": {
+        "EMPTY_STATE": "No opportunities linked to this contact",
+        "CREATE": "Create opportunity",
+        "UNTITLED": "Untitled opportunity"
       },
       "HISTORY": {
         "EMPTY_STATE": "There are no previous conversations associated to this contact"

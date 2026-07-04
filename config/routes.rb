@@ -268,6 +268,24 @@ Rails.application.routes.draw do
             end
           end
 
+          resources :pipelines do
+            resources :pipeline_stages, only: [:index, :create, :show, :update, :destroy] do
+              collection { post :reorder }
+            end
+            resources :pipeline_items, only: [:index]
+            resources :pipeline_members, only: [:index, :create] do
+              collection do
+                delete :destroy
+                patch :update
+              end
+            end
+          end
+
+          resources :pipeline_items, only: [:index, :create, :show, :update, :destroy] do
+            collection { post :reorder }
+            resource :labels, only: [:index, :create], module: :pipeline_items
+          end
+
           # Assignment V2 Routes
           resources :assignment_policies do
             resources :inboxes, only: [:index, :create, :destroy], module: :assignment_policies

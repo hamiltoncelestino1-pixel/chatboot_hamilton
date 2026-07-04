@@ -38,6 +38,7 @@ export default {
       attributeKey: '',
       values: [],
       tagInputTouched: false,
+      displayOnCard: false,
     };
   },
   validations: {
@@ -121,6 +122,7 @@ export default {
       this.regexCue = this.selectedAttribute.regex_cue;
       this.regexEnabled = regexPattern != null;
       this.values = this.setAttributeListValue;
+      this.displayOnCard = this.selectedAttribute.display_on_card || false;
     },
     async editAttributes() {
       this.v$.$touch();
@@ -139,6 +141,7 @@ export default {
           attribute_values: this.updatedAttributeListValues,
           regex_pattern: normalizeRegexPattern(this.regexPattern),
           regex_cue: this.regexCue,
+          display_on_card: this.displayOnCard,
         });
         this.alertMessage = this.$t('ATTRIBUTES_MGMT.EDIT.API.SUCCESS_MESSAGE');
         this.onClose();
@@ -209,6 +212,19 @@ export default {
             {{ $t('ATTRIBUTES_MGMT.ADD.FORM.TYPE.ERROR') }}
           </span>
         </label>
+        <div
+          v-if="selectedAttribute.attribute_model === 'pipeline_item_attribute'"
+          class="mb-4"
+        >
+          <input
+            id="display-on-card-edit"
+            v-model="displayOnCard"
+            type="checkbox"
+          />
+          <label for="display-on-card-edit" class="inline ml-1">
+            {{ $t('ATTRIBUTES_MGMT.ADD.FORM.DISPLAY_ON_CARD.LABEL') }}
+          </label>
+        </div>
         <div v-if="isAttributeTypeList" class="mb-4">
           <label class="mb-1 block">
             {{ $t('ATTRIBUTES_MGMT.EDIT.TYPE.LIST.LABEL') }}

@@ -1,0 +1,13 @@
+type: object
+properties:
+  stage_id:
+    type: number
+    description: The ID of the stage containing the items to reorder
+  ordered_ids:
+    type: array
+    description: Array of item IDs in the desired display order
+    items:
+      type: number
+required:
+  - stage_id
+  - ordered_ids

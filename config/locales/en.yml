@@ -139,6 +139,11 @@ en:
     custom_attribute_definition:
       attribute_key_format: must only contain letters, numbers, underscores, hyphens, and dots
       key_conflict: The provided key is not allowed as it might conflict with default attributes.
+    pipeline_item:
+      assignee_not_member: Assignee must be a member of the pipeline
+      conversation_contact_mismatch: Conversation does not belong to the linked contact
+    pipeline_stage:
+      cannot_delete_special_stage: This stage is required and cannot be deleted
     mfa:
       already_enabled: MFA is already enabled
       not_enabled: MFA is not enabled

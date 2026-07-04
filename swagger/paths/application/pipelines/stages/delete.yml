@@ -1,0 +1,16 @@
+tags:
+  - Pipelines
+operationId: delete-a-pipeline-stage
+summary: Delete a pipeline stage
+security:
+  - userApiKey: []
+description: Remove a stage and all its items from a pipeline
+responses:
+  '200':
+    description: Success
+  '401':
+    description: Unauthorized
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/bad_request_error'

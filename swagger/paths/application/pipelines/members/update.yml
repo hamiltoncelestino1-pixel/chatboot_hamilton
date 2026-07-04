@@ -1,0 +1,50 @@
+tags:
+  - Pipelines
+operationId: update-pipeline-members
+summary: Update Pipeline Members
+description: Replace the full list of agents assigned to a pipeline. Agents not included in user_ids will be removed.
+security:
+  - userApiKey: []
+requestBody:
+  required: true
+  content:
+    application/json:
+      schema:
+        type: object
+        required:
+          - user_ids
+        properties:
+          user_ids:
+            type: array
+            items:
+              type: integer
+            description: IDs of users that should be members of the pipeline
+            example: [1, 2]
+responses:
+  '200':
+    description: Success
+    content:
+      application/json:
+        schema:
+          type: array
+          description: 'Array of all current pipeline members'
+          items:
+            $ref: '#/components/schemas/agent'
+  '401':
+    description: Unauthorized
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/bad_request_error'
+  '403':
+    description: Access denied
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/bad_request_error'
+  '404':
+    description: Pipeline not found
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/bad_request_error'

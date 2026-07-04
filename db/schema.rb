@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_04_30_114500) do
+ActiveRecord::Schema[7.1].define(version: 2026_07_01_100010) do
   # These extensions should be enabled to support this database
   enable_extension "pg_stat_statements"
   enable_extension "pg_trgm"
@@ -381,11 +381,11 @@ ActiveRecord::Schema[7.1].define(version: 2026_04_30_114500) do
     t.integer "sync_status"
     t.datetime "last_synced_at"
     t.datetime "last_sync_attempted_at"
+    t.index ["account_id", "sync_status"], name: "index_captain_documents_on_account_id_and_sync_status"
     t.index ["account_id"], name: "index_captain_documents_on_account_id"
     t.index ["assistant_id", "external_link"], name: "index_captain_documents_on_assistant_id_and_external_link", unique: true
     t.index ["assistant_id"], name: "index_captain_documents_on_assistant_id"
     t.index ["status"], name: "index_captain_documents_on_status"
-    t.index ["account_id", "sync_status"], name: "index_captain_documents_on_account_id_and_sync_status"
   end
 
   create_table "captain_inboxes", force: :cascade do |t|
@@ -779,6 +779,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_04_30_114500) do
     t.jsonb "attribute_values", default: []
     t.string "regex_pattern"
     t.string "regex_cue"
+    t.boolean "display_on_card", default: false, null: false
     t.index ["account_id"], name: "index_custom_attribute_definitions_on_account_id"
     t.index ["attribute_key", "attribute_model", "account_id"], name: "attribute_key_model_index", unique: true
   end
@@ -935,7 +936,9 @@ ActiveRecord::Schema[7.1].define(version: 2026_04_30_114500) do
     t.bigint "account_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.integer "label_type", default: 0, null: false
     t.index ["account_id"], name: "index_labels_on_account_id"
+    t.index ["label_type", "account_id"], name: "index_labels_on_label_type_and_account_id"
     t.index ["title", "account_id"], name: "index_labels_on_title_and_account_id", unique: true
   end
 
@@ -1068,6 +1071,68 @@ ActiveRecord::Schema[7.1].define(version: 2026_04_30_114500) do
     t.index ["secondary_actor_type", "secondary_actor_id"], name: "uniq_secondary_actor_per_account_notifications"
     t.index ["user_id", "account_id", "snoozed_until", "read_at"], name: "idx_notifications_performance"
     t.index ["user_id"], name: "index_notifications_on_user_id"
+  end
+
+  create_table "pipeline_items", force: :cascade do |t|
+    t.bigint "account_id", null: false
+    t.bigint "pipeline_stage_id", null: false
+    t.bigint "contact_id", null: false
+    t.bigint "conversation_id"
+    t.string "title", limit: 255
+    t.decimal "value", precision: 15, scale: 2, default: "0.0"
+    t.text "notes"
+    t.integer "position", default: 0, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "assignee_id"
+    t.bigint "team_id"
+    t.jsonb "custom_attributes", default: {}, null: false
+    t.index ["account_id", "contact_id"], name: "index_pipeline_items_on_account_id_and_contact_id"
+    t.index ["account_id"], name: "index_pipeline_items_on_account_id"
+    t.index ["assignee_id"], name: "index_pipeline_items_on_assignee_id"
+    t.index ["contact_id"], name: "index_pipeline_items_on_contact_id"
+    t.index ["conversation_id"], name: "index_pipeline_items_on_conversation_id"
+    t.index ["pipeline_stage_id", "position"], name: "index_pipeline_items_on_pipeline_stage_id_and_position"
+    t.index ["pipeline_stage_id"], name: "index_pipeline_items_on_pipeline_stage_id"
+    t.index ["team_id"], name: "index_pipeline_items_on_team_id"
+  end
+
+  create_table "pipeline_members", force: :cascade do |t|
+    t.bigint "pipeline_id", null: false
+    t.bigint "user_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["pipeline_id", "user_id"], name: "index_pipeline_members_on_pipeline_id_and_user_id", unique: true
+    t.index ["user_id"], name: "index_pipeline_members_on_user_id"
+  end
+
+  create_table "pipeline_stages", force: :cascade do |t|
+    t.bigint "account_id", null: false
+    t.bigint "pipeline_id", null: false
+    t.string "name", limit: 255, null: false
+    t.string "color", limit: 10, default: "#1f93ff", null: false
+    t.integer "position", default: 0, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.integer "stage_type", default: 0, null: false
+    t.index ["account_id"], name: "index_pipeline_stages_on_account_id"
+    t.index ["pipeline_id", "name"], name: "index_pipeline_stages_on_pipeline_id_and_name", unique: true
+    t.index ["pipeline_id", "position"], name: "index_pipeline_stages_on_pipeline_id_and_position"
+    t.index ["pipeline_id"], name: "index_pipeline_stages_on_pipeline_id"
+  end
+
+  create_table "pipelines", force: :cascade do |t|
+    t.bigint "account_id", null: false
+    t.string "name", limit: 255, null: false
+    t.text "description"
+    t.integer "position", default: 0, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.boolean "enable_auto_assignment", default: false, null: false
+    t.integer "max_assignment_limit", default: 0, null: false
+    t.index ["account_id", "name"], name: "index_pipelines_on_account_id_and_name", unique: true
+    t.index ["account_id", "position"], name: "index_pipelines_on_account_id_and_position"
+    t.index ["account_id"], name: "index_pipelines_on_account_id"
   end
 
   create_table "platform_app_permissibles", force: :cascade do |t|
@@ -1319,6 +1384,10 @@ ActiveRecord::Schema[7.1].define(version: 2026_04_30_114500) do
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "inboxes", "portals"
+  add_foreign_key "pipeline_items", "teams"
+  add_foreign_key "pipeline_items", "users", column: "assignee_id"
+  add_foreign_key "pipeline_members", "pipelines"
+  add_foreign_key "pipeline_members", "users"
   create_trigger("accounts_after_insert_row_tr", :generated => true, :compatibility => 1).
       on("accounts").
       after(:insert).

@@ -16,6 +16,10 @@ export default {
       type: String,
       default: '',
     },
+    fixedLabelType: {
+      type: String,
+      default: 'general_label',
+    },
   },
   emits: ['close'],
   setup() {
@@ -54,6 +58,7 @@ export default {
           description: this.description,
           title: this.title.toLowerCase(),
           show_on_sidebar: this.showOnSidebar,
+          label_type: this.fixedLabelType,
         });
         useAlert(this.$t('LABEL_MGMT.ADD.API.SUCCESS_MESSAGE'));
         this.onClose();

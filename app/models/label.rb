@@ -5,6 +5,7 @@
 #  id              :bigint           not null, primary key
 #  color           :string           default("#1f93ff"), not null
 #  description     :text
+#  label_type      :integer          default("general_label"), not null
 #  show_on_sidebar :boolean
 #  title           :string
 #  created_at      :datetime         not null
@@ -13,14 +14,20 @@
 #
 # Indexes
 #
-#  index_labels_on_account_id            (account_id)
-#  index_labels_on_title_and_account_id  (title,account_id) UNIQUE
+#  index_labels_on_account_id                 (account_id)
+#  index_labels_on_label_type_and_account_id  (label_type,account_id)
+#  index_labels_on_title_and_account_id       (title,account_id) UNIQUE
 #
 class Label < ApplicationRecord
   include RegexHelper
   include AccountCacheRevalidator
 
   belongs_to :account
+
+  enum label_type: { general_label: 0, pipeline_label: 1 }
+
+  scope :general, -> { where(label_type: :general_label) }
+  scope :for_pipelines, -> { where(label_type: :pipeline_label) }
 
   validates :title,
             presence: { message: I18n.t('errors.validations.presence') },

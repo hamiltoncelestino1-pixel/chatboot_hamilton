@@ -58,6 +58,10 @@ const tabs = computed(() => {
       key: 1,
       name: t('ATTRIBUTES_MGMT.TABS.CONTACT'),
     },
+    {
+      key: 2,
+      name: t('ATTRIBUTES_MGMT.TABS.PIPELINE_ITEM'),
+    },
   ];
 });
 
@@ -69,9 +73,11 @@ onMounted(() => {
   store.dispatch('attributes/get');
 });
 
-const attributeModel = computed(() =>
-  selectedTabIndex.value ? 'contact_attribute' : 'conversation_attribute'
-);
+const attributeModel = computed(() => {
+  if (selectedTabIndex.value === 1) return 'contact_attribute';
+  if (selectedTabIndex.value === 2) return 'pipeline_item_attribute';
+  return 'conversation_attribute';
+});
 
 const attributes = computed(() =>
   getters['attributes/getAttributesByModel'].value(attributeModel.value)

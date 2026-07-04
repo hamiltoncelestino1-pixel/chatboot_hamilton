@@ -1,0 +1,120 @@
+<script setup>
+import { computed } from 'vue';
+import { useStore } from 'dashboard/composables/store';
+
+const props = defineProps({
+  item: { type: Object, required: true },
+});
+
+const emit = defineEmits(['click']);
+
+const store = useStore();
+
+const formattedValue = computed(() => {
+  if (!props.item.value || Number(props.item.value) === 0) return null;
+  return new Intl.NumberFormat('pt-BR', {
+    style: 'currency',
+    currency: 'BRL',
+  }).format(props.item.value);
+});
+
+const pipelineItemAttributes = computed(() =>
+  store.getters['attributes/getAttributesByModel']('pipeline_item_attribute')
+);
+
+const visibleAttributes = computed(() =>
+  pipelineItemAttributes.value
+    .filter(attr => attr.display_on_card)
+    .map(attr => ({
+      key: attr.attribute_key,
+      label: attr.attribute_display_name,
+      value: props.item.custom_attributes?.[attr.attribute_key],
+    }))
+    .filter(
+      attr =>
+        attr.value !== undefined && attr.value !== null && attr.value !== ''
+    )
+);
+</script>
+
+<template>
+  <div
+    class="bg-white dark:bg-slate-700 rounded-lg p-3 shadow-sm cursor-pointer hover:shadow-md transition-shadow border border-slate-100 dark:border-slate-600"
+    @click="emit('click', item)"
+  >
+    <div class="flex items-center gap-2 mb-1.5">
+      <img
+        v-if="item.contact?.avatar_url"
+        :src="item.contact.avatar_url"
+        :alt="item.contact?.name"
+        class="w-6 h-6 rounded-full flex-shrink-0 object-cover"
+      />
+      <span
+        v-else
+        class="w-6 h-6 rounded-full flex-shrink-0 bg-woot-100 dark:bg-woot-900 flex items-center justify-center text-xs font-semibold text-woot-600 dark:text-woot-300"
+      >
+        {{ item.contact?.name?.[0]?.toUpperCase() || '?' }}
+      </span>
+      <span
+        class="text-sm font-medium text-slate-700 dark:text-slate-200 truncate"
+      >
+        {{ item.title || item.contact?.name }}
+      </span>
+    </div>
+
+    <div
+      v-if="item.contact?.email"
+      class="text-xs text-slate-400 dark:text-slate-500 truncate mb-1"
+    >
+      {{ item.contact.email }}
+    </div>
+
+    <div v-if="item.label_list?.length" class="flex flex-wrap gap-1 mt-1.5">
+      <span
+        v-for="label in item.label_list"
+        :key="label"
+        class="px-1.5 py-0.5 rounded text-[10px] font-medium bg-slate-100 dark:bg-slate-600 text-slate-600 dark:text-slate-200"
+      >
+        {{ label }}
+      </span>
+    </div>
+
+    <div v-if="visibleAttributes.length" class="flex flex-col gap-0.5 mt-1.5">
+      <div
+        v-for="attr in visibleAttributes"
+        :key="attr.key"
+        class="text-[10px] text-slate-500 dark:text-slate-400 truncate"
+      >
+        <span class="font-medium">{{ attr.label }}:</span> {{ attr.value }}
+      </div>
+    </div>
+
+    <div class="flex items-center justify-between mt-2">
+      <span
+        v-if="formattedValue"
+        class="text-xs font-semibold text-emerald-600 dark:text-emerald-400"
+      >
+        {{ formattedValue }}
+      </span>
+      <span
+        v-if="item.conversation_id"
+        class="text-xs text-woot-500 dark:text-woot-400 ml-auto"
+      >
+        #{{ item.conversation_id }}
+      </span>
+      <img
+        v-if="item.assignee?.thumbnail"
+        :src="item.assignee.thumbnail"
+        :title="item.assignee.name"
+        class="w-5 h-5 rounded-full object-cover ml-auto flex-shrink-0"
+      />
+      <span
+        v-else-if="item.assignee"
+        :title="item.assignee.name"
+        class="w-5 h-5 rounded-full bg-slate-200 dark:bg-slate-600 flex items-center justify-center text-[10px] font-semibold text-slate-600 dark:text-slate-200 ml-auto flex-shrink-0"
+      >
+        {{ item.assignee.name?.[0]?.toUpperCase() }}
+      </span>
+    </div>
+  </div>
+</template>

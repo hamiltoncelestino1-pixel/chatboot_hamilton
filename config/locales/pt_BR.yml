@@ -123,6 +123,8 @@ pt_BR:
     custom_attribute_definition:
       attribute_key_format: deve conter apenas letras, números, sublinhados, hífens, e pontos
       key_conflict: A chave fornecida não é permitida pois pode entrar em conflito com os atributos padrão.
+    pipeline_item:
+      assignee_not_member: O responsável precisa ser um agente atribuído ao pipeline
     mfa:
       already_enabled: MFA já está habilitado
       not_enabled: MFA não está habilitado

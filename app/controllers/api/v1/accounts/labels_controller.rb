@@ -5,6 +5,7 @@ class Api::V1::Accounts::LabelsController < Api::V1::Accounts::BaseController
 
   def index
     @labels = policy_scope(Current.account.labels)
+    @labels = @labels.where(label_type: params[:label_type]) if params[:label_type].present?
   end
 
   def show; end
@@ -29,6 +30,6 @@ class Api::V1::Accounts::LabelsController < Api::V1::Accounts::BaseController
   end
 
   def permitted_params
-    params.require(:label).permit(:title, :description, :color, :show_on_sidebar)
+    params.require(:label).permit(:title, :description, :color, :show_on_sidebar, :label_type)
   end
 end

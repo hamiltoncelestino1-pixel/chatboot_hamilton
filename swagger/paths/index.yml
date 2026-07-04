@@ -529,6 +529,105 @@
   delete:
     $ref: ./application/team_members/delete.yml
 
+# Pipelines
+
+/api/v1/accounts/{account_id}/pipelines:
+  parameters:
+    - $ref: '#/components/parameters/account_id'
+  get:
+    $ref: ./application/pipelines/index.yml
+  post:
+    $ref: ./application/pipelines/create.yml
+/api/v1/accounts/{account_id}/pipelines/{pipeline_id}:
+  parameters:
+    - $ref: '#/components/parameters/account_id'
+    - $ref: '#/components/parameters/pipeline_id'
+  get:
+    $ref: ./application/pipelines/show.yml
+  patch:
+    $ref: ./application/pipelines/update.yml
+  delete:
+    $ref: ./application/pipelines/delete.yml
+/api/v1/accounts/{account_id}/pipelines/{pipeline_id}/pipeline_stages:
+  parameters:
+    - $ref: '#/components/parameters/account_id'
+    - $ref: '#/components/parameters/pipeline_id'
+  get:
+    $ref: ./application/pipelines/stages/index.yml
+  post:
+    $ref: ./application/pipelines/stages/create.yml
+/api/v1/accounts/{account_id}/pipelines/{pipeline_id}/pipeline_stages/{pipeline_stage_id}:
+  parameters:
+    - $ref: '#/components/parameters/account_id'
+    - $ref: '#/components/parameters/pipeline_id'
+    - $ref: '#/components/parameters/pipeline_stage_id'
+  get:
+    $ref: ./application/pipelines/stages/index.yml
+  patch:
+    $ref: ./application/pipelines/stages/update.yml
+  delete:
+    $ref: ./application/pipelines/stages/delete.yml
+/api/v1/accounts/{account_id}/pipelines/{pipeline_id}/pipeline_stages/reorder:
+  parameters:
+    - $ref: '#/components/parameters/account_id'
+    - $ref: '#/components/parameters/pipeline_id'
+  post:
+    $ref: ./application/pipelines/stages/reorder.yml
+/api/v1/accounts/{account_id}/pipelines/{pipeline_id}/pipeline_items:
+  parameters:
+    - $ref: '#/components/parameters/account_id'
+    - $ref: '#/components/parameters/pipeline_id'
+  get:
+    $ref: ./application/pipelines/items/index.yml
+/api/v1/accounts/{account_id}/pipeline_items:
+  parameters:
+    - $ref: '#/components/parameters/account_id'
+  post:
+    $ref: ./application/pipelines/items/create.yml
+/api/v1/accounts/{account_id}/pipeline_items/{pipeline_item_id}:
+  parameters:
+    - $ref: '#/components/parameters/account_id'
+    - $ref: '#/components/parameters/pipeline_item_id'
+  get:
+    $ref: ./application/pipelines/items/index.yml
+  patch:
+    $ref: ./application/pipelines/items/update.yml
+  delete:
+    $ref: ./application/pipelines/items/delete.yml
+/api/v1/accounts/{account_id}/pipeline_items/reorder:
+  parameters:
+    - $ref: '#/components/parameters/account_id'
+  post:
+    $ref: ./application/pipelines/items/reorder.yml
+/api/v1/accounts/{account_id}/pipeline_items/{pipeline_item_id}/labels:
+  parameters:
+    - $ref: '#/components/parameters/account_id'
+    - $ref: '#/components/parameters/pipeline_item_id'
+  get:
+    $ref: ./application/pipelines/items/labels/index.yml
+  post:
+    $ref: ./application/pipelines/items/labels/create.yml
+/api/v1/accounts/{account_id}/pipelines/{pipeline_id}/pipeline_members:
+  parameters:
+    - $ref: '#/components/parameters/account_id'
+    - $ref: '#/components/parameters/pipeline_id'
+  get:
+    $ref: ./application/pipelines/members/index.yml
+  post:
+    $ref: ./application/pipelines/members/create.yml
+/api/v1/accounts/{account_id}/pipelines/{pipeline_id}/pipeline_members/update:
+  parameters:
+    - $ref: '#/components/parameters/account_id'
+    - $ref: '#/components/parameters/pipeline_id'
+  patch:
+    $ref: ./application/pipelines/members/update.yml
+/api/v1/accounts/{account_id}/pipelines/{pipeline_id}/pipeline_members/destroy:
+  parameters:
+    - $ref: '#/components/parameters/account_id'
+    - $ref: '#/components/parameters/pipeline_id'
+  delete:
+    $ref: ./application/pipelines/members/delete.yml
+
 ### Custom Filters goes here
 
 # Custom Filters
