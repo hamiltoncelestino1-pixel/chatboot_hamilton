@@ -18,6 +18,16 @@ module RequestExceptionHandler
   rescue ActionController::ParameterMissing => e
     log_handled_error(e)
     render_could_not_create_error(e.message)
+  rescue StandardError => e
+    # TEMP DEBUG (remover após diagnosticar o 500 no carregamento/filtro de conversas — Anna Beatriz)
+    Rails.logger.error(
+      "[REQUEST_DEBUG_TEMP] controller=#{controller_name}##{action_name} " \
+      "account=#{Current.account&.id} user=#{Current.user&.id} " \
+      "params=#{params.except(:controller, :action).to_unsafe_h} " \
+      "error=#{e.class}: #{e.message}"
+    )
+    Rails.logger.error("[REQUEST_DEBUG_TEMP] backtrace:\n#{e.backtrace&.first(20)&.join("\n")}")
+    raise
   ensure
     # to address the thread variable leak issues in Puma/Thin webserver
     Current.reset
