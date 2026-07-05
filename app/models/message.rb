@@ -160,7 +160,7 @@ class Message < ApplicationRecord
       assignee_id: conversation.assignee_id,
       unread_count: conversation.unread_incoming_messages.count,
       last_activity_at: conversation.last_activity_at.to_i,
-      contact_inbox: { source_id: conversation.contact_inbox.source_id }
+      contact_inbox: { source_id: conversation_contact_inbox_source_id }
     }
   end
 
@@ -284,6 +284,18 @@ class Message < ApplicationRecord
   end
 
   private
+
+  def conversation_contact_inbox_source_id
+    conversation.contact_inbox.source_id
+  rescue NoMethodError => e
+    # TEMP DEBUG (remover após diagnosticar o 500 no carregamento/filtro de conversas — Anna Beatriz)
+    Rails.logger.error(
+      "[CONV_DEBUG_TEMP] conversation_id=#{conversation.id} " \
+      "contact_inbox_id=#{conversation.contact_inbox_id} contact_id=#{conversation.contact_id} " \
+      "error=#{e.message}"
+    )
+    raise
+  end
 
   def prevent_message_flooding
     # Added this to cover the validation specs in messages
