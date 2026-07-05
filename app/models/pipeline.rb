@@ -22,7 +22,7 @@ class Pipeline < ApplicationRecord
   belongs_to :account
   has_many :pipeline_stages, -> { order(:position) }, dependent: :destroy_async
   has_many :pipeline_items, through: :pipeline_stages
-  has_many :pipeline_members, dependent: :destroy_async
+  has_many :pipeline_members, dependent: :destroy
   has_many :members, through: :pipeline_members, source: :user
 
   validates :name,
