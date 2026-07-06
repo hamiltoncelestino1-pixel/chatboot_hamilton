@@ -1,0 +1,47 @@
+// Noble Company brand overrides
+// Replaces Chatwoot blue (#2781F6) with Noble red (#E0203E) across the design system.
+// These override the --blue-* CSS variables defined in _next-colors.scss.
+
+@layer base {
+  :root {
+    --blue-1: 255 247 247;
+    --blue-2: 254 235 236;
+    --blue-3: 253 214 217;
+    --blue-4: 250 186 191;
+    --blue-5: 246 150 158;
+    --blue-6: 239 108 119;
+    --blue-7: 227 76 90;
+    --blue-8: 217 45 62;
+    --blue-9: 224 32 62;
+    --blue-10: 198 24 51;
+    --blue-11: 163 15 40;
+    --blue-12: 64 8 18;
+
+    --border-blue-strong: 140 15 35;
+    --border-blue: 224, 32, 62, 0.5;
+    --solid-blue: 250 186 191;
+    --solid-blue-2: 255 247 247;
+    --text-blue: 90 8 18;
+  }
+
+  .dark {
+    --blue-1: 30 10 12;
+    --blue-2: 46 14 17;
+    --blue-3: 70 18 24;
+    --blue-4: 94 22 30;
+    --blue-5: 116 26 36;
+    --blue-6: 140 32 44;
+    --blue-7: 166 40 54;
+    --blue-8: 194 48 64;
+    --blue-9: 224 32 62;
+    --blue-10: 235 60 84;
+    --blue-11: 245 110 128;
+    --blue-12: 254 224 228;
+
+    --border-blue-strong: 245 110 128;
+    --border-blue: 224, 32, 62, 0.5;
+    --solid-blue: 94 22 30;
+    --solid-blue-2: 30 10 12;
+    --text-blue: 254 224 228;
+  }
+}

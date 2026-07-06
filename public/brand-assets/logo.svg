@@ -1,8 +1,0 @@
-<svg width="480" height="120" viewBox="0 0 480 120" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <!-- Border frame -->
-  <rect x="2" y="2" width="476" height="116" rx="2" fill="none" stroke="#D4AF37" stroke-width="3"/>
-  <!-- MAZZA -->
-  <text x="240" y="72" font-family="Georgia, 'Times New Roman', serif" font-size="52" font-weight="700" fill="#D4AF37" text-anchor="middle" letter-spacing="12">MAZZA</text>
-  <!-- ADVOCACIA -->
-  <text x="240" y="98" font-family="Georgia, 'Times New Roman', serif" font-size="14" fill="#D4AF37" text-anchor="middle" letter-spacing="9">ADVOCACIA</text>
-</svg>
