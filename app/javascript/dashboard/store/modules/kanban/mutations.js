@@ -96,6 +96,12 @@ const mutations = {
     }
   },
 
+  // Stores item data only — does NOT touch itemOrder (used by contact/conversation lookups
+  // to avoid polluting the board's column ordering before SET_ACTIVE_PIPELINE clears it)
+  SET_ITEM_DATA($state, item) {
+    $state.items[item.id] = item;
+  },
+
   EDIT_ITEM($state, item) {
     $state.items[item.id] = { ...($state.items[item.id] || {}), ...item };
   },

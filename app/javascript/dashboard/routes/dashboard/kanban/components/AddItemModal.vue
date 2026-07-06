@@ -3,7 +3,11 @@ import { ref, reactive, computed, watch, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useStore, useMapGetter } from 'dashboard/composables/store';
 import { useAlert } from 'dashboard/composables';
-import ContactAPI from 'dashboard/api/contacts';
+import ContactSelector from 'dashboard/components-next/NewConversation/components/ContactSelector.vue';
+import {
+  createContactSearcher,
+  createNewContact,
+} from 'dashboard/components-next/NewConversation/helpers/composeConversationHelper';
 
 const props = defineProps({
   stageId: { type: Number, default: null },
@@ -23,15 +27,18 @@ const pipelines = useMapGetter('kanban/getPipelines');
 const currentUser = useMapGetter('getCurrentUser');
 const preselectedContact = useMapGetter('contacts/getContactById');
 
-const contactSearch = ref('');
-const contactResults = ref([]);
 const selectedContact = ref(null);
+const contacts = ref([]);
+const showContactsDropdown = ref(false);
+const isCreatingContact = ref(false);
 
 const contactForDisplay = computed(() =>
   props.contactId
     ? preselectedContact.value(props.contactId)
     : selectedContact.value
 );
+
+const searchContactsFn = createContactSearcher();
 
 const selectedPipelineId = ref(
   props.pipelineId || activePipeline.value?.id || null
@@ -63,31 +70,38 @@ watch(
 const isSearching = ref(false);
 const assignToMe = ref(false);
 
+const handleSearchContacts = async query => {
+  showContactsDropdown.value = true;
+  isSearching.value = true;
+  contacts.value = await searchContactsFn(query);
+  isSearching.value = false;
+};
+
+const handleSetSelectedContact = async ({ value, action, ...rest }) => {
+  if (action === 'create') {
+    isCreatingContact.value = true;
+    try {
+      selectedContact.value = await createNewContact(value);
+    } catch {
+      useAlert(t('KANBAN.ITEM.CONTACT_SELECTOR.CREATE_ERROR'));
+      return;
+    } finally {
+      isCreatingContact.value = false;
+    }
+  } else {
+    selectedContact.value = rest;
+  }
+  contacts.value = [];
+  showContactsDropdown.value = false;
+};
+
+const clearSelectedContact = () => {
+  selectedContact.value = null;
+};
+
 const showPipelineSelector = computed(
   () => !!props.contactId || (!props.pipelineId && !activePipeline.value)
 );
-
-const searchContacts = async () => {
-  if (!contactSearch.value.trim()) {
-    contactResults.value = [];
-    return;
-  }
-  isSearching.value = true;
-  try {
-    const { data } = await ContactAPI.search(contactSearch.value, 1);
-    contactResults.value = Array.isArray(data?.payload) ? data.payload : [];
-  } catch {
-    contactResults.value = [];
-  } finally {
-    isSearching.value = false;
-  }
-};
-
-const selectContact = contact => {
-  selectedContact.value = contact;
-  contactSearch.value = contact.name;
-  contactResults.value = [];
-};
 
 onMounted(async () => {
   if (props.contactId && !preselectedContact.value(props.contactId)) {
@@ -184,47 +198,19 @@ const handleSubmit = async () => {
                 </p>
               </div>
             </div>
-            <div v-else class="relative">
-              <input
-                v-model="contactSearch"
-                type="text"
-                class="w-full px-3 py-2 text-sm border border-slate-200 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-woot-500"
-                :placeholder="t('KANBAN.ITEM.CONTACT_PLACEHOLDER')"
-                @input="searchContacts"
-              />
-              <div
-                v-if="contactResults.length > 0"
-                class="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-lg shadow-lg z-10 max-h-48 overflow-y-auto"
-              >
-                <button
-                  v-for="contact in contactResults"
-                  :key="contact.id"
-                  class="w-full text-left px-3 py-2 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 flex items-center gap-2 transition-colors"
-                  @click="selectContact(contact)"
-                >
-                  <img
-                    v-if="contact.avatar_url"
-                    :src="contact.avatar_url"
-                    class="w-6 h-6 rounded-full flex-shrink-0"
-                  />
-                  <span
-                    v-else
-                    class="w-6 h-6 rounded-full bg-woot-100 dark:bg-woot-900 flex-shrink-0 flex items-center justify-center text-xs font-bold text-woot-600 dark:text-woot-300"
-                  >
-                    {{ contact.name?.[0]?.toUpperCase() }}
-                  </span>
-                  <div class="min-w-0">
-                    <p class="truncate font-medium">{{ contact.name }}</p>
-                    <p
-                      v-if="contact.email"
-                      class="text-xs text-slate-400 truncate"
-                    >
-                      {{ contact.email }}
-                    </p>
-                  </div>
-                </button>
-              </div>
-            </div>
+            <ContactSelector
+              v-else
+              :contacts="contacts"
+              :selected-contact="selectedContact"
+              :show-contacts-dropdown="showContactsDropdown"
+              :is-loading="isSearching"
+              :is-creating-contact="isCreatingContact"
+              :contactable-inboxes-list="[]"
+              :show-inboxes-dropdown="false"
+              @search-contacts="handleSearchContacts"
+              @set-selected-contact="handleSetSelectedContact"
+              @clear-selected-contact="clearSelectedContact"
+            />
           </div>
 
           <!-- Pipeline selector: only when no activePipeline and no pipelineId prop -->

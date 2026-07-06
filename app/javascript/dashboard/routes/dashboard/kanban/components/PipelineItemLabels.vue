@@ -1,5 +1,6 @@
 <script setup>
 import { ref, computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { useStore, useMapGetter } from 'dashboard/composables/store';
 import LabelDropdown from 'shared/components/ui/label/LabelDropdown.vue';
 
@@ -8,6 +9,7 @@ const props = defineProps({
 });
 
 const store = useStore();
+const { t } = useI18n();
 const pipelineLabels = useMapGetter('labels/getPipelineLabels');
 
 const showDropdown = ref(false);
@@ -45,7 +47,7 @@ const addLabel = async label => {
 
 const removeLabel = async title => {
   const previous = [...activeLabels.value];
-  const updated = previous.filter(t => t !== title);
+  const updated = previous.filter(existingTitle => existingTitle !== title);
   store.commit('kanban/EDIT_ITEM', { id: props.item.id, label_list: updated });
   try {
     await store.dispatch('kanban/updateItemLabels', {
