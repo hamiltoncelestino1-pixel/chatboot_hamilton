@@ -1,5 +1,6 @@
 <script setup>
 import { computed } from 'vue';
+import { useRoute } from 'vue-router';
 import { useStore } from 'dashboard/composables/store';
 
 const props = defineProps({
@@ -9,6 +10,8 @@ const props = defineProps({
 const emit = defineEmits(['click']);
 
 const store = useStore();
+const route = useRoute();
+const accountId = computed(() => route.params.accountId);
 
 const formattedValue = computed(() => {
   if (!props.item.value || Number(props.item.value) === 0) return null;
@@ -42,7 +45,15 @@ const visibleAttributes = computed(() =>
     class="bg-white dark:bg-slate-700 rounded-lg p-3 shadow-sm cursor-pointer hover:shadow-md transition-shadow border border-slate-100 dark:border-slate-600"
     @click="emit('click', item)"
   >
-    <div class="flex items-center gap-2 mb-1.5">
+    <router-link
+      v-if="item.contact?.id"
+      :to="{
+        name: 'contacts_edit',
+        params: { accountId: accountId, contactId: item.contact.id },
+      }"
+      class="flex items-center gap-2 mb-1.5 hover:underline"
+      @click.stop
+    >
       <img
         v-if="item.contact?.avatar_url"
         :src="item.contact.avatar_url"
@@ -59,6 +70,18 @@ const visibleAttributes = computed(() =>
         class="text-sm font-medium text-slate-700 dark:text-slate-200 truncate"
       >
         {{ item.title || item.contact?.name }}
+      </span>
+    </router-link>
+    <div v-else class="flex items-center gap-2 mb-1.5">
+      <span
+        class="w-6 h-6 rounded-full flex-shrink-0 bg-woot-100 dark:bg-woot-900 flex items-center justify-center text-xs font-semibold text-woot-600 dark:text-woot-300"
+      >
+        ?
+      </span>
+      <span
+        class="text-sm font-medium text-slate-700 dark:text-slate-200 truncate"
+      >
+        {{ item.title }}
       </span>
     </div>
 

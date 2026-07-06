@@ -53,6 +53,9 @@
       "CONTACT": {
         "VIEW_PROFILE": "View contact profile"
       },
+      "CONTACT_SELECTOR": {
+        "CREATE_ERROR": "Failed to create contact. Please try again."
+      },
       "CONVERSATION": {
         "SEARCH_PLACEHOLDER": "Link a conversation...",
         "CLEAR": "Unlink conversation"

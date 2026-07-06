@@ -150,7 +150,7 @@ export const actions = {
         toStageId: fromStageId,
         position: 0,
       });
-      useAlert('Erro ao mover card. Tente novamente.');
+      useAlert('Failed to move card. Please try again.');
     }
   },
 
@@ -159,7 +159,7 @@ export const actions = {
     try {
       await PipelinesAPI.reorderStages(pipelineId, orderedIds);
     } catch {
-      useAlert('Erro ao reordenar etapas. Tente novamente.');
+      useAlert('Failed to reorder stages. Please try again.');
     }
   },
 
@@ -168,7 +168,7 @@ export const actions = {
     try {
       await PipelineItemsAPI.reorder(stageId, orderedIds);
     } catch {
-      useAlert('Erro ao reordenar cards. Tente novamente.');
+      useAlert('Failed to reorder cards. Please try again.');
     }
   },
 
@@ -186,13 +186,13 @@ export const actions = {
 
   fetchItemsForContact: async ({ commit }, contactId) => {
     const { data } = await PipelineItemsAPI.getByContact(contactId);
-    data.forEach(item => commit('SET_ITEM', item));
+    data.forEach(item => commit('SET_ITEM_DATA', item));
     return data;
   },
 
   fetchItemsForConversation: async ({ commit }, conversationId) => {
     const { data } = await PipelineItemsAPI.getByConversation(conversationId);
-    data.forEach(item => commit('SET_ITEM', item));
+    data.forEach(item => commit('SET_ITEM_DATA', item));
     return data;
   },
 };
