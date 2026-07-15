@@ -36,6 +36,35 @@
         "ERROR": "Algo deu errado. Tente novamente."
       }
     },
+    "SORT": {
+      "TOOLTIP": "Ordenar cards",
+      "FIELD_LABEL": "Ordenar por",
+      "ORDER_LABEL": "Direção",
+      "OPTIONS": {
+        "ASSIGNEE": "Responsável",
+        "CREATED_AT": "Criado em",
+        "UPDATED_AT": "Atualizado em",
+        "VALUE": "Valor"
+      },
+      "ORDER": {
+        "ASC": "Crescente",
+        "DESC": "Decrescente"
+      }
+    },
+    "FILTER": {
+      "TOOLTIP": "Filtrar cards",
+      "DISABLE_DRAG_HINT": "Limpe a ordenação para reordenar os cards",
+      "SHOW_ONLY_MINE": "Exibir apenas minhas",
+      "ASSIGNEE_LABEL": "Responsável",
+      "ALL": "Todos",
+      "UNASSIGNED": "Não atribuído",
+      "CREATED_AT_LABEL": "Criado em",
+      "UPDATED_AT_LABEL": "Atualizado em",
+      "VALUE_LABEL": "Valor",
+      "MIN": "Mín",
+      "MAX": "Máx",
+      "CLEAR": "Limpar filtros"
+    },
     "ITEM": {
       "ADD": "Adicionar card",
       "EDIT": "Editar card",
@@ -76,6 +105,19 @@
       "ASSIGN_TO_ME": "Atribuir a mim",
       "CANCEL": "Cancelar",
       "SAVE": "Salvar",
+      "CREATED_AT": "Criado",
+      "UPDATED_AT": "Atualizado",
+      "EXPORT": {
+        "BUTTON": "Exportar para outra pipeline",
+        "TITLE": "Exportar oportunidade",
+        "TARGET_PIPELINE_LABEL": "Pipeline de destino",
+        "TARGET_STAGE_LABEL": "Stage de destino",
+        "SUBMIT": "Exportar",
+        "CANCEL": "Cancelar",
+        "SUCCESS": "Card exportado com sucesso.",
+        "ERROR": "Falha ao exportar o card. Tente novamente.",
+        "ASSIGNEE_STRIPPED_NOTICE": "O responsável atual não pertence à pipeline de destino e será removido."
+      },
       "ERRORS": {
         "ASSIGNEE_NOT_MEMBER": "Este agente não é membro do pipeline."
       },

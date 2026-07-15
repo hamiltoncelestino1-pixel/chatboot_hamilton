@@ -9,13 +9,19 @@ const props = defineProps({
   stage: { type: Object, required: true },
 });
 
-const emit = defineEmits(['card-click', 'cardMove', 'add-item']);
+const emit = defineEmits(['card-click', 'cardMove', 'add-item', 'export']);
 
 const { t } = useI18n();
 const store = useStore();
-const getItemsForStage = useMapGetter('kanban/getItemsForStage');
+const getFilteredSortedItemsForStage = useMapGetter(
+  'kanban/getFilteredSortedItemsForStage'
+);
+const currentUser = useMapGetter('getCurrentUser');
+const isSortActive = useMapGetter('kanban/isSortActive');
 
-const storeItems = computed(() => getItemsForStage.value(props.stage.id));
+const storeItems = computed(() =>
+  getFilteredSortedItemsForStage.value(props.stage.id, currentUser.value?.id)
+);
 const localItems = ref([...storeItems.value]);
 
 watch(
@@ -42,6 +48,10 @@ const onAdd = ({ item, newIndex }) => {
 
 const onEnd = ({ from, to }) => {
   if (from !== to) return;
+  if (isSortActive.value) {
+    localItems.value = [...storeItems.value];
+    return;
+  }
   const orderedIds = localItems.value.map(i => i.id);
   store.dispatch('kanban/reorderItems', {
     stageId: props.stage.id,
@@ -61,6 +71,9 @@ const onEnd = ({ from, to }) => {
       <div class="flex items-center gap-2 min-w-0">
         <span
           class="text-sm font-semibold text-slate-700 dark:text-slate-200 truncate"
+          :title="
+            isSortActive ? t('KANBAN.FILTER.DISABLE_DRAG_HINT') : undefined
+          "
         >
           {{ stage.name }}
         </span>
@@ -94,6 +107,7 @@ const onEnd = ({ from, to }) => {
           :data-id="item.id"
           :data-stage-id="stage.id"
           @click="emit('card-click', item)"
+          @export="item => emit('export', item)"
         />
       </template>
     </draggable>

@@ -8,8 +8,8 @@ json.pipeline_id resource.pipeline_stage.pipeline_id
 json.pipeline_name resource.pipeline_stage.pipeline.name
 json.pipeline_stage_name resource.pipeline_stage.name
 json.conversation_id resource.conversation_id
-json.created_at resource.created_at
-json.updated_at resource.updated_at
+json.created_at resource.created_at.to_i
+json.updated_at resource.updated_at.to_i
 json.contact do
   json.id resource.contact.id
   json.name resource.contact.name

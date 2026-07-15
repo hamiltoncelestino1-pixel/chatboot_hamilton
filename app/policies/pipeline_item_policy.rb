@@ -1,9 +1,7 @@
 class PipelineItemPolicy < ApplicationPolicy
   class Scope < ApplicationPolicy::Scope
     def resolve
-      return scope.all if @account_user.administrator?
-
-      scope.where(assignee_id: [nil, @user.id])
+      scope.all
     end
   end
 
@@ -28,6 +26,10 @@ class PipelineItemPolicy < ApplicationPolicy
   end
 
   def reorder?
+    true
+  end
+
+  def export?
     true
   end
 end

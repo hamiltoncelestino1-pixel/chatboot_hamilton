@@ -283,6 +283,7 @@ Rails.application.routes.draw do
 
           resources :pipeline_items, only: [:index, :create, :show, :update, :destroy] do
             collection { post :reorder }
+            member { post :export }
             resource :labels, only: [:index, :create], module: :pipeline_items
           end
 

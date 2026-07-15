@@ -1,6 +1,11 @@
 class Api::V1::Accounts::PipelineItemsController < Api::V1::Accounts::BaseController
-  before_action :fetch_item, only: [:show, :update, :destroy]
+  before_action :fetch_item, only: [:show, :update, :destroy, :export]
   before_action :check_authorization
+
+  rescue_from Pipelines::ExportItemService::SamePipelineError,
+              Pipelines::ExportItemService::InvalidTargetStageError do |e|
+    render json: { error: e.message }, status: :unprocessable_entity
+  end
 
   def index
     return nested_pipeline_index if params[:pipeline_id].present?
@@ -38,6 +43,18 @@ class Api::V1::Accounts::PipelineItemsController < Api::V1::Accounts::BaseContro
   def destroy
     @item.destroy!
     head :ok
+  end
+
+  # POST /api/v1/accounts/:account_id/pipeline_items/:id/export
+  # Body: { pipeline_item: { target_pipeline_id: 3, target_stage_id: 12 } }
+  def export
+    target_pipeline = policy_scope(Current.account.pipelines).find(export_params[:target_pipeline_id])
+    @item = Pipelines::ExportItemService.new(
+      pipeline_item: @item,
+      target_pipeline: target_pipeline,
+      target_stage_id: export_params[:target_stage_id]
+    ).perform
+    render :show
   end
 
   # POST /api/v1/accounts/:account_id/pipeline_items/reorder
@@ -97,5 +114,9 @@ class Api::V1::Accounts::PipelineItemsController < Api::V1::Accounts::BaseContro
       :title, :value, :notes, :position, :assignee_id, :team_id,
       custom_attributes: {}
     )
+  end
+
+  def export_params
+    params.require(:pipeline_item).permit(:target_pipeline_id, :target_stage_id)
   end
 end

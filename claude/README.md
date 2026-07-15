@@ -30,6 +30,17 @@ Enterprise       →  enterprise/ (espelha app/ com recursos premium)
 | [09-deploy-producao.md](09-deploy-producao.md) | Levar nossa versão para o servidor: build da imagem, registry, compose de produção |
 | [10-fluxo-git.md](10-fluxo-git.md) | Fluxo de Git em equipe: branches, commits, Pull Requests e como evitar conflitos |
 
+## Históricos de implementação (tasks passo a passo)
+
+Pastas com tasks numeradas (`NN-tipo-descricao.md`) documentando, em detalhe, ciclos de
+trabalho já concluídos ou em andamento — úteis como exemplo real para quem for fazer algo
+parecido no futuro:
+
+| Pasta | Conteúdo |
+|---|---|
+| [white-label/](white-label/) | Rebrand completo para Noble Company (cores, assets, i18n) |
+| [pipeline_tasks/](pipeline_tasks/) | Melhorias no Pipeline/Kanban de oportunidades: filtro geral, ordenação, datas fixas no card, exportar (transferir) card entre pipelines, e ajuste de policy para agentes verem todas as oportunidades |
+
 ## Arquivos-chave para conhecer primeiro
 
 - `config/routes.rb` — mapa de todas as URLs → controllers.

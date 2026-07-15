@@ -1,4 +1,22 @@
+import { DEFAULT_KANBAN_FILTERS } from './constants';
+
 const mutations = {
+  SET_KANBAN_FILTERS($state, filters) {
+    $state.activeFilters = { ...$state.activeFilters, ...filters };
+  },
+
+  RESET_KANBAN_FILTERS($state) {
+    $state.activeFilters = { ...DEFAULT_KANBAN_FILTERS };
+  },
+
+  SET_KANBAN_SORT($state, sort) {
+    $state.activeSort = { ...$state.activeSort, ...sort };
+  },
+
+  SET_SHOW_ONLY_MINE($state, value) {
+    $state.showOnlyMine = value;
+  },
+
   SET_KANBAN_UI_FLAG($state, data) {
     $state.uiFlags = { ...$state.uiFlags, ...data };
   },
