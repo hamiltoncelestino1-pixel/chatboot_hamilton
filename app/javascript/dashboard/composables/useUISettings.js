@@ -132,6 +132,39 @@ const isEditorHotKeyEnabled = (key, uiSettings) => {
   return editorMessageKey === key;
 };
 
+const DEFAULT_KANBAN_BOARD_SETTINGS = {
+  filters: {
+    assigneeId: null,
+    createdAtRange: null,
+    updatedAtRange: null,
+    valueRange: null,
+  },
+  sort: { field: 'created_at', order: 'desc' },
+  showOnlyMine: false,
+};
+
+const kanbanBoardSettingsFor = (pipelineId, uiSettings) => ({
+  ...DEFAULT_KANBAN_BOARD_SETTINGS,
+  ...(uiSettings.value.kanban_board_settings?.[pipelineId] || {}),
+});
+
+const setKanbanBoardSettings = (
+  pipelineId,
+  patch,
+  uiSettings,
+  updateUISettings
+) => {
+  updateUISettings({
+    kanban_board_settings: {
+      ...uiSettings.value.kanban_board_settings,
+      [pipelineId]: {
+        ...kanbanBoardSettingsFor(pipelineId, uiSettings),
+        ...patch,
+      },
+    },
+  });
+};
+
 /**
  * Main composable function for managing UI settings.
  * @returns {Object} An object containing reactive properties and methods for UI settings management.
@@ -167,5 +200,9 @@ export function useUISettings() {
     fetchQuotedReplyFlagFromUISettings: channelType =>
       fetchQuotedReplyFlagFromUISettings(channelType, uiSettings),
     isEditorHotKeyEnabled: key => isEditorHotKeyEnabled(key, uiSettings),
+    kanbanBoardSettings: pipelineId =>
+      kanbanBoardSettingsFor(pipelineId, uiSettings),
+    setKanbanBoardSettings: (pipelineId, patch) =>
+      setKanbanBoardSettings(pipelineId, patch, uiSettings, updateUISettings),
   };
 }

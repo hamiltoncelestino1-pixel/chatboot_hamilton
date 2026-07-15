@@ -160,4 +160,64 @@ describe('useUISettings', () => {
     );
     expect(isEditorHotKeyEnabled('non_existent_key')).toBe(false);
   });
+
+  describe('kanbanBoardSettings', () => {
+    const defaultSettings = {
+      filters: {
+        assigneeId: null,
+        createdAtRange: null,
+        updatedAtRange: null,
+        valueRange: null,
+      },
+      sort: { field: 'created_at', order: 'desc' },
+      showOnlyMine: false,
+    };
+
+    beforeEach(() => {
+      getUISettingsMock.value = {
+        is_ct_labels_open: true,
+        conversation_sidebar_items_order:
+          DEFAULT_CONVERSATION_SIDEBAR_ITEMS_ORDER,
+        contact_sidebar_items_order: DEFAULT_CONTACT_SIDEBAR_ITEMS_ORDER,
+        editor_message_key: 'enter',
+        channel_email_quoted_reply_enabled: true,
+      };
+      mockDispatch.mockClear();
+    });
+
+    it('returns defaults when nothing saved for the pipeline', () => {
+      const { kanbanBoardSettings } = useUISettings();
+      expect(kanbanBoardSettings(42)).toEqual(defaultSettings);
+    });
+
+    it('saves settings for a pipeline without affecting others', () => {
+      const { setKanbanBoardSettings } = useUISettings();
+      setKanbanBoardSettings(1, { showOnlyMine: true });
+
+      expect(mockDispatch).toHaveBeenCalledWith('updateUISettings', {
+        uiSettings: expect.objectContaining({
+          kanban_board_settings: {
+            1: { ...defaultSettings, showOnlyMine: true },
+          },
+        }),
+      });
+    });
+
+    it('merges settings for two different pipelines independently', () => {
+      getUISettingsMock.value.kanban_board_settings = {
+        1: { ...defaultSettings, showOnlyMine: true },
+      };
+      const { setKanbanBoardSettings } = useUISettings();
+      setKanbanBoardSettings(2, { sort: { field: 'value', order: 'asc' } });
+
+      expect(mockDispatch).toHaveBeenCalledWith('updateUISettings', {
+        uiSettings: expect.objectContaining({
+          kanban_board_settings: {
+            1: { ...defaultSettings, showOnlyMine: true },
+            2: { ...defaultSettings, sort: { field: 'value', order: 'asc' } },
+          },
+        }),
+      });
+    });
+  });
 });

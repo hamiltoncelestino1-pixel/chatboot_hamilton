@@ -36,6 +36,35 @@
         "ERROR": "Something went wrong. Please try again."
       }
     },
+    "SORT": {
+      "TOOLTIP": "Sort cards",
+      "FIELD_LABEL": "Sort by",
+      "ORDER_LABEL": "Order",
+      "OPTIONS": {
+        "ASSIGNEE": "Assignee",
+        "CREATED_AT": "Created at",
+        "UPDATED_AT": "Updated at",
+        "VALUE": "Value"
+      },
+      "ORDER": {
+        "ASC": "Ascending",
+        "DESC": "Descending"
+      }
+    },
+    "FILTER": {
+      "TOOLTIP": "Filter cards",
+      "DISABLE_DRAG_HINT": "Clear sorting to reorder cards",
+      "SHOW_ONLY_MINE": "Show only mine",
+      "ASSIGNEE_LABEL": "Assignee",
+      "ALL": "All",
+      "UNASSIGNED": "Unassigned",
+      "CREATED_AT_LABEL": "Created",
+      "UPDATED_AT_LABEL": "Updated",
+      "VALUE_LABEL": "Value",
+      "MIN": "Min",
+      "MAX": "Max",
+      "CLEAR": "Clear filters"
+    },
     "ITEM": {
       "ADD": "Add card",
       "EDIT": "Edit card",
@@ -76,6 +105,19 @@
       "ASSIGN_TO_ME": "Assign to me",
       "CANCEL": "Cancel",
       "SAVE": "Save",
+      "CREATED_AT": "Created",
+      "UPDATED_AT": "Updated",
+      "EXPORT": {
+        "BUTTON": "Export to another pipeline",
+        "TITLE": "Export opportunity",
+        "TARGET_PIPELINE_LABEL": "Destination pipeline",
+        "TARGET_STAGE_LABEL": "Destination stage",
+        "SUBMIT": "Export",
+        "CANCEL": "Cancel",
+        "SUCCESS": "Card exported successfully.",
+        "ERROR": "Failed to export card. Please try again.",
+        "ASSIGNEE_STRIPPED_NOTICE": "The current assignee is not a member of the destination pipeline and will be removed."
+      },
       "ERRORS": {
         "ASSIGNEE_NOT_MEMBER": "This agent is not a member of the pipeline."
       },

@@ -14,7 +14,7 @@ const props = defineProps({
   item: { type: Object, default: null },
 });
 
-const emit = defineEmits(['close']);
+const emit = defineEmits(['close', 'export']);
 
 const { t } = useI18n();
 const store = useStore();
@@ -562,14 +562,24 @@ const handleDelete = async () => {
         <div
           class="flex items-center justify-between px-5 py-4 border-t border-slate-100 dark:border-slate-700"
         >
-          <button
-            class="px-3 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors flex items-center gap-1"
-            :disabled="uiFlags.isDeleting"
-            @click="handleDelete"
-          >
-            <span class="i-lucide-trash-2 size-4" />
-            {{ t('KANBAN.ITEM.DELETE') }}
-          </button>
+          <div class="flex items-center gap-2">
+            <button
+              class="px-3 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors flex items-center gap-1"
+              :disabled="uiFlags.isDeleting"
+              @click="handleDelete"
+            >
+              <span class="i-lucide-trash-2 size-4" />
+              {{ t('KANBAN.ITEM.DELETE') }}
+            </button>
+            <button
+              v-tooltip="t('KANBAN.ITEM.EXPORT.BUTTON')"
+              class="px-3 py-2 text-sm text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors flex items-center gap-1"
+              @click="emit('export', item)"
+            >
+              <span class="i-lucide-arrow-right-left size-4" />
+              {{ t('KANBAN.ITEM.EXPORT.SUBMIT') }}
+            </button>
+          </div>
 
           <div class="flex gap-2">
             <button

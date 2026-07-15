@@ -2,12 +2,19 @@
 import { computed } from 'vue';
 import { useRoute } from 'vue-router';
 import { useStore } from 'dashboard/composables/store';
+import { useI18n } from 'vue-i18n';
+import {
+  dynamicTime,
+  shortTimestamp,
+  dateFormat,
+} from 'shared/helpers/timeHelper';
 
 const props = defineProps({
   item: { type: Object, required: true },
 });
 
-const emit = defineEmits(['click']);
+const emit = defineEmits(['click', 'export']);
+const { t } = useI18n();
 
 const store = useStore();
 const route = useRoute();
@@ -24,6 +31,26 @@ const formattedValue = computed(() => {
 const pipelineItemAttributes = computed(() =>
   store.getters['attributes/getAttributesByModel']('pipeline_item_attribute')
 );
+
+const createdAtShort = computed(() =>
+  props.item.created_at
+    ? shortTimestamp(dynamicTime(props.item.created_at))
+    : null
+);
+const updatedAtShort = computed(() =>
+  props.item.updated_at
+    ? shortTimestamp(dynamicTime(props.item.updated_at))
+    : null
+);
+const datesTooltip = computed(() => {
+  const created = props.item.created_at
+    ? dateFormat(props.item.created_at, 'MMM d, yyyy HH:mm')
+    : '—';
+  const updated = props.item.updated_at
+    ? dateFormat(props.item.updated_at, 'MMM d, yyyy HH:mm')
+    : '—';
+  return `${t('KANBAN.ITEM.CREATED_AT')}: ${created} · ${t('KANBAN.ITEM.UPDATED_AT')}: ${updated}`;
+});
 
 const visibleAttributes = computed(() =>
   pipelineItemAttributes.value
@@ -42,9 +69,16 @@ const visibleAttributes = computed(() =>
 
 <template>
   <div
-    class="bg-white dark:bg-slate-700 rounded-lg p-3 shadow-sm cursor-pointer hover:shadow-md transition-shadow border border-slate-100 dark:border-slate-600"
+    class="group bg-white dark:bg-slate-700 rounded-lg p-3 shadow-sm cursor-pointer hover:shadow-md transition-shadow border border-slate-100 dark:border-slate-600 relative"
     @click="emit('click', item)"
   >
+    <button
+      v-tooltip.top="t('KANBAN.ITEM.EXPORT.BUTTON')"
+      class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity p-0.5 text-slate-400 hover:text-woot-500"
+      @click.stop="emit('export', item)"
+    >
+      <span class="i-lucide-arrow-right-left size-3.5" />
+    </button>
     <router-link
       v-if="item.contact?.id"
       :to="{
@@ -138,6 +172,21 @@ const visibleAttributes = computed(() =>
       >
         {{ item.assignee.name?.[0]?.toUpperCase() }}
       </span>
+    </div>
+
+    <div
+      v-if="createdAtShort || updatedAtShort"
+      v-tooltip.top="datesTooltip"
+      class="flex items-center gap-1.5 mt-1.5 text-[10px] text-slate-500 dark:text-slate-400 cursor-default"
+    >
+      <span
+        class="i-lucide-plus-circle size-3 text-slate-500 dark:text-slate-400 flex-shrink-0"
+      />
+      <span>{{ createdAtShort }}</span>
+      <span
+        class="i-lucide-pencil size-3 text-slate-500 dark:text-slate-400 flex-shrink-0 ml-1"
+      />
+      <span>{{ updatedAtShort }}</span>
     </div>
   </div>
 </template>

@@ -1,13 +1,17 @@
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, watch, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute } from 'vue-router';
 import { useStore, useMapGetter } from 'dashboard/composables/store';
+import { useUISettings } from 'dashboard/composables/useUISettings';
 import KanbanBoard from '../components/KanbanBoard.vue';
 import KanbanEmptyState from '../components/KanbanEmptyState.vue';
 import KanbanCardDetail from '../components/KanbanCardDetail.vue';
 import PipelineSelector from '../components/PipelineSelector.vue';
 import AddItemModal from '../components/AddItemModal.vue';
+import KanbanFilterBar from '../components/KanbanFilterBar.vue';
+import KanbanSortMenu from '../components/KanbanSortMenu.vue';
+import ExportItemModal from '../components/ExportItemModal.vue';
 
 const { t } = useI18n();
 const store = useStore();
@@ -18,6 +22,21 @@ const activePipeline = useMapGetter('kanban/getActivePipeline');
 const uiFlags = useMapGetter('kanban/getUIFlags');
 
 const hasPipelines = computed(() => pipelines.value.length > 0);
+
+const { kanbanBoardSettings } = useUISettings();
+
+watch(
+  activePipeline,
+  pipeline => {
+    if (!pipeline) return;
+    const saved = kanbanBoardSettings(pipeline.id);
+    store.commit('kanban/SET_KANBAN_FILTERS', saved.filters);
+    store.commit('kanban/SET_KANBAN_SORT', saved.sort);
+    store.commit('kanban/SET_SHOW_ONLY_MINE', saved.showOnlyMine);
+    store.dispatch('pipelineMembers/get', { pipelineId: pipeline.id });
+  },
+  { immediate: true }
+);
 
 const showAddItemModal = ref(false);
 const selectedStageId = ref(null);
@@ -58,6 +77,17 @@ const openCardDetail = item => {
 const closeCardDetail = () => {
   selectedCardId.value = null;
 };
+
+const itemToExport = ref(null);
+const openExportModal = item => {
+  itemToExport.value = item;
+};
+const closeExportModal = () => {
+  if (itemToExport.value && selectedCardId.value === itemToExport.value.id) {
+    selectedCardId.value = null;
+  }
+  itemToExport.value = null;
+};
 </script>
 
 <template>
@@ -69,6 +99,8 @@ const closeCardDetail = () => {
         {{ t('KANBAN.TITLE') }}
       </h1>
       <PipelineSelector v-if="hasPipelines" />
+      <KanbanFilterBar v-if="activePipeline" />
+      <KanbanSortMenu v-if="activePipeline" />
     </div>
 
     <div
@@ -84,15 +116,26 @@ const closeCardDetail = () => {
       v-else-if="activePipeline"
       @card-click="openCardDetail"
       @add-item="openAddItem"
+      @export="openExportModal"
     />
 
-    <KanbanCardDetail :item="selectedCard" @close="closeCardDetail" />
+    <KanbanCardDetail
+      :item="selectedCard"
+      @close="closeCardDetail"
+      @export="openExportModal"
+    />
 
     <AddItemModal
       v-if="showAddItemModal"
       :stage-id="selectedStageId"
       @close="showAddItemModal = false"
       @created="showAddItemModal = false"
+    />
+
+    <ExportItemModal
+      v-if="itemToExport"
+      :item="itemToExport"
+      @close="closeExportModal"
     />
   </div>
 </template>

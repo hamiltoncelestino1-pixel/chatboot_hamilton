@@ -142,6 +142,8 @@ en:
     pipeline_item:
       assignee_not_member: Assignee must be a member of the pipeline
       conversation_contact_mismatch: Conversation does not belong to the linked contact
+      invalid_target_stage: "The selected stage does not belong to the destination pipeline."
+      export_same_pipeline: "Cannot export a card to the pipeline it already belongs to."
     pipeline_stage:
       cannot_delete_special_stage: This stage is required and cannot be deleted
     mfa:

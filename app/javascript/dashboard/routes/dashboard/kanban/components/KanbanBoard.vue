@@ -4,7 +4,7 @@ import draggable from 'vuedraggable';
 import { useStore, useMapGetter } from 'dashboard/composables/store';
 import KanbanColumn from './KanbanColumn.vue';
 
-const emit = defineEmits(['card-click', 'add-item']);
+const emit = defineEmits(['card-click', 'add-item', 'export']);
 
 const store = useStore();
 const activePipeline = useMapGetter('kanban/getActivePipeline');
@@ -63,6 +63,7 @@ const handleCardMove = async ({ itemId, fromStageId, toStageId, position }) => {
           @card-click="item => emit('card-click', item)"
           @card-move="handleCardMove"
           @add-item="stageId => emit('add-item', stageId)"
+          @export="item => emit('export', item)"
         />
       </template>
     </draggable>

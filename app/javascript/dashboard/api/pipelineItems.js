@@ -20,6 +20,15 @@ class PipelineItemsAPI extends ApiClient {
   getByConversation(conversationId) {
     return axios.get(this.url, { params: { conversation_id: conversationId } });
   }
+
+  export(itemId, { targetPipelineId, targetStageId }) {
+    return axios.post(`${this.url}/${itemId}/export`, {
+      pipeline_item: {
+        target_pipeline_id: targetPipelineId,
+        target_stage_id: targetStageId,
+      },
+    });
+  }
 }
 
 export default new PipelineItemsAPI();

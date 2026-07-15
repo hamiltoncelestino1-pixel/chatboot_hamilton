@@ -140,9 +140,10 @@ export const actions = {
   ) => {
     commit('MOVE_ITEM', { itemId, fromStageId, toStageId, position });
     try {
-      await PipelineItemsAPI.update(itemId, {
+      const { data } = await PipelineItemsAPI.update(itemId, {
         pipeline_item: { pipeline_stage_id: toStageId, position },
       });
+      commit('EDIT_ITEM', data);
     } catch {
       commit('MOVE_ITEM', {
         itemId,
@@ -182,6 +183,24 @@ export const actions = {
     const { data } = await PipelineItemLabelsAPI.update(itemId, labels);
     commit('EDIT_ITEM', { id: itemId, label_list: data.payload });
     return data.payload;
+  },
+
+  exportItem: async (
+    { commit, state },
+    { itemId, targetPipelineId, targetStageId }
+  ) => {
+    commit('SET_KANBAN_UI_FLAG', { isExporting: true });
+    try {
+      const item = state.items[itemId];
+      const { data } = await PipelineItemsAPI.export(itemId, {
+        targetPipelineId,
+        targetStageId,
+      });
+      commit('DELETE_ITEM', { stageId: item?.pipeline_stage_id, itemId });
+      return data;
+    } finally {
+      commit('SET_KANBAN_UI_FLAG', { isExporting: false });
+    }
   },
 
   fetchItemsForContact: async ({ commit }, contactId) => {
