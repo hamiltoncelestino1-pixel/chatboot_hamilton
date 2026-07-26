@@ -39,7 +39,7 @@ parecido no futuro:
 | Pasta | Conteúdo |
 |---|---|
 | [white-label/](white-label/) | Rebrand completo para Noble Company (cores, assets, i18n) |
-| [pipeline_tasks/](pipeline_tasks/) | Melhorias no Pipeline/Kanban de oportunidades: filtro geral, ordenação, datas fixas no card, exportar (transferir) card entre pipelines, e ajuste de policy para agentes verem todas as oportunidades |
+| [pipeline_tasks/](pipeline_tasks/) | Melhorias no Pipeline/Kanban de oportunidades: filtro geral, ordenação, datas fixas no card, exportar (transferir) card entre pipelines, ajuste de policy para agentes verem todas as oportunidades; e o épico atual — macros/automações aplicáveis a pipelines e regra de 1 card por contato por pipeline (ver [00-visao-geral.md](pipeline_tasks/00-visao-geral.md)) |
 
 ## Arquivos-chave para conhecer primeiro
 
