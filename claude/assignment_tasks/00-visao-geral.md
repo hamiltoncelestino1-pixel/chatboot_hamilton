@@ -105,3 +105,23 @@ tela. Task 07 depende só de 03 (mesmo método `find_available_agent`).
    tradeoff consciente, mitigado só por visibilidade via log (task 07).
 6. Sessões de dashboard já abertas não veem os novos toggles até recarregar a página (feature
    flag cacheada no Vuex client-side) — não é bug, documentar em release notes.
+
+## Auditoria pós-implementação (tasks 08-15)
+
+Depois que as tasks `01`-`07` foram implementadas, uma auditoria completa (bugs, código
+morto, redundância, desvio de padrão) encontrou a maior parte do trabalho fiel ao spec,
+com um punhado de problemas pontuais registrados como tasks de ajuste adicionais:
+
+| # | Task | Tipo |
+|---|------|------|
+| [08](08-fix-dead-code-capacity-fallback.md) | Consolidar fallback de capacidade v2 duplicado (código morto por shadowing de `prepend_mod_with`) | Bug/código morto |
+| [09](09-fix-stale-assignment-service-spec.md) | Corrigir teste inválido "returns 0 when no agents are online" | Bug em teste |
+| [10](10-fix-dynamic-i18n-key-lint.md) | Remover chave i18n dinâmica em `assignmentModeOptions` (quebra `no-dynamic-keys`) | Bug/lint |
+| [11](11-cobertura-policy-precedence-e2e.md) | Teste end-to-end de precedência de `AssignmentPolicy` | Cobertura |
+| [12](12-cobertura-fallback-log-reason.md) | Asserções de log de fallback cobrindo `reason=`/`action=` | Cobertura |
+| [13](13-cobertura-controller-invalid-mode.md) | Teste de integração do controller para `assignment_mode` inválido | Cobertura |
+| [14](14-cobertura-frontend-template-wiring.md) | Fiação real do template + cenário `showDirectAssignmentModeUI === false` | Cobertura |
+| [15](15-limpeza-qualidade-specs-menores.md) | Nomenclatura/consistência de specs + decisão documentada sobre `spec/db/migrate/` | Qualidade menor |
+
+Nenhuma dessas tasks foi implementada ainda (assim como `01`-`07` originalmente) — são
+especificações prontas para pegar e codar.

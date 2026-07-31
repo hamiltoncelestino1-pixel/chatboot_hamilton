@@ -27,6 +27,143 @@ RSpec.describe Enterprise::AutoAssignment::AssignmentService, type: :service do
     OnlineStatusTracker.set_status(account.id, agent2.id, 'online')
   end
 
+  describe '#assignment_mode_balanced?' do
+    before do
+      account.enable_features('advanced_assignment')
+      account.save!
+    end
+
+    context 'without a linked AssignmentPolicy' do
+      before { inbox.inbox_assignment_policy.destroy }
+
+      it 'uses balanced when auto_assignment_config[assignment_mode] == balanced' do
+        inbox.update!(auto_assignment_config: { 'assignment_mode' => 'balanced' })
+
+        expect(assignment_service.send(:assignment_mode_balanced?)).to be true
+      end
+
+      it 'uses round robin when assignment_mode is absent' do
+        inbox.update!(auto_assignment_config: {})
+
+        expect(assignment_service.send(:assignment_mode_balanced?)).to be false
+      end
+
+      it 'uses round robin when assignment_mode is explicitly round_robin' do
+        inbox.update!(auto_assignment_config: { 'assignment_mode' => 'round_robin' })
+
+        expect(assignment_service.send(:assignment_mode_balanced?)).to be false
+      end
+
+      it 'ignores balanced when advanced_assignment is disabled on the account' do
+        account.disable_features!('advanced_assignment')
+        inbox.update!(auto_assignment_config: { 'assignment_mode' => 'balanced' })
+
+        expect(assignment_service.send(:assignment_mode_balanced?)).to be false
+      end
+
+      it 'assigns to the agent with fewer open conversations when balanced' do
+        inbox.update!(auto_assignment_config: { 'assignment_mode' => 'balanced' }, enable_auto_assignment: true)
+        create(:conversation, inbox: inbox, assignee: agent1, status: :open)
+        conversation = create(:conversation, inbox: inbox, assignee: nil)
+
+        assignment_service.perform_bulk_assignment(limit: 10)
+
+        expect(conversation.reload.assignee).to eq(agent2)
+      end
+    end
+
+    context 'with a linked AssignmentPolicy' do
+      it 'still takes precedence over the inbox direct config' do
+        assignment_policy.update!(assignment_order: 'balanced')
+        inbox.update!(auto_assignment_config: {})
+
+        expect(assignment_service.send(:assignment_mode_balanced?)).to be true
+      end
+
+      it 'assigns to the agent with fewer open conversations via the linked policy' do
+        assignment_policy.update!(assignment_order: 'balanced')
+        inbox.update!(auto_assignment_config: {}, enable_auto_assignment: true)
+        create(:conversation, inbox: inbox, assignee: agent1, status: :open)
+        conversation = create(:conversation, inbox: inbox, assignee: nil)
+
+        assignment_service.perform_bulk_assignment(limit: 10)
+
+        expect(conversation.reload.assignee).to eq(agent2)
+      end
+    end
+  end
+
+  describe 'restrict_to_online_agents' do
+    let(:offline_agent) { create(:user, account: account, name: 'Offline Agent') }
+
+    before do
+      InboxMember.where(inbox: inbox, user: [agent1, agent2]).destroy_all
+      create(:inbox_member, inbox: inbox, user: offline_agent)
+      inbox.update!(auto_assignment_config: { 'restrict_to_online_agents' => false }, enable_auto_assignment: true)
+    end
+
+    it 'assigns conversations to an offline inbox member when restrict_to_online_agents is false' do
+      conversation = create(:conversation, inbox: inbox, assignee: nil)
+
+      assignment_service.perform_bulk_assignment(limit: 10)
+
+      expect(conversation.reload.assignee).to eq(offline_agent)
+    end
+  end
+
+  describe 'fallback when rate-limit/capacity filters exclude every candidate' do
+    before { inbox.update!(enable_auto_assignment: true) }
+
+    it 'assigns even when every agent is over the fair distribution rate limit' do
+      allow(Rails.logger).to receive(:warn).and_call_original
+      limit = assignment_policy.fair_distribution_limit
+      conversation_id = 0
+      [agent1, agent2].each do |agent|
+        rate_limiter = AutoAssignment::RateLimiter.new(inbox: inbox, agent: agent)
+        limit.times do
+          conversation_id += 1
+          rate_limiter.track_assignment(instance_double(Conversation, id: conversation_id))
+        end
+      end
+      conversation = create(:conversation, inbox: inbox, assignee: nil)
+
+      assignment_service.perform_bulk_assignment(limit: 1)
+
+      expect(conversation.reload.assignee).to be_present
+      expect(Rails.logger).to have_received(:warn).with(
+        a_string_matching(/filter=rate_limit .*reason=all_agents_excluded_by_filter action=ignoring_filter_as_last_resort/)
+      )
+    end
+
+    it 'assigns even when every agent is over the capacity limit' do
+      allow(Rails.logger).to receive(:warn).and_call_original
+      account.enable_features('advanced_assignment')
+      account.save!
+      capacity_policy = create(:agent_capacity_policy, account: account)
+      create(:inbox_capacity_limit, agent_capacity_policy: capacity_policy, inbox: inbox, conversation_limit: 0)
+      [agent1, agent2].each do |agent|
+        agent.account_users.find_by(account: account).update!(agent_capacity_policy: capacity_policy)
+      end
+      conversation = create(:conversation, inbox: inbox, assignee: nil)
+
+      assignment_service.perform_bulk_assignment(limit: 1)
+
+      expect(conversation.reload.assignee).to be_present
+      expect(Rails.logger).to have_received(:warn).with(
+        a_string_matching(/filter=capacity .*reason=all_agents_excluded_by_filter action=ignoring_filter_as_last_resort/)
+      )
+    end
+
+    it 'does not fall back for the team boundary (no eligible team members)' do
+      team = create(:team, account: account, allow_auto_assign: true)
+      conversation = create(:conversation, inbox: inbox, team: team, assignee: nil)
+
+      agent = assignment_service.send(:find_available_agent, conversation)
+
+      expect(agent).to be_nil
+    end
+  end
+
   describe 'exclusion rules' do
     let(:capacity_policy) { create(:agent_capacity_policy, account: account) }
     let(:label1) { create(:label, account: account, title: 'high-priority') }

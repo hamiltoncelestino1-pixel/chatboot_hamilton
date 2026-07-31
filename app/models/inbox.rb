@@ -53,6 +53,7 @@ class Inbox < ApplicationRecord
   validates :out_of_office_message, length: { maximum: Limits::OUT_OF_OFFICE_MESSAGE_MAX_LENGTH }
   validates :greeting_message, length: { maximum: Limits::GREETING_MESSAGE_MAX_LENGTH }
   validate :ensure_valid_max_assignment_limit
+  validate :ensure_valid_assignment_mode
 
   belongs_to :account
   belongs_to :portal, optional: true
@@ -245,6 +246,10 @@ class Inbox < ApplicationRecord
   end
 
   def ensure_valid_max_assignment_limit
+    # overridden in enterprise/app/models/enterprise/inbox.rb
+  end
+
+  def ensure_valid_assignment_mode
     # overridden in enterprise/app/models/enterprise/inbox.rb
   end
 

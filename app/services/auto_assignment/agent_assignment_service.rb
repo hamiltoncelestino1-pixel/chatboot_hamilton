@@ -5,7 +5,7 @@ class AutoAssignment::AgentAssignmentService
   pattr_initialize [:conversation!, :allowed_agent_ids!]
 
   def find_assignee
-    round_robin_manage_service.available_agent(allowed_agent_ids: allowed_online_agent_ids)
+    round_robin_manage_service.available_agent(allowed_agent_ids: effective_allowed_agent_ids)
   end
 
   def perform
@@ -14,6 +14,16 @@ class AutoAssignment::AgentAssignmentService
   end
 
   private
+
+  def effective_allowed_agent_ids
+    return allowed_agent_ids&.map(&:to_s) unless restrict_to_online_agents?
+
+    allowed_online_agent_ids
+  end
+
+  def restrict_to_online_agents?
+    ActiveModel::Type::Boolean.new.cast(conversation.inbox.auto_assignment_config['restrict_to_online_agents'])
+  end
 
   def online_agent_ids
     online_agents = OnlineStatusTracker.get_available_users(conversation.account_id)

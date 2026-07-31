@@ -47,8 +47,10 @@ RSpec.describe AutoAssignment::AssignmentService do
         expect(conv.reload.assignee).to eq(agent)
       end
 
-      it 'returns 0 when no agents are online' do
+      it 'returns 0 when restrict_to_online_agents is enabled and no agents are online' do
+        inbox.update!(auto_assignment_config: { 'restrict_to_online_agents' => true })
         allow(OnlineStatusTracker).to receive(:get_available_users).and_return({})
+        conversation # ensure it exists
 
         assigned_count = service.perform_bulk_assignment(limit: 1)
 
@@ -345,7 +347,8 @@ RSpec.describe AutoAssignment::AssignmentService do
         expect(conversation_with_team.reload.assignee).to be_nil
       end
 
-      it 'skips assignment when no team members are available' do
+      it 'skips assignment when restrict_to_online_agents is true and no team member is online' do
+        inbox.update!(auto_assignment_config: { 'restrict_to_online_agents' => true })
         allow(OnlineStatusTracker).to receive(:get_available_users).and_return({})
         conversation_with_team = create(:conversation, inbox: inbox, team: team, assignee: nil)
 

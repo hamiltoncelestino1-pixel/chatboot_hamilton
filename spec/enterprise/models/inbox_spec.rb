@@ -37,6 +37,53 @@ RSpec.describe Inbox do
     end
   end
 
+  describe 'member_ids_with_assignment_capacity fallback (legacy max_assignment_limit)' do
+    let(:account) { create(:account) }
+    let(:inbox) { create(:inbox, account: account) }
+    let(:member_a) { create(:inbox_member, inbox: inbox) }
+    let(:member_b) { create(:inbox_member, inbox: inbox) }
+
+    before do
+      create(:conversation, inbox: inbox, account: account, assignee: member_a.user, status: :open)
+      create(:conversation, inbox: inbox, account: account, assignee: member_b.user, status: :open)
+      inbox.update!(auto_assignment_config: { max_assignment_limit: 1 })
+    end
+
+    it 'falls back to the full eligible list when every member is over the limit, and warns' do
+      allow(Rails.logger).to receive(:warn).and_call_original
+
+      expect(inbox.member_ids_with_assignment_capacity).to contain_exactly(member_a.user_id, member_b.user_id)
+      expect(Rails.logger).to have_received(:warn).with(
+        a_string_matching(/filter=max_assignment_limit .*reason=all_agents_over_limit action=ignoring_limit_as_last_resort/)
+      )
+    end
+  end
+
+  describe '#ensure_valid_assignment_mode' do
+    it 'accepts round_robin' do
+      account = create(:account)
+      expect(build(:inbox, account: account, auto_assignment_config: { 'assignment_mode' => 'round_robin' })).to be_valid
+    end
+
+    it 'accepts balanced' do
+      account = create(:account)
+      expect(build(:inbox, account: account, auto_assignment_config: { 'assignment_mode' => 'balanced' })).to be_valid
+    end
+
+    it 'accepts blank/absent' do
+      account = create(:account)
+      expect(build(:inbox, account: account, auto_assignment_config: {})).to be_valid
+    end
+
+    it 'rejects invalid values' do
+      account = create(:account)
+      inbox = build(:inbox, account: account, auto_assignment_config: { 'assignment_mode' => 'invalid_mode' })
+
+      expect(inbox).not_to be_valid
+      expect(inbox.errors[:auto_assignment_config]).to be_present
+    end
+  end
+
   describe 'member_ids_with_assignment_capacity with V2 capacity' do
     let(:account) { create(:account) }
     let(:v2_inbox) { create(:inbox, account: account, enable_auto_assignment: true) }
@@ -73,11 +120,15 @@ RSpec.describe Inbox do
         expect(result).not_to include(agent1.id)
       end
 
-      it 'filters out all agents when all are at capacity' do
+      it 'falls back to all agents (ignoring capacity) when all are at capacity' do
         create(:conversation, inbox: v2_inbox, account: account, assignee: agent1, status: :open)
         create(:conversation, inbox: v2_inbox, account: account, assignee: agent2, status: :open)
+        allow(Rails.logger).to receive(:warn).and_call_original
 
-        expect(v2_inbox.member_ids_with_assignment_capacity).to be_empty
+        expect(v2_inbox.member_ids_with_assignment_capacity).to contain_exactly(agent1.id, agent2.id)
+        expect(Rails.logger).to have_received(:warn).with(
+          a_string_matching(/filter=agent_capacity_policy .*reason=all_agents_over_capacity action=ignoring_limit_as_last_resort/)
+        )
       end
 
       it 'skips V1 max_assignment_limit when V2 is enabled' do

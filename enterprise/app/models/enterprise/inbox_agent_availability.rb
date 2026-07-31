@@ -1,15 +1,13 @@
 module Enterprise::InboxAgentAvailability
   extend ActiveSupport::Concern
 
-  def member_ids_with_assignment_capacity
-    return member_ids unless capacity_filtering_enabled?
-
-    # Get online agents with capacity
-    agents = available_agents
-    agents = filter_by_capacity(agents)
-    agents.map(&:user_id)
-  end
-
+  # No member_ids_with_assignment_capacity entry point here on purpose: this module is
+  # reached via `Inbox`'s `include InboxAgentAvailability`, but `Inbox.prepend_mod_with('Inbox')`
+  # prepends Enterprise::Inbox directly onto the Inbox class, which always wins method
+  # resolution over anything reached only through an included module — even one that has
+  # its own module prepended onto it, like this one. So Enterprise::Inbox#member_ids_with_assignment_capacity
+  # (enterprise/app/models/enterprise/inbox.rb) is the real, only entry point for the v2
+  # capacity path; the methods below are still used from there.
   private
 
   def filter_by_capacity(inbox_members_scope)

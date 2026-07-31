@@ -50,6 +50,26 @@ shared_examples_for 'assignment_handler' do
                                 content: "Assigned to #{conversation.assignee.name} via #{team.name} by #{agent.name}" }))
       end
 
+      it 'assigns to an offline team member when restrict_to_online_agents is false' do
+        team.update!(allow_auto_assign: true)
+        conversation.inbox.update!(auto_assignment_config: { 'restrict_to_online_agents' => false })
+        allow(OnlineStatusTracker).to receive(:get_available_users).and_return({})
+
+        conversation.update(team: team)
+
+        expect(conversation.reload.assignee).to eq agent
+      end
+
+      it 'does not assign to an offline team member when restrict_to_online_agents is true' do
+        team.update!(allow_auto_assign: true)
+        conversation.inbox.update!(auto_assignment_config: { 'restrict_to_online_agents' => true })
+        allow(OnlineStatusTracker).to receive(:get_available_users).and_return({})
+
+        conversation.update(team: team)
+
+        expect(conversation.reload.assignee).to be_nil
+      end
+
       it 'wont change assignee if he is already a team member' do
         team.update!(allow_auto_assign: true)
         assignee = create(:user, account: conversation.account, role: :agent)
