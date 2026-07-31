@@ -2,7 +2,10 @@ require 'rails_helper'
 
 RSpec.describe AutoAssignment::AgentAssignmentService do
   let!(:account) { create(:account) }
-  let!(:inbox) { create(:inbox, account: account, enable_auto_assignment: false) }
+  let!(:inbox) do
+    create(:inbox, account: account, enable_auto_assignment: false,
+                   auto_assignment_config: { 'restrict_to_online_agents' => true })
+  end
   let!(:inbox_members) { create_list(:inbox_member, 5, inbox: inbox) }
   let!(:conversation) { create(:conversation, inbox: inbox, account: account) }
   let!(:online_users) do
@@ -34,6 +37,31 @@ RSpec.describe AutoAssignment::AgentAssignmentService do
                                  allowed_agent_ids: inbox_members.map(&:user_id).map(&:to_s)).find_assignee).to eq(inbox_members[3].user)
       expect(described_class.new(conversation: conversation,
                                  allowed_agent_ids: inbox_members.map(&:user_id).map(&:to_s)).find_assignee).to eq(inbox_members[4].user)
+    end
+
+    context 'when restrict_to_online_agents is false/absent' do
+      let!(:offline_agent) { create(:user, account: account) }
+
+      before do
+        create(:inbox_member, inbox: inbox, user: offline_agent)
+        inbox.update!(auto_assignment_config: { 'restrict_to_online_agents' => false })
+      end
+
+      it 'considers offline agents as eligible' do
+        service = described_class.new(conversation: conversation, allowed_agent_ids: [offline_agent.id])
+        expect(service.find_assignee).to eq(offline_agent)
+      end
+    end
+
+    context 'when restrict_to_online_agents is true' do
+      let!(:offline_agent) { create(:user, account: account) }
+
+      before { create(:inbox_member, inbox: inbox, user: offline_agent) }
+
+      it 'keeps the online-only filter' do
+        service = described_class.new(conversation: conversation, allowed_agent_ids: [offline_agent.id])
+        expect(service.find_assignee).to be_nil
+      end
     end
   end
 end

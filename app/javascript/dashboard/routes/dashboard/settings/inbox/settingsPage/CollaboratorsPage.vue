@@ -16,6 +16,12 @@ import Icon from 'dashboard/components-next/icon/Icon.vue';
 import TagInput from 'dashboard/components-next/taginput/TagInput.vue';
 import assignmentPoliciesAPI from 'dashboard/api/assignmentPolicies';
 import { useI18n } from 'vue-i18n';
+import RadioCard from 'dashboard/components-next/radioCard/RadioCard.vue';
+import {
+  ROUND_ROBIN,
+  BALANCED,
+  OPTIONS,
+} from 'dashboard/routes/dashboard/settings/assignmentPolicy/constants';
 
 const props = defineProps({
   inbox: {
@@ -34,6 +40,8 @@ const selectedAgentIds = ref([]);
 const isAgentListUpdating = ref(false);
 const enableAutoAssignment = ref(false);
 const maxAssignmentLimit = ref(null);
+const assignmentMode = ref(ROUND_ROBIN);
+const restrictToOnlineAgents = ref(false);
 const assignmentPolicy = ref(null);
 const isLoadingPolicy = ref(false);
 const isDeletingPolicy = ref(false);
@@ -44,6 +52,25 @@ const showPolicyDropdown = ref(false);
 const isLinkingPolicy = ref(false);
 
 const agentList = computed(() => store.getters['agents/getAgents']);
+
+const agentCapacityPolicies = computed(
+  () => store.getters['agentCapacityPolicies/getAgentCapacityPolicies']
+);
+
+// Capacity limits (max open conversations per agent) live on a separate
+// AgentCapacityPolicy entity, not on the inbox itself. This surfaces whether
+// this inbox is already covered by one, without adding a new backend field.
+const inboxCapacityPolicy = computed(() =>
+  agentCapacityPolicies.value.find(policy =>
+    policy.inboxCapacityLimits?.some(limit => limit.inboxId === props.inbox.id)
+  )
+);
+
+const inboxCapacityLimit = computed(() =>
+  inboxCapacityPolicy.value?.inboxCapacityLimits?.find(
+    limit => limit.inboxId === props.inbox.id
+  )
+);
 
 const selectedAgentNames = computed(() =>
   selectedAgentIds.value.map(
@@ -91,6 +118,33 @@ const hasAssignmentV2 = computed(() => {
 const showAdvancedAssignmentUI = computed(() => {
   return hasAdvancedAssignment.value && hasAssignmentV2.value;
 });
+
+// "No policy linked" state: shows the lightweight round_robin/balanced toggle directly on the
+// inbox jsonb, without requiring a full AssignmentPolicy to be created/linked. Takes precedence
+// over the existing "Default Policy Linked" card (inserted before it in the template).
+const showDirectAssignmentModeUI = computed(
+  () =>
+    hasAssignmentV2.value && !assignmentPolicy.value && !isLoadingPolicy.value
+);
+
+const assignmentModeLabel = key =>
+  key === BALANCED
+    ? t('INBOX_MGMT.ASSIGNMENT.MODE.BALANCED.LABEL')
+    : t('INBOX_MGMT.ASSIGNMENT.MODE.ROUND_ROBIN.LABEL');
+
+const assignmentModeDescription = key =>
+  key === BALANCED
+    ? t('INBOX_MGMT.ASSIGNMENT.MODE.BALANCED.DESCRIPTION')
+    : t('INBOX_MGMT.ASSIGNMENT.MODE.ROUND_ROBIN.DESCRIPTION');
+
+const assignmentModeOptions = computed(() =>
+  OPTIONS.ORDER.map(key => ({
+    key,
+    label: assignmentModeLabel(key),
+    description: assignmentModeDescription(key),
+    isActive: assignmentMode.value === key,
+  }))
+);
 
 const assignmentOrderLabel = computed(() => {
   if (!assignmentPolicy.value) return '';
@@ -261,6 +315,44 @@ const handleToggleAutoAssignment = async val => {
   }
 };
 
+const updateAssignmentMode = async newMode => {
+  const previous = assignmentMode.value;
+  assignmentMode.value = newMode;
+  try {
+    await store.dispatch('inboxes/updateInbox', {
+      id: props.inbox.id,
+      formData: false,
+      auto_assignment_config: {
+        ...props.inbox.auto_assignment_config,
+        assignment_mode: newMode,
+      },
+    });
+    useAlert(t('INBOX_MGMT.EDIT.API.SUCCESS_MESSAGE'));
+  } catch (error) {
+    assignmentMode.value = previous;
+    useAlert(t('INBOX_MGMT.EDIT.API.ERROR_MESSAGE'));
+  }
+};
+
+const updateRestrictToOnlineAgents = async value => {
+  const previous = restrictToOnlineAgents.value;
+  restrictToOnlineAgents.value = value;
+  try {
+    await store.dispatch('inboxes/updateInbox', {
+      id: props.inbox.id,
+      formData: false,
+      auto_assignment_config: {
+        ...props.inbox.auto_assignment_config,
+        restrict_to_online_agents: value,
+      },
+    });
+    useAlert(t('INBOX_MGMT.EDIT.API.SUCCESS_MESSAGE'));
+  } catch (error) {
+    restrictToOnlineAgents.value = previous;
+    useAlert(t('INBOX_MGMT.EDIT.API.ERROR_MESSAGE'));
+  }
+};
+
 const updateAgents = async () => {
   isAgentListUpdating.value = true;
   try {
@@ -318,6 +410,23 @@ const navigateToBilling = () => {
   });
 };
 
+const navigateToCapacityPolicyIndex = () => {
+  const accountId = route.params.accountId;
+  router.push({
+    name: 'agent_capacity_policy_index',
+    params: { accountId },
+  });
+};
+
+const navigateToCapacityPolicyEdit = () => {
+  if (!inboxCapacityPolicy.value?.id) return;
+  const accountId = route.params.accountId;
+  router.push({
+    name: 'agent_capacity_policy_edit',
+    params: { accountId, id: inboxCapacityPolicy.value.id },
+  });
+};
+
 const confirmDeletePolicy = () => {
   showDeleteConfirmModal.value = true;
 };
@@ -345,10 +454,16 @@ const setDefaults = () => {
   enableAutoAssignment.value = props.inbox.enable_auto_assignment;
   maxAssignmentLimit.value =
     props.inbox.auto_assignment_config?.max_assignment_limit || null;
+  assignmentMode.value =
+    props.inbox.auto_assignment_config?.assignment_mode || ROUND_ROBIN;
+  restrictToOnlineAgents.value = Boolean(
+    props.inbox.auto_assignment_config?.restrict_to_online_agents
+  );
   fetchAttachedAgents();
   if (showAdvancedAssignmentUI.value) {
     fetchAssignmentPolicy();
     fetchAvailablePolicies();
+    store.dispatch('agentCapacityPolicies/get');
   }
 };
 
@@ -475,6 +590,38 @@ onMounted(() => {
                   />
                 </div>
               </div>
+            </div>
+
+            <!-- Direct assignment mode toggle - when no policy attached (new default) -->
+            <div
+              v-else-if="showDirectAssignmentModeUI"
+              class="ltr:pr-0 rtl:pl-0 ltr:pl-4 rtl:pr-4 py-4"
+            >
+              <p class="text-body-main text-n-slate-11 mb-3">
+                {{ $t('INBOX_MGMT.ASSIGNMENT.MODE.LABEL') }}
+              </p>
+              <div class="grid grid-cols-1 xs:grid-cols-2 gap-4 w-full mb-4">
+                <RadioCard
+                  v-for="option in assignmentModeOptions"
+                  :id="option.key"
+                  :key="option.key"
+                  :label="option.label"
+                  :description="option.description"
+                  :is-active="option.isActive"
+                  @select="updateAssignmentMode"
+                />
+              </div>
+
+              <div class="w-full h-px my-4 bg-n-weak" />
+
+              <NextButton
+                :label="$t('INBOX_MGMT.ASSIGNMENT.CREATE_NEW_POLICY')"
+                icon="i-lucide-arrow-right"
+                trailing-icon
+                link
+                class="mb-2"
+                @click="navigateToCreatePolicy"
+              />
             </div>
 
             <!-- Default Policy - When no custom policy attached but feature enabled -->
@@ -664,6 +811,67 @@ onMounted(() => {
               </div>
             </div>
           </template>
+
+          <div v-if="hasAssignmentV2" class="mt-2">
+            <SettingsToggleSection
+              v-model="restrictToOnlineAgents"
+              compact
+              :header="
+                $t('INBOX_MGMT.ASSIGNMENT.RESTRICT_TO_ONLINE_AGENTS.LABEL')
+              "
+              :description="
+                $t(
+                  'INBOX_MGMT.ASSIGNMENT.RESTRICT_TO_ONLINE_AGENTS.DESCRIPTION'
+                )
+              "
+              @update:model-value="updateRestrictToOnlineAgents"
+            />
+          </div>
+
+          <div
+            v-if="hasAssignmentV2"
+            class="mt-2 ltr:pr-0 rtl:pl-0 ltr:pl-4 rtl:pr-4 py-4"
+          >
+            <p class="text-body-main text-n-slate-11 mb-1">
+              {{ $t('INBOX_MGMT.ASSIGNMENT.CAPACITY_POLICY.LABEL') }}
+            </p>
+            <p
+              v-if="inboxCapacityLimit"
+              class="text-body-main text-n-slate-12 mb-2"
+            >
+              {{
+                $t(
+                  'INBOX_MGMT.ASSIGNMENT.CAPACITY_POLICY.CONFIGURED_DESCRIPTION',
+                  {
+                    policyName: inboxCapacityPolicy.name,
+                    limit: inboxCapacityLimit.conversationLimit,
+                  }
+                )
+              }}
+            </p>
+            <p v-else class="text-body-main text-n-slate-11 mb-2">
+              {{
+                $t(
+                  'INBOX_MGMT.ASSIGNMENT.CAPACITY_POLICY.NOT_CONFIGURED_DESCRIPTION'
+                )
+              }}
+            </p>
+            <NextButton
+              :label="
+                inboxCapacityLimit
+                  ? $t('INBOX_MGMT.ASSIGNMENT.CAPACITY_POLICY.MANAGE')
+                  : $t('INBOX_MGMT.ASSIGNMENT.CAPACITY_POLICY.CONFIGURE')
+              "
+              icon="i-lucide-arrow-right"
+              trailing-icon
+              link
+              @click="
+                inboxCapacityLimit
+                  ? navigateToCapacityPolicyEdit()
+                  : navigateToCapacityPolicyIndex()
+              "
+            />
+          </div>
         </template>
       </SettingsToggleSection>
     </SettingsAccordion>

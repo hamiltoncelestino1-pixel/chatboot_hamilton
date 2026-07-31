@@ -65,6 +65,30 @@ RSpec.describe 'Enterprise Inboxes API', type: :request do
         expect(response).to have_http_status(:success)
         expect(JSON.parse(response.body)['auto_assignment_config']['max_assignment_limit']).to eq 10
       end
+
+      it 'updates inbox with assignment_mode and restrict_to_online_agents' do
+        patch "/api/v1/accounts/#{account.id}/inboxes/#{inbox.id}",
+              headers: admin.create_new_auth_token,
+              params: { auto_assignment_config: { assignment_mode: 'balanced', restrict_to_online_agents: true } },
+              as: :json
+
+        expect(response).to have_http_status(:success)
+        response_config = JSON.parse(response.body)['auto_assignment_config']
+        expect(response_config['assignment_mode']).to eq 'balanced'
+        expect(response_config['restrict_to_online_agents']).to be true
+      end
+
+      it 'rejects invalid assignment_mode with a validation error' do
+        patch "/api/v1/accounts/#{account.id}/inboxes/#{inbox.id}",
+              headers: admin.create_new_auth_token,
+              params: { auto_assignment_config: { assignment_mode: 'invalid_mode' } },
+              as: :json
+
+        expect(response).to have_http_status(:unprocessable_entity)
+        expect(JSON.parse(response.body)['attributes']).to include('auto_assignment_config')
+        expect(inbox.reload.auto_assignment_config['assignment_mode']).to be_nil
+        expect(inbox.reload.auto_assignment_config['max_assignment_limit']).to eq 5
+      end
     end
   end
 end
