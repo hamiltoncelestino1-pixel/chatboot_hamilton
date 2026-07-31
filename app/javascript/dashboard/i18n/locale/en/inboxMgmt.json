@@ -852,7 +852,29 @@
       "VIEW_ALL_POLICIES": "View all policies",
       "CURRENT_BEHAVIOR": "Currently using default assignment behavior:",
       "LINK_SUCCESS": "Assignment policy linked successfully",
-      "LINK_ERROR": "Failed to link assignment policy"
+      "LINK_ERROR": "Failed to link assignment policy",
+      "MODE": {
+        "LABEL": "Assignment mode",
+        "ROUND_ROBIN": {
+          "LABEL": "Round robin",
+          "DESCRIPTION": "Distribute conversations evenly, one at a time, in rotation."
+        },
+        "BALANCED": {
+          "LABEL": "Least busy agent",
+          "DESCRIPTION": "Assign to the agent with the fewest open conversations in this inbox."
+        }
+      },
+      "RESTRICT_TO_ONLINE_AGENTS": {
+        "LABEL": "Restrict to online agents",
+        "DESCRIPTION": "When enabled, only agents currently online can receive automatic assignments. When disabled, any member of this inbox is eligible, online or not."
+      },
+      "CAPACITY_POLICY": {
+        "LABEL": "Capacity limit",
+        "CONFIGURED_DESCRIPTION": "Managed by the \"{policyName}\" capacity policy — up to {limit} open conversations per agent.",
+        "NOT_CONFIGURED_DESCRIPTION": "No capacity limit is configured for this inbox yet.",
+        "MANAGE": "Manage capacity policy",
+        "CONFIGURE": "Configure capacity limit"
+      }
     },
     "ASSIGNMENT_POLICY": {
       "DELETE_CONFIRM_TITLE": "Delete assignment policy?",

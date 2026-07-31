@@ -17,14 +17,41 @@ module Enterprise::AutoAssignment::AssignmentService
   def find_available_agent(conversation = nil)
     agents = filter_agents_by_team(inbox.available_agents, conversation)
     return nil if agents.nil?
-
-    agents = filter_agents_by_rate_limit(agents)
-    agents = filter_agents_by_capacity(agents) if capacity_filtering_enabled?
     return nil if agents.empty?
 
-    # Use balanced selector only if advanced_assignment feature is enabled
-    selector = policy&.balanced? && account.feature_enabled?('advanced_assignment') ? balanced_selector : round_robin_selector
+    agents = apply_with_fallback(agents, 'rate_limit', conversation) { |scope| filter_agents_by_rate_limit(scope) }
+    agents = apply_with_fallback(agents, 'capacity', conversation) { |scope| filter_agents_by_capacity(scope) } if capacity_filtering_enabled?
+
+    selector = assignment_mode_balanced? ? balanced_selector : round_robin_selector
     selector.select_agent(agents)
+  end
+
+  # Nunca deixa uma conversa sem atribuição por causa de rate-limit/capacidade — só time
+  # (filter_agents_by_team, acima) ou ausência total de membros são fronteiras rígidas. Se o
+  # filtro esvaziar um conjunto que tinha candidatos antes dele, volta ao conjunto anterior e
+  # loga bem alto — nunca silencioso.
+  def apply_with_fallback(agents, filter_name, conversation)
+    filtered = yield(agents)
+    return filtered if filtered.present?
+
+    Rails.logger.warn(
+      "[AutoAssignment::Fallback] inbox_id=#{inbox.id} account_id=#{account.id} " \
+      "conversation_id=#{conversation&.id} filter=#{filter_name} " \
+      "eligible_before=#{agents.map(&:user_id)} " \
+      'reason=all_agents_excluded_by_filter action=ignoring_filter_as_last_resort'
+    )
+    agents
+  end
+
+  # Prioridade: AssignmentPolicy vinculada > config direta na inbox (auto_assignment_config).
+  # Mesmo no caminho direto (sem policy), respeita o feature flag — se um Super Admin
+  # desabilitar advanced_assignment pontualmente numa conta no futuro, o balanceamento por
+  # carga é desativado ali sem precisar mexer no jsonb de cada inbox individualmente.
+  def assignment_mode_balanced?
+    return false unless account.feature_enabled?('advanced_assignment')
+    return true if policy&.balanced?
+
+    inbox.auto_assignment_config['assignment_mode'] == 'balanced'
   end
 
   def filter_agents_by_capacity(agents)
