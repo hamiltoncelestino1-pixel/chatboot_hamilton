@@ -2,12 +2,14 @@
 # use https://crontab.guru/ to validate
 # validations for this file exist in /spec/configs/schedule_spec.rb
 
-# executed daily at 0000 UTC
-# schedules daily deferred jobs at stable times for each installation
-internal_check_new_versions_job:
-  cron: '0 0 * * *'
-  class: 'Internal::TriggerDailyScheduledItemsJob'
-  queue: scheduled_jobs
+# internal_check_new_versions_job: DESATIVADO DE PROPÓSITO.
+# Esse job fazia ping diário pro hub.2.chatwoot.com (telemetria + checagem de versão nova) e,
+# via Enterprise::Internal::CheckNewVersionsJob, disparava Internal::ReconcilePlanConfigService
+# — que resetava branding (INSTALLATION_NAME/LOGO/BRAND_NAME/...) e desligava features premium
+# pra TODAS as contas toda madrugada em produção, sempre que INSTALLATION_PRICING_PLAN fosse
+# 'community' (o default desta instalação). Este fork não usa licenciamento real — ver
+# claude/premium_unlock_tasks/00-visao-geral.md para o plano completo (3 camadas de defesa).
+# Não reativar sem uma decisão de produto explícita.
 # # executed At every 5th minute..
 trigger_scheduled_items_job:
   cron: '*/5 * * * *'

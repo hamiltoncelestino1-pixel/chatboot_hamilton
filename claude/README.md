@@ -41,6 +41,7 @@ parecido no futuro:
 | [white-label/](white-label/) | Rebrand completo para Noble Company (cores, assets, i18n) |
 | [pipeline_tasks/](pipeline_tasks/) | Melhorias no Pipeline/Kanban de oportunidades: filtro geral, ordenação, datas fixas no card, exportar (transferir) card entre pipelines, ajuste de policy para agentes verem todas as oportunidades; e o épico atual — macros/automações aplicáveis a pipelines e regra de 1 card por contato por pipeline (ver [00-visao-geral.md](pipeline_tasks/00-visao-geral.md)) |
 | [assignment_tasks/](assignment_tasks/) | Atribuição automática de conversas por demanda (least-busy) além do rodízio, fim da regra "só agente online" e fallback anti-silêncio de capacidade/rate-limit (ver [00-visao-geral.md](assignment_tasks/00-visao-geral.md)) |
+| [premium_unlock_tasks/](premium_unlock_tasks/) | Remoção da trava de reset noturno que desligava features premium e resetava o branding pro padrão Chatwoot (ping pro hub da Chatwoot + `ReconcilePlanConfigService`) — ver [00-visao-geral.md](premium_unlock_tasks/00-visao-geral.md) |
 
 ## Arquivos-chave para conhecer primeiro
 
