@@ -48,16 +48,32 @@ class Api::V1::Accounts::MacrosController < Api::V1::Accounts::BaseController
   end
 
   def execute
-    ::MacrosExecutionJob.perform_later(@macro, conversation_ids: params[:conversation_ids], user: Current.user)
+    if params[:pipeline_item_ids].present?
+      ::MacrosPipelineExecutionJob.perform_later(@macro, pipeline_item_ids: authorized_pipeline_item_ids, user: Current.user)
+    else
+      ::MacrosExecutionJob.perform_later(@macro, conversation_ids: params[:conversation_ids], user: Current.user)
+    end
 
     head :ok
   end
 
   private
 
+  # PipelineItemPolicy::Scope is unconditional (scope.all) - the actual per-pipeline
+  # restriction lives in PipelinePolicy::Scope (assigned_pipelines), so authorization must
+  # go through the pipeline, mirroring PipelineItemsController#fetch_item/#index.
+  def authorized_pipeline_item_ids
+    allowed_pipeline_ids = policy_scope(Current.account.pipelines).select(:id)
+    Current.account.pipeline_items
+           .joins(:pipeline_stage)
+           .where(pipeline_stages: { pipeline_id: allowed_pipeline_ids })
+           .where(id: params[:pipeline_item_ids])
+           .pluck(:id)
+  end
+
   def permitted_params
     params.permit(
-      :name, :visibility,
+      :name, :visibility, :macro_type,
       actions: [:action_name, { action_params: [] }]
     )
   end

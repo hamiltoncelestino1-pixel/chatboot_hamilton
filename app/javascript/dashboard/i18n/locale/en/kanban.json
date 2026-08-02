@@ -127,6 +127,12 @@
         "DELETE_SUCCESS": "Card deleted successfully.",
         "ERROR": "Something went wrong. Please try again."
       }
+    },
+    "RUN_MACRO": {
+      "BUTTON": "Run macro",
+      "EMPTY_STATE": "No pipeline macros available.",
+      "SUCCESS": "Macro executed successfully.",
+      "ERROR": "Failed to run macro. Please try again."
     }
   }
 }

@@ -64,4 +64,38 @@ describe('ActionCableConnector - Copilot Tests', () => {
       );
     });
   });
+
+  describe('pipeline_item event handlers', () => {
+    it('should register the pipeline_item.created and pipeline_item.updated event handlers', () => {
+      expect(Object.keys(actionCable.events)).toContain(
+        'pipeline_item.created'
+      );
+      expect(Object.keys(actionCable.events)).toContain(
+        'pipeline_item.updated'
+      );
+      expect(actionCable.events['pipeline_item.created']).toBe(
+        actionCable.onPipelineItemChanged
+      );
+      expect(actionCable.events['pipeline_item.updated']).toBe(
+        actionCable.onPipelineItemChanged
+      );
+    });
+
+    it('should dispatch kanban/applyRealtimePipelineItem when a pipeline_item event is received', () => {
+      const pipelineItemData = {
+        id: 5,
+        pipeline_id: 1,
+        pipeline_stage_id: 3,
+        account_id: 1,
+      };
+      actionCable.onReceived({
+        event: 'pipeline_item.created',
+        data: pipelineItemData,
+      });
+      expect(mockDispatch).toHaveBeenCalledWith(
+        'kanban/applyRealtimePipelineItem',
+        pipelineItemData
+      );
+    });
+  });
 });

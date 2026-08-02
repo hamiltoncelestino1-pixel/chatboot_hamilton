@@ -127,6 +127,12 @@
         "DELETE_SUCCESS": "Card excluído com sucesso.",
         "ERROR": "Algo deu errado. Tente novamente."
       }
+    },
+    "RUN_MACRO": {
+      "BUTTON": "Rodar macro",
+      "EMPTY_STATE": "Nenhuma macro de pipeline disponível.",
+      "SUCCESS": "Macro executada com sucesso.",
+      "ERROR": "Falha ao rodar a macro. Tente novamente."
     }
   }
 }

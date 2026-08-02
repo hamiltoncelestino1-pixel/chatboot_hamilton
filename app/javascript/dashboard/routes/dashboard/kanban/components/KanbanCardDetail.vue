@@ -9,6 +9,7 @@ import MultiselectDropdown from 'shared/components/ui/MultiselectDropdown.vue';
 import TagInput from 'dashboard/components-next/taginput/TagInput.vue';
 import PipelineItemLabels from './PipelineItemLabels.vue';
 import AccordionItem from 'dashboard/components/Accordion/AccordionItem.vue';
+import KanbanRunMacroMenu from './KanbanRunMacroMenu.vue';
 
 const props = defineProps({
   item: { type: Object, default: null },
@@ -579,6 +580,11 @@ const handleDelete = async () => {
               <span class="i-lucide-arrow-right-left size-4" />
               {{ t('KANBAN.ITEM.EXPORT.SUBMIT') }}
             </button>
+            <KanbanRunMacroMenu
+              :pipeline-item-ids="[item.id]"
+              show-label
+              button-class="px-3 py-2 text-sm text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors flex items-center gap-1"
+            />
           </div>
 
           <div class="flex gap-2">

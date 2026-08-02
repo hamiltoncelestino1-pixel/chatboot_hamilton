@@ -130,8 +130,8 @@ const handleSubmit = async () => {
     useAlert(t('KANBAN.ITEM.API.CREATE_SUCCESS'));
     emit('created', item);
     emit('close');
-  } catch {
-    useAlert(t('KANBAN.ITEM.API.ERROR'));
+  } catch (error) {
+    useAlert(error.message || t('KANBAN.ITEM.API.ERROR'));
   }
 };
 </script>

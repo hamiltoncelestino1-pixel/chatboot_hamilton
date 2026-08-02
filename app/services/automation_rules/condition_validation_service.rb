@@ -11,6 +11,7 @@ class AutomationRules::ConditionValidationService
     @conversation_filters = @filters['conversations']
     @contact_filters = @filters['contacts']
     @message_filters = @filters['messages']
+    @pipeline_item_filters = @filters['pipeline_items']
   end
 
   def perform
@@ -38,9 +39,11 @@ class AutomationRules::ConditionValidationService
     conversation_filter = @conversation_filters[key]
     contact_filter = @contact_filters[key]
     message_filter = @message_filters[key]
+    pipeline_item_filter = @pipeline_item_filters[key]
 
-    if conversation_filter || contact_filter || message_filter
-      operation_valid?(condition, conversation_filter || contact_filter || message_filter)
+    filter = conversation_filter || contact_filter || message_filter || pipeline_item_filter
+    if filter
+      operation_valid?(condition, filter)
     else
       custom_attribute_present?(key, condition['custom_attribute_type'])
     end

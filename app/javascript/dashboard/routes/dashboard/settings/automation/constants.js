@@ -152,6 +152,38 @@ export const AUTOMATIONS = {
         key: 'send_attachment',
         name: 'SEND_ATTACHMENT',
       },
+      {
+        key: 'create_pipeline_item',
+        name: 'CREATE_PIPELINE_ITEM',
+      },
+      {
+        key: 'move_pipeline_item_stage',
+        name: 'MOVE_PIPELINE_ITEM_STAGE',
+      },
+      {
+        key: 'assign_pipeline_item_agent',
+        name: 'ASSIGN_PIPELINE_ITEM_AGENT',
+      },
+      {
+        key: 'assign_pipeline_item_team',
+        name: 'ASSIGN_PIPELINE_ITEM_TEAM',
+      },
+      {
+        key: 'add_pipeline_item_label',
+        name: 'ADD_PIPELINE_ITEM_LABEL',
+      },
+      {
+        key: 'remove_pipeline_item_label',
+        name: 'REMOVE_PIPELINE_ITEM_LABEL',
+      },
+      {
+        key: 'update_pipeline_item',
+        name: 'UPDATE_PIPELINE_ITEM',
+      },
+      {
+        key: 'export_pipeline_item',
+        name: 'EXPORT_PIPELINE_ITEM',
+      },
     ],
   },
   conversation_created: {
@@ -285,6 +317,38 @@ export const AUTOMATIONS = {
       {
         key: 'send_attachment',
         name: 'SEND_ATTACHMENT',
+      },
+      {
+        key: 'create_pipeline_item',
+        name: 'CREATE_PIPELINE_ITEM',
+      },
+      {
+        key: 'move_pipeline_item_stage',
+        name: 'MOVE_PIPELINE_ITEM_STAGE',
+      },
+      {
+        key: 'assign_pipeline_item_agent',
+        name: 'ASSIGN_PIPELINE_ITEM_AGENT',
+      },
+      {
+        key: 'assign_pipeline_item_team',
+        name: 'ASSIGN_PIPELINE_ITEM_TEAM',
+      },
+      {
+        key: 'add_pipeline_item_label',
+        name: 'ADD_PIPELINE_ITEM_LABEL',
+      },
+      {
+        key: 'remove_pipeline_item_label',
+        name: 'REMOVE_PIPELINE_ITEM_LABEL',
+      },
+      {
+        key: 'update_pipeline_item',
+        name: 'UPDATE_PIPELINE_ITEM',
+      },
+      {
+        key: 'export_pipeline_item',
+        name: 'EXPORT_PIPELINE_ITEM',
       },
     ],
   },
@@ -432,6 +496,38 @@ export const AUTOMATIONS = {
         key: 'send_attachment',
         name: 'SEND_ATTACHMENT',
       },
+      {
+        key: 'create_pipeline_item',
+        name: 'CREATE_PIPELINE_ITEM',
+      },
+      {
+        key: 'move_pipeline_item_stage',
+        name: 'MOVE_PIPELINE_ITEM_STAGE',
+      },
+      {
+        key: 'assign_pipeline_item_agent',
+        name: 'ASSIGN_PIPELINE_ITEM_AGENT',
+      },
+      {
+        key: 'assign_pipeline_item_team',
+        name: 'ASSIGN_PIPELINE_ITEM_TEAM',
+      },
+      {
+        key: 'add_pipeline_item_label',
+        name: 'ADD_PIPELINE_ITEM_LABEL',
+      },
+      {
+        key: 'remove_pipeline_item_label',
+        name: 'REMOVE_PIPELINE_ITEM_LABEL',
+      },
+      {
+        key: 'update_pipeline_item',
+        name: 'UPDATE_PIPELINE_ITEM',
+      },
+      {
+        key: 'export_pipeline_item',
+        name: 'EXPORT_PIPELINE_ITEM',
+      },
     ],
   },
   conversation_opened: {
@@ -568,6 +664,38 @@ export const AUTOMATIONS = {
         key: 'send_attachment',
         name: 'SEND_ATTACHMENT',
       },
+      {
+        key: 'create_pipeline_item',
+        name: 'CREATE_PIPELINE_ITEM',
+      },
+      {
+        key: 'move_pipeline_item_stage',
+        name: 'MOVE_PIPELINE_ITEM_STAGE',
+      },
+      {
+        key: 'assign_pipeline_item_agent',
+        name: 'ASSIGN_PIPELINE_ITEM_AGENT',
+      },
+      {
+        key: 'assign_pipeline_item_team',
+        name: 'ASSIGN_PIPELINE_ITEM_TEAM',
+      },
+      {
+        key: 'add_pipeline_item_label',
+        name: 'ADD_PIPELINE_ITEM_LABEL',
+      },
+      {
+        key: 'remove_pipeline_item_label',
+        name: 'REMOVE_PIPELINE_ITEM_LABEL',
+      },
+      {
+        key: 'update_pipeline_item',
+        name: 'UPDATE_PIPELINE_ITEM',
+      },
+      {
+        key: 'export_pipeline_item',
+        name: 'EXPORT_PIPELINE_ITEM',
+      },
     ],
   },
   conversation_resolved: {
@@ -681,6 +809,38 @@ export const AUTOMATIONS = {
       {
         key: 'send_attachment',
         name: 'SEND_ATTACHMENT',
+      },
+      {
+        key: 'create_pipeline_item',
+        name: 'CREATE_PIPELINE_ITEM',
+      },
+      {
+        key: 'move_pipeline_item_stage',
+        name: 'MOVE_PIPELINE_ITEM_STAGE',
+      },
+      {
+        key: 'assign_pipeline_item_agent',
+        name: 'ASSIGN_PIPELINE_ITEM_AGENT',
+      },
+      {
+        key: 'assign_pipeline_item_team',
+        name: 'ASSIGN_PIPELINE_ITEM_TEAM',
+      },
+      {
+        key: 'add_pipeline_item_label',
+        name: 'ADD_PIPELINE_ITEM_LABEL',
+      },
+      {
+        key: 'remove_pipeline_item_label',
+        name: 'REMOVE_PIPELINE_ITEM_LABEL',
+      },
+      {
+        key: 'update_pipeline_item',
+        name: 'UPDATE_PIPELINE_ITEM',
+      },
+      {
+        key: 'export_pipeline_item',
+        name: 'EXPORT_PIPELINE_ITEM',
       },
     ],
   },
@@ -804,5 +964,45 @@ export const AUTOMATION_ACTION_TYPES = [
     key: 'add_sla',
     label: 'ADD_SLA',
     inputType: 'search_select',
+  },
+  {
+    key: 'create_pipeline_item',
+    label: 'CREATE_PIPELINE_ITEM',
+    inputType: 'pipeline_create_item',
+  },
+  {
+    key: 'move_pipeline_item_stage',
+    label: 'MOVE_PIPELINE_ITEM_STAGE',
+    inputType: 'pipeline_stage_select',
+  },
+  {
+    key: 'export_pipeline_item',
+    label: 'EXPORT_PIPELINE_ITEM',
+    inputType: 'pipeline_stage_select',
+  },
+  {
+    key: 'assign_pipeline_item_agent',
+    label: 'ASSIGN_PIPELINE_ITEM_AGENT',
+    inputType: 'pipeline_assignee_select',
+  },
+  {
+    key: 'assign_pipeline_item_team',
+    label: 'ASSIGN_PIPELINE_ITEM_TEAM',
+    inputType: 'pipeline_assignee_select',
+  },
+  {
+    key: 'add_pipeline_item_label',
+    label: 'ADD_PIPELINE_ITEM_LABEL',
+    inputType: 'pipeline_label_select',
+  },
+  {
+    key: 'remove_pipeline_item_label',
+    label: 'REMOVE_PIPELINE_ITEM_LABEL',
+    inputType: 'pipeline_label_select',
+  },
+  {
+    key: 'update_pipeline_item',
+    label: 'UPDATE_PIPELINE_ITEM',
+    inputType: 'pipeline_update_fields',
   },
 ];

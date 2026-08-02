@@ -72,9 +72,24 @@ export default {
     updateVisibility(value) {
       this.macro.visibility = value;
     },
+    defaultActionNameFor(macroType) {
+      return macroType === 'pipeline_item'
+        ? 'move_pipeline_item_stage'
+        : 'assign_team';
+    },
+    updateMacroType(value) {
+      this.macro.macro_type = value;
+      // The action whitelist differs per macro_type (task 06), so existing actions
+      // configured for the previous type would fail validation - reset them, mirroring
+      // how AutomationRuleForm resets actions on event_name change.
+      this.macro.actions = [
+        { action_name: this.defaultActionNameFor(value), action_params: [] },
+      ];
+      this.errors = {};
+    },
     appendNode() {
       this.macro.actions.push({
-        action_name: 'assign_team',
+        action_name: this.defaultActionNameFor(this.macro.macro_type),
         action_params: [],
       });
     },
@@ -125,8 +140,10 @@ export default {
       <MacroProperties
         :macro-name="macro.name"
         :macro-visibility="macro.visibility"
+        :macro-type="macro.macro_type"
         @update:name="updateName"
         @update:visibility="updateVisibility"
+        @update:macro-type="updateMacroType"
         @submit="submit"
       />
     </div>

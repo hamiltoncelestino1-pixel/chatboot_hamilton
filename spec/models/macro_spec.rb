@@ -19,6 +19,46 @@ RSpec.describe Macro do
       expect(macro).not_to be_valid
       expect(macro.errors.full_messages).to eq(['Actions Macro execution actions update_last_seen not supported.'])
     end
+
+    context 'when macro_type is set' do
+      it 'defaults to conversation' do
+        macro = create(:macro, account: account, created_by: admin, updated_by: admin, actions: [])
+        expect(macro.conversation?).to be true
+      end
+
+      it 'validates conversation actions against CONVERSATION_ACTIONS_ATTRS' do
+        macro = FactoryBot.build(:macro, account: account, created_by: admin, updated_by: admin,
+                                         macro_type: :conversation, actions: [{ action_name: :move_pipeline_item_stage }])
+        expect(macro).not_to be_valid
+        expect(macro.errors.full_messages).to eq(['Actions Macro execution actions move_pipeline_item_stage not supported.'])
+      end
+
+      it 'accepts conversation actions for a conversation macro' do
+        macro = FactoryBot.build(:macro, account: account, created_by: admin, updated_by: admin,
+                                         macro_type: :conversation, actions: [{ action_name: :add_label, action_params: ['bug'] }])
+        expect(macro).to be_valid
+      end
+
+      it 'validates pipeline actions against PIPELINE_ACTIONS_ATTRS' do
+        macro = FactoryBot.build(:macro, account: account, created_by: admin, updated_by: admin,
+                                         macro_type: :pipeline_item, actions: [{ action_name: :add_label }])
+        expect(macro).not_to be_valid
+        expect(macro.errors.full_messages).to eq(['Actions Macro execution actions add_label not supported.'])
+      end
+
+      it 'rejects create_pipeline_item for a pipeline macro (the card is always the target, never created)' do
+        macro = FactoryBot.build(:macro, account: account, created_by: admin, updated_by: admin,
+                                         macro_type: :pipeline_item, actions: [{ action_name: :create_pipeline_item }])
+        expect(macro).not_to be_valid
+        expect(macro.errors.full_messages).to eq(['Actions Macro execution actions create_pipeline_item not supported.'])
+      end
+
+      it 'accepts pipeline actions for a pipeline macro' do
+        macro = FactoryBot.build(:macro, account: account, created_by: admin, updated_by: admin, macro_type: :pipeline_item,
+                                         actions: [{ action_name: :move_pipeline_item_stage, action_params: [{ target_stage_id: 1 }] }])
+        expect(macro).to be_valid
+      end
+    end
   end
 
   describe '#set_visibility' do

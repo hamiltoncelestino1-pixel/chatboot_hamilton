@@ -36,14 +36,16 @@ class AutomationRule < ApplicationRecord
 
   def conditions_attributes
     %w[content email country_code status message_type browser_language assignee_id team_id referer city company_name inbox_id
-       mail_subject phone_number priority conversation_language labels private_note]
+       mail_subject phone_number priority conversation_language labels private_note stage_id pipeline_id value]
   end
 
   def actions_attributes
     %w[send_message add_label remove_label send_email_to_team assign_team assign_agent remove_assigned_agent
        remove_assigned_team send_webhook_event mute_conversation send_attachment change_status resolve_conversation
        open_conversation pending_conversation snooze_conversation change_priority send_email_transcript
-       add_private_note].freeze
+       add_private_note create_pipeline_item move_pipeline_item_stage assign_pipeline_item_agent
+       assign_pipeline_item_team add_pipeline_item_label remove_pipeline_item_label update_pipeline_item
+       export_pipeline_item].freeze
   end
 
   def file_base_data

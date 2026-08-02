@@ -8,6 +8,7 @@ import {
   shortTimestamp,
   dateFormat,
 } from 'shared/helpers/timeHelper';
+import KanbanRunMacroMenu from './KanbanRunMacroMenu.vue';
 
 const props = defineProps({
   item: { type: Object, required: true },
@@ -72,13 +73,21 @@ const visibleAttributes = computed(() =>
     class="group bg-white dark:bg-slate-700 rounded-lg p-3 shadow-sm cursor-pointer hover:shadow-md transition-shadow border border-slate-100 dark:border-slate-600 relative"
     @click="emit('click', item)"
   >
-    <button
-      v-tooltip.top="t('KANBAN.ITEM.EXPORT.BUTTON')"
-      class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity p-0.5 text-slate-400 hover:text-woot-500"
-      @click.stop="emit('export', item)"
+    <div
+      class="absolute top-2 right-2 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity"
     >
-      <span class="i-lucide-arrow-right-left size-3.5" />
-    </button>
+      <KanbanRunMacroMenu
+        :pipeline-item-ids="[item.id]"
+        button-class="p-0.5 text-slate-400 hover:text-woot-500"
+      />
+      <button
+        v-tooltip.top="t('KANBAN.ITEM.EXPORT.BUTTON')"
+        class="p-0.5 text-slate-400 hover:text-woot-500"
+        @click.stop="emit('export', item)"
+      >
+        <span class="i-lucide-arrow-right-left size-3.5" />
+      </button>
+    </div>
     <router-link
       v-if="item.contact?.id"
       :to="{

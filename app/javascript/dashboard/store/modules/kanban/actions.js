@@ -2,6 +2,7 @@ import PipelinesAPI from 'dashboard/api/pipelines';
 import PipelineItemsAPI from 'dashboard/api/pipelineItems';
 import PipelineItemLabelsAPI from 'dashboard/api/pipelineItemLabels';
 import { useAlert } from 'dashboard/composables';
+import { throwErrorMessage } from '../../utils/api';
 
 export const actions = {
   fetchPipelines: async ({ commit }) => {
@@ -102,6 +103,9 @@ export const actions = {
       });
       commit('SET_ITEM', data);
       return data;
+    } catch (error) {
+      throwErrorMessage(error);
+      return null;
     } finally {
       commit('SET_KANBAN_UI_FLAG', { isCreating: false });
     }
@@ -213,5 +217,27 @@ export const actions = {
     const { data } = await PipelineItemsAPI.getByConversation(conversationId);
     data.forEach(item => commit('SET_ITEM_DATA', item));
     return data;
+  },
+
+  // Applies a pipeline_item.created/pipeline_item.updated ActionCable push (task 10).
+  // Ignores items outside the pipeline currently open on this board - they aren't
+  // rendered anywhere here, and staying quiet avoids polluting itemOrder for stages
+  // that were never fetched into stageOrder.
+  applyRealtimePipelineItem: ({ commit, state }, item) => {
+    if (state.activePipelineId !== item.pipeline_id) return;
+
+    const existingItem = state.items[item.id];
+    if (
+      existingItem &&
+      existingItem.pipeline_stage_id !== item.pipeline_stage_id
+    ) {
+      commit('MOVE_ITEM', {
+        itemId: item.id,
+        fromStageId: existingItem.pipeline_stage_id,
+        toStageId: item.pipeline_stage_id,
+        position: 0,
+      });
+    }
+    commit('SET_ITEM', item);
   },
 };

@@ -4,6 +4,7 @@ import draggable from 'vuedraggable';
 import { useI18n } from 'vue-i18n';
 import { useStore, useMapGetter } from 'dashboard/composables/store';
 import KanbanCard from './KanbanCard.vue';
+import KanbanRunMacroMenu from './KanbanRunMacroMenu.vue';
 
 const props = defineProps({
   stage: { type: Object, required: true },
@@ -83,12 +84,19 @@ const onEnd = ({ from, to }) => {
           {{ localItems.length }}
         </span>
       </div>
-      <button
-        class="flex-shrink-0 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors"
-        @click="emit('add-item', stage.id)"
-      >
-        <span class="i-lucide-plus size-4" />
-      </button>
+      <div class="flex items-center gap-1 flex-shrink-0">
+        <KanbanRunMacroMenu
+          v-if="localItems.length"
+          :pipeline-item-ids="localItems.map(item => item.id)"
+          button-class="p-0.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors"
+        />
+        <button
+          class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors"
+          @click="emit('add-item', stage.id)"
+        >
+          <span class="i-lucide-plus size-4" />
+        </button>
+      </div>
     </div>
 
     <draggable

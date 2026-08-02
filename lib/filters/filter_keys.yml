@@ -239,3 +239,57 @@ messages:
       - "does_not_contain"
 
 ### ----- End of Message Filters ----- ###
+
+### ----- Pipeline Item Filters (task 09, automation rules only) ----- ###
+# stage_id maps to the pipeline_items.pipeline_stage_id column (see
+# AutomationRules::PipelineConditionsFilterService) - kept short here to match the key the
+# frontend already uses for pipeline actions (pipeline_tasks/05).
+pipeline_items:
+  stage_id:
+    attribute_type: "standard"
+    data_type: "text"
+    filter_operators:
+      - "equal_to"
+      - "not_equal_to"
+  pipeline_id:
+    attribute_type: "standard"
+    data_type: "text"
+    filter_operators:
+      - "equal_to"
+      - "not_equal_to"
+  value:
+    attribute_type: "standard"
+    # "numeric" (not "number"), matching FilterService#coerce_lt_gt_value's expected string
+    # for the is_greater_than/is_less_than path - see message_type above for precedent.
+    data_type: "numeric"
+    filter_operators:
+      - "equal_to"
+      - "not_equal_to"
+      - "is_greater_than"
+      - "is_less_than"
+  assignee_id:
+    attribute_type: "standard"
+    data_type: "text"
+    filter_operators:
+      - "equal_to"
+      - "not_equal_to"
+      - "is_present"
+      - "is_not_present"
+  team_id:
+    attribute_type: "standard"
+    data_type: "number"
+    filter_operators:
+      - "equal_to"
+      - "not_equal_to"
+      - "is_present"
+      - "is_not_present"
+  labels:
+    attribute_type: "standard"
+    data_type: "labels"
+    filter_operators:
+      - "equal_to"
+      - "not_equal_to"
+      - "is_present"
+      - "is_not_present"
+
+### ----- End of Pipeline Item Filters ----- ###

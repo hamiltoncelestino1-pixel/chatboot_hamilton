@@ -99,7 +99,25 @@
       "TEAM_MESSAGE_INPUT_PLACEHOLDER": "Escreva sua mensagem aqui",
       "TEAM_DROPDOWN_PLACEHOLDER": "Selecione times",
       "EMAIL_INPUT_PLACEHOLDER": "Insira o e-mail",
-      "URL_INPUT_PLACEHOLDER": "Insira a URL"
+      "URL_INPUT_PLACEHOLDER": "Insira a URL",
+      "PIPELINE": {
+        "PIPELINE_PLACEHOLDER": "Selecione a pipeline",
+        "STAGE_PLACEHOLDER": "Selecione a etapa",
+        "TARGET_PIPELINE_PLACEHOLDER": "Selecione a pipeline de destino",
+        "ASSIGNEE_MODE_PLACEHOLDER": "Selecione o responsável",
+        "TEAM_MODE_PLACEHOLDER": "Selecione o time",
+        "TITLE_PLACEHOLDER": "Título (opcional)",
+        "VALUE_PLACEHOLDER": "Valor do negócio (opcional)",
+        "NOTES_PLACEHOLDER": "Notas (opcional)",
+        "ASSIGNEE_MODE": {
+          "CONVERSATION_ASSIGNEE": "Mesmo agente da conversa",
+          "NONE": "Sem responsável"
+        },
+        "TEAM_MODE": {
+          "CONVERSATION_TEAM": "Mesmo time da conversa",
+          "NONE": "Sem time"
+        }
+      }
     },
     "TOGGLE": {
       "ACTIVATION_TITLE": "Ativar regra de automação",
@@ -156,7 +174,15 @@
       "CHANGE_PRIORITY": "Alterar Prioridade",
       "ADD_SLA": "Adicionar SLA",
       "OPEN_CONVERSATION": "Abrir conversa",
-      "PENDING_CONVERSATION": "Marcar conversa como pendente"
+      "PENDING_CONVERSATION": "Marcar conversa como pendente",
+      "CREATE_PIPELINE_ITEM": "Criar Card no Pipeline",
+      "MOVE_PIPELINE_ITEM_STAGE": "Mover Card para Estágio",
+      "ASSIGN_PIPELINE_ITEM_AGENT": "Atribuir Card do Pipeline a Agente",
+      "ASSIGN_PIPELINE_ITEM_TEAM": "Atribuir Card do Pipeline a Time",
+      "ADD_PIPELINE_ITEM_LABEL": "Adicionar Etiqueta ao Card do Pipeline",
+      "REMOVE_PIPELINE_ITEM_LABEL": "Remover Etiqueta do Card do Pipeline",
+      "UPDATE_PIPELINE_ITEM": "Atualizar Card do Pipeline",
+      "EXPORT_PIPELINE_ITEM": "Exportar Card para Outro Pipeline"
     },
     "MESSAGE_TYPES": {
       "INCOMING": "Mensagem Recebida",

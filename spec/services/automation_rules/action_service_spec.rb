@@ -202,6 +202,215 @@ RSpec.describe AutomationRules::ActionService do
       end
     end
 
+    describe '#perform with create_pipeline_item action' do
+      let(:pipeline) { create(:pipeline, account: account) }
+      let(:stage) { pipeline.pipeline_stages.find_by(stage_type: :start) }
+
+      before do
+        create(:pipeline_member, pipeline: pipeline, user: agent)
+        conversation.update!(assignee: agent)
+        rule.actions << {
+          action_name: 'create_pipeline_item',
+          action_params: [{ pipeline_id: pipeline.id, pipeline_stage_id: stage.id, assignee_mode: 'conversation_assignee', title: 'From automation' }]
+        }
+        rule.save!
+      end
+
+      it 'creates a pipeline item for the conversation contact' do
+        described_class.new(rule, account, conversation).perform
+
+        item = PipelineItem.find_by(contact_id: conversation.contact_id, pipeline_id: pipeline.id)
+        expect(item).to be_present
+        expect(item.conversation_id).to eq(conversation.id)
+        expect(item.assignee_id).to eq(agent.id)
+        expect(item.title).to eq('From automation')
+      end
+
+      it 'logs via ChatwootExceptionTracker and keeps running other actions when the contact already has a card' do
+        create(:pipeline_item, pipeline_stage: stage, account: account, contact: conversation.contact)
+        rule.actions << { action_name: 'remove_assigned_agent', action_params: [] }
+        rule.save!
+
+        expect(ChatwootExceptionTracker).to receive(:new).with(an_instance_of(ActiveRecord::RecordInvalid), account: account).and_call_original
+        described_class.new(rule, account, conversation).perform
+
+        expect(conversation.reload.assignee).to be_nil
+      end
+    end
+
+    describe '#perform with move_pipeline_item_stage action' do
+      let(:pipeline) { create(:pipeline, account: account) }
+      let(:start_stage) { pipeline.pipeline_stages.find_by(stage_type: :start) }
+      let(:won_stage) { pipeline.pipeline_stages.find_by(stage_type: :won) }
+
+      before do
+        rule.actions << { action_name: 'move_pipeline_item_stage', action_params: [{ pipeline_id: pipeline.id, target_stage_id: won_stage.id }] }
+        rule.save!
+      end
+
+      it 'moves the existing card to the target stage' do
+        item = create(:pipeline_item, pipeline_stage: start_stage, account: account, contact: conversation.contact)
+
+        described_class.new(rule, account, conversation).perform
+
+        expect(item.reload.pipeline_stage_id).to eq(won_stage.id)
+      end
+
+      it 'does nothing when the contact has no card in the pipeline' do
+        expect { described_class.new(rule, account, conversation).perform }.not_to raise_error
+        expect(PipelineItem.where(contact_id: conversation.contact_id, pipeline_id: pipeline.id)).to be_empty
+      end
+    end
+
+    describe '#perform with assign_pipeline_item_agent action' do
+      let(:pipeline) { create(:pipeline, account: account) }
+      let(:stage) { pipeline.pipeline_stages.find_by(stage_type: :start) }
+
+      before do
+        create(:pipeline_member, pipeline: pipeline, user: agent)
+        conversation.update!(assignee: agent)
+        rule.actions << { action_name: 'assign_pipeline_item_agent',
+                          action_params: [{ pipeline_id: pipeline.id, assignee_mode: 'conversation_assignee' }] }
+        rule.save!
+      end
+
+      it 'assigns the card to the conversation assignee' do
+        item = create(:pipeline_item, pipeline_stage: stage, account: account, contact: conversation.contact)
+
+        described_class.new(rule, account, conversation).perform
+
+        expect(item.reload.assignee_id).to eq(agent.id)
+      end
+
+      it 'does nothing when the contact has no card in the pipeline' do
+        expect { described_class.new(rule, account, conversation).perform }.not_to raise_error
+      end
+    end
+
+    describe '#perform with assign_pipeline_item_team action' do
+      let(:pipeline) { create(:pipeline, account: account) }
+      let(:stage) { pipeline.pipeline_stages.find_by(stage_type: :start) }
+      let!(:team) { create(:team, account: account) }
+
+      before do
+        conversation.update!(team: team)
+        rule.actions << { action_name: 'assign_pipeline_item_team', action_params: [{ pipeline_id: pipeline.id, team_mode: 'conversation_team' }] }
+        rule.save!
+      end
+
+      it 'assigns the card to the conversation team' do
+        item = create(:pipeline_item, pipeline_stage: stage, account: account, contact: conversation.contact)
+
+        described_class.new(rule, account, conversation).perform
+
+        expect(item.reload.team_id).to eq(team.id)
+      end
+
+      it 'does nothing when the contact has no card in the pipeline' do
+        expect { described_class.new(rule, account, conversation).perform }.not_to raise_error
+      end
+    end
+
+    describe '#perform with add_pipeline_item_label action' do
+      let(:pipeline) { create(:pipeline, account: account) }
+      let(:stage) { pipeline.pipeline_stages.find_by(stage_type: :start) }
+
+      before do
+        create(:label, account: account, title: 'quente', label_type: :pipeline_label)
+        rule.actions << { action_name: 'add_pipeline_item_label', action_params: [{ pipeline_id: pipeline.id, labels: ['quente'] }] }
+        rule.save!
+      end
+
+      it 'adds the labels to the card' do
+        item = create(:pipeline_item, pipeline_stage: stage, account: account, contact: conversation.contact)
+
+        described_class.new(rule, account, conversation).perform
+
+        expect(item.reload.label_list).to include('quente')
+      end
+
+      it 'does nothing when the contact has no card in the pipeline' do
+        expect { described_class.new(rule, account, conversation).perform }.not_to raise_error
+      end
+    end
+
+    describe '#perform with remove_pipeline_item_label action' do
+      let(:pipeline) { create(:pipeline, account: account) }
+      let(:stage) { pipeline.pipeline_stages.find_by(stage_type: :start) }
+
+      before do
+        create(:label, account: account, title: 'quente', label_type: :pipeline_label)
+        create(:label, account: account, title: 'frio', label_type: :pipeline_label)
+        rule.actions << { action_name: 'remove_pipeline_item_label', action_params: [{ pipeline_id: pipeline.id, labels: ['quente'] }] }
+        rule.save!
+      end
+
+      it 'removes the labels from the card' do
+        item = create(:pipeline_item, pipeline_stage: stage, account: account, contact: conversation.contact)
+        item.update!(label_list: %w[quente frio])
+
+        described_class.new(rule, account, conversation).perform
+
+        expect(item.reload.label_list).to contain_exactly('frio')
+      end
+
+      it 'does nothing when the contact has no card in the pipeline' do
+        expect { described_class.new(rule, account, conversation).perform }.not_to raise_error
+      end
+    end
+
+    describe '#perform with update_pipeline_item action' do
+      let(:pipeline) { create(:pipeline, account: account) }
+      let(:stage) { pipeline.pipeline_stages.find_by(stage_type: :start) }
+
+      before do
+        rule.actions << { action_name: 'update_pipeline_item', action_params: [{ pipeline_id: pipeline.id, title: 'Updated title', value: 250 }] }
+        rule.save!
+      end
+
+      it 'updates the given subset of fields on the card' do
+        item = create(:pipeline_item, pipeline_stage: stage, account: account, contact: conversation.contact, notes: 'keep me')
+
+        described_class.new(rule, account, conversation).perform
+        item.reload
+
+        expect(item.title).to eq('Updated title')
+        expect(item.value.to_f).to eq(250.0)
+        expect(item.notes).to eq('keep me')
+      end
+
+      it 'does nothing when the contact has no card in the pipeline' do
+        expect { described_class.new(rule, account, conversation).perform }.not_to raise_error
+      end
+    end
+
+    describe '#perform with export_pipeline_item action' do
+      let(:pipeline) { create(:pipeline, account: account) }
+      let(:stage) { pipeline.pipeline_stages.find_by(stage_type: :start) }
+      let(:target_pipeline) { create(:pipeline, account: account) }
+      let(:target_stage) { target_pipeline.pipeline_stages.find_by(stage_type: :start) }
+
+      before do
+        rule.actions << {
+          action_name: 'export_pipeline_item',
+          action_params: [{ pipeline_id: pipeline.id, target_pipeline_id: target_pipeline.id, target_stage_id: target_stage.id }]
+        }
+        rule.save!
+      end
+
+      it "delegates to Pipelines::ExportItemService to move the card into the target pipeline's stage" do
+        item = create(:pipeline_item, pipeline_stage: stage, account: account, contact: conversation.contact)
+
+        described_class.new(rule, account, conversation).perform
+
+        expect(item.reload.pipeline_stage_id).to eq(target_stage.id)
+      end
+
+      it 'does nothing when the contact has no card in the pipeline' do
+        expect { described_class.new(rule, account, conversation).perform }.not_to raise_error
+      end
+    end
+
     describe '#perform with assign_agent action' do
       before do
         create(:inbox_member, inbox: conversation.inbox, user: agent)

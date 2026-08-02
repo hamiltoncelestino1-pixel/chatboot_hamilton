@@ -72,6 +72,17 @@
           "LABEL": "Privada",
           "DESCRIPTION": "Esta macro será privada para você e não estará disponível para outras pessoas."
         }
+      },
+      "MACRO_TYPE": {
+        "LABEL": "Tipo de Macro",
+        "CONVERSATION": {
+          "LABEL": "Macro de conversa",
+          "DESCRIPTION": "Roda em uma conversa, a partir da barra lateral da conversa."
+        },
+        "PIPELINE_ITEM": {
+          "LABEL": "Macro de pipeline",
+          "DESCRIPTION": "Roda em um card do pipeline, a partir do quadro Kanban."
+        }
       }
     },
     "EXECUTE": {
@@ -103,7 +114,14 @@
       "SEND_MESSAGE": "Enviar uma Mensagem",
       "CHANGE_PRIORITY": "Alterar Prioridade",
       "ADD_PRIVATE_NOTE": "Adicionar uma Nota Privada",
-      "SEND_WEBHOOK_EVENT": "Enviar evento de Webhook"
+      "SEND_WEBHOOK_EVENT": "Enviar evento de Webhook",
+      "MOVE_PIPELINE_ITEM_STAGE": "Mover Card para Estágio",
+      "ASSIGN_PIPELINE_ITEM_AGENT": "Atribuir Card a Agente",
+      "ASSIGN_PIPELINE_ITEM_TEAM": "Atribuir Card a Time",
+      "ADD_PIPELINE_ITEM_LABEL": "Adicionar Etiqueta ao Card",
+      "REMOVE_PIPELINE_ITEM_LABEL": "Remover Etiqueta do Card",
+      "UPDATE_PIPELINE_ITEM": "Atualizar Card",
+      "EXPORT_PIPELINE_ITEM": "Exportar Card para Outro Pipeline"
     },
     "PRIORITY_TYPES": {
       "NONE": "Nenhuma",

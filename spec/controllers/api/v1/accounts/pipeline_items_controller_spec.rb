@@ -17,6 +17,32 @@ RSpec.describe 'Pipeline Items API', type: :request do
     item # force creation before tests
   end
 
+  describe 'POST /api/v1/accounts/:account_id/pipeline_items' do
+    context 'when authenticated' do
+      let(:headers) { agent.create_new_auth_token }
+
+      it 'returns 422 with the duplicate-card message when the contact already has a card in the pipeline' do
+        existing_item = item
+        contact = existing_item.contact
+
+        post "/api/v1/accounts/#{account.id}/pipeline_items",
+             params: {
+               pipeline_item: {
+                 pipeline_stage_id: source_stage.id,
+                 contact_id: contact.id
+               }
+             },
+             headers: headers,
+             as: :json
+
+        expect(response).to have_http_status(:unprocessable_entity)
+        expect(response.parsed_body['message']).to include(
+          I18n.t('errors.pipeline_item.duplicate_contact_in_pipeline')
+        )
+      end
+    end
+  end
+
   describe 'POST /api/v1/accounts/:account_id/pipeline_items/:id/export' do
     context 'when unauthenticated' do
       it 'returns unauthorized' do

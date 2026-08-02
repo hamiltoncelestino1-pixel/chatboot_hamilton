@@ -59,4 +59,13 @@ module Events::Types
 
   # copilot events
   COPILOT_MESSAGE_CREATED = 'copilot.message.created'
+
+  # pipeline item events
+  PIPELINE_ITEM_CREATED = 'pipeline_item.created'
+  PIPELINE_ITEM_STAGE_CHANGED = 'pipeline_item.stage_changed'
+  # Broader than PIPELINE_ITEM_STAGE_CHANGED on purpose: used only for the Kanban real-time
+  # broadcast (task 10), not automation rules (task 09 deliberately only reacts to stage
+  # changes). Fires on stage/assignee/team change - the fields that affect a card's
+  # position/appearance on the board.
+  PIPELINE_ITEM_UPDATED = 'pipeline_item.updated'
 end
