@@ -66,7 +66,7 @@
 
 - Prefer Conventional Commits: `type(scope): subject` (scope optional)
 - Example: `feat(auth): add user authentication`
-- Don't reference Claude in commit messages
+- A `Co-Authored-By: Claude ...` trailer is accepted practice in this repo — keep it, don't strip it
 
 ## PR Description Format
 
@@ -83,6 +83,10 @@
   - Only update `en.yml` and `en.json`
   - Other languages are handled by the community
   - Backend i18n → `en.yml`, Frontend i18n → `en.json`
+  - **Exception (active, intentional):** the Kanban/Pipeline domain
+    (`app/javascript/dashboard/i18n/locale/*/kanban.json`, `automation.json`, `macros.json`)
+    also keeps `pt_BR` in sync manually alongside `en` — this is a deliberate deviation from
+    the rule above, not an accident. Keep both locales updated when touching these files.
 - **Frontend**:
   - Use `components-next/` for message bubbles (the rest is being deprecated)
 
