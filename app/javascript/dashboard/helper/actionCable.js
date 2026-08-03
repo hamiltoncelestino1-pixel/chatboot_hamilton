@@ -35,6 +35,8 @@ class ActionCableConnector extends BaseActionCableConnector {
       'account.cache_invalidated': this.onCacheInvalidate,
       'account.enrichment_completed': this.onEnrichmentCompleted,
       'copilot.message.created': this.onCopilotMessageCreated,
+      'pipeline_item.created': this.onPipelineItemChanged,
+      'pipeline_item.updated': this.onPipelineItemChanged,
     };
   }
 
@@ -197,6 +199,10 @@ class ActionCableConnector extends BaseActionCableConnector {
 
   onEnrichmentCompleted = () => {
     this.app.$store.dispatch('accounts/get', { silent: true });
+  };
+
+  onPipelineItemChanged = data => {
+    this.app.$store.dispatch('kanban/applyRealtimePipelineItem', data);
   };
 
   onCacheInvalidate = data => {

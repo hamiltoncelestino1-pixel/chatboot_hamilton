@@ -11,6 +11,7 @@ class AutomationRules::ConditionValidationService
     @conversation_filters = @filters['conversations']
     @contact_filters = @filters['contacts']
     @message_filters = @filters['messages']
+    @pipeline_item_filters = @filters['pipeline_items']
   end
 
   def perform
@@ -38,9 +39,11 @@ class AutomationRules::ConditionValidationService
     conversation_filter = @conversation_filters[key]
     contact_filter = @contact_filters[key]
     message_filter = @message_filters[key]
+    pipeline_item_filter = @pipeline_item_filters[key]
 
-    if conversation_filter || contact_filter || message_filter
-      operation_valid?(condition, conversation_filter || contact_filter || message_filter)
+    filter = conversation_filter || contact_filter || message_filter || pipeline_item_filter
+    if filter
+      operation_valid?(condition, filter)
     else
       custom_attribute_present?(key, condition['custom_attribute_type'])
     end
@@ -56,10 +59,21 @@ class AutomationRules::ConditionValidationService
   end
 
   def custom_attribute_present?(attribute_key, attribute_model)
-    attribute_model = attribute_model.presence || self.class::ATTRIBUTE_MODEL
+    attribute_model = attribute_model.presence || default_attribute_model
 
     @account.custom_attribute_definitions.where(
       attribute_model: attribute_model
     ).find_by(attribute_key: attribute_key).present?
+  end
+
+  # This class isn't part of PipelineConditionsFilterService's inheritance chain (that one
+  # extends FilterService, not this class), so its own ATTRIBUTE_MODEL constant never
+  # overrides this one by polymorphism - it has to be picked explicitly from the rule's
+  # event_name. No pipeline_item custom attribute condition exists in the UI yet, so this
+  # branch is currently a safety net for when that's added, not something exercised today.
+  def default_attribute_model
+    return AutomationRules::PipelineConditionsFilterService::ATTRIBUTE_MODEL if @rule.event_name.to_s.start_with?('pipeline_item')
+
+    self.class::ATTRIBUTE_MODEL
   end
 end

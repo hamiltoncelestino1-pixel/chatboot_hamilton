@@ -1,6 +1,11 @@
 <script>
 import AutomationActionTeamMessageInput from './AutomationActionTeamMessageInput.vue';
 import AutomationActionFileInput from './AutomationFileInput.vue';
+import AutomationActionCreatePipelineItemInput from './AutomationActionCreatePipelineItemInput.vue';
+import AutomationActionPipelineStageInput from './AutomationActionPipelineStageInput.vue';
+import AutomationActionPipelineAssigneeInput from './AutomationActionPipelineAssigneeInput.vue';
+import AutomationActionPipelineLabelInput from './AutomationActionPipelineLabelInput.vue';
+import AutomationActionPipelineUpdateFieldsInput from './AutomationActionPipelineUpdateFieldsInput.vue';
 import WootMessageEditor from 'dashboard/components/widgets/WootWriter/Editor.vue';
 import NextButton from 'dashboard/components-next/button/Button.vue';
 import SingleSelect from 'dashboard/components-next/filter/inputs/SingleSelect.vue';
@@ -11,6 +16,11 @@ export default {
   components: {
     AutomationActionTeamMessageInput,
     AutomationActionFileInput,
+    AutomationActionCreatePipelineItemInput,
+    AutomationActionPipelineStageInput,
+    AutomationActionPipelineAssigneeInput,
+    AutomationActionPipelineLabelInput,
+    AutomationActionPipelineUpdateFieldsInput,
     WootMessageEditor,
     NextButton,
     SingleSelect,
@@ -93,7 +103,15 @@ export default {
       return this.actionTypes.map(a => ({ id: a.key, name: a.label }));
     },
     isVerticalLayout() {
-      return ['team_message', 'textarea'].includes(this.inputType);
+      return [
+        'team_message',
+        'textarea',
+        'pipeline_create_item',
+        'pipeline_stage_select',
+        'pipeline_assignee_select',
+        'pipeline_label_select',
+        'pipeline_update_fields',
+      ].includes(this.inputType);
     },
     castMessageVmodel: {
       get() {
@@ -184,6 +202,36 @@ export default {
         v-if="inputType === 'team_message'"
         v-model="action_params"
         :teams="dropdownValues"
+        :dropdown-max-height="dropdownMaxHeight"
+      />
+      <AutomationActionCreatePipelineItemInput
+        v-if="inputType === 'pipeline_create_item'"
+        v-model="action_params"
+        :dropdown-max-height="dropdownMaxHeight"
+      />
+      <AutomationActionPipelineStageInput
+        v-if="inputType === 'pipeline_stage_select'"
+        :key="action_name"
+        v-model="action_params"
+        :action-name="action_name"
+        :dropdown-max-height="dropdownMaxHeight"
+      />
+      <AutomationActionPipelineAssigneeInput
+        v-if="inputType === 'pipeline_assignee_select'"
+        :key="action_name"
+        v-model="action_params"
+        :action-name="action_name"
+        :dropdown-max-height="dropdownMaxHeight"
+      />
+      <AutomationActionPipelineLabelInput
+        v-if="inputType === 'pipeline_label_select'"
+        :key="action_name"
+        v-model="action_params"
+        :dropdown-max-height="dropdownMaxHeight"
+      />
+      <AutomationActionPipelineUpdateFieldsInput
+        v-if="inputType === 'pipeline_update_fields'"
+        v-model="action_params"
         :dropdown-max-height="dropdownMaxHeight"
       />
       <WootMessageEditor

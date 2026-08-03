@@ -63,6 +63,8 @@
       "VALUE_LABEL": "Valor",
       "MIN": "Mín",
       "MAX": "Máx",
+      "LABEL_LABEL": "Etiquetas",
+      "LABEL_PLACEHOLDER": "Filtrar por etiqueta...",
       "CLEAR": "Limpar filtros"
     },
     "ITEM": {
@@ -87,7 +89,8 @@
       },
       "CONVERSATION": {
         "SEARCH_PLACEHOLDER": "Vincular uma conversa...",
-        "CLEAR": "Desvincular conversa"
+        "CLEAR": "Desvincular conversa",
+        "VIEW": "Ver Conversa"
       },
       "MOVE_ERROR": "Falha ao mover card. Tente novamente.",
       "ASSIGNEE_LABEL": "Responsável",
@@ -127,6 +130,12 @@
         "DELETE_SUCCESS": "Card excluído com sucesso.",
         "ERROR": "Algo deu errado. Tente novamente."
       }
+    },
+    "RUN_MACRO": {
+      "BUTTON": "Rodar macro",
+      "EMPTY_STATE": "Nenhuma macro de pipeline disponível.",
+      "SUCCESS": "Macro executada com sucesso.",
+      "ERROR": "Falha ao rodar a macro. Tente novamente."
     }
   }
 }

@@ -34,7 +34,31 @@ class AutomationRuleListener < BaseListener
     end
   end
 
+  def pipeline_item_created(event)
+    process_pipeline_item_event(event, 'pipeline_item_created')
+  end
+
+  def pipeline_item_stage_changed(event)
+    process_pipeline_item_event(event, 'pipeline_item_stage_changed')
+  end
+
   private
+
+  def process_pipeline_item_event(event, event_name)
+    return if performed_by_automation?(event)
+
+    pipeline_item = event.data[:pipeline_item]
+    account = pipeline_item.account
+
+    return unless rule_present?(event_name, account)
+
+    rules = current_account_rules(event_name, account)
+
+    rules.each do |rule|
+      conditions_match = ::AutomationRules::PipelineConditionsFilterService.new(rule, pipeline_item).perform
+      ::AutomationRules::PipelineActionService.new(rule, account, pipeline_item).perform if conditions_match.present?
+    end
+  end
 
   def process_conversation_event(event, event_name)
     return if performed_by_automation?(event)

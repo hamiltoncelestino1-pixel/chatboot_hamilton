@@ -71,6 +71,26 @@ Tasks 09-10 = **Grupo D** (gatilhos nativos + tempo real).
   `macros.json`, `kanban.json` já existem em pt_BR) — toda chave de i18n nova destas tasks
   precisa ir nos dois locales, ao contrário da regra geral do AGENTS.md de só tocar arquivos en.
 
+## Auditoria pós-implementação (2026-08-01) — tasks de correção
+
+As 10 tasks acima foram implementadas (branch `feature/pipeline-automations-and-unique-card`,
+ainda não commitada). Uma auditoria completa (3 agentes Explore + verificação manual) comparou a
+implementação real contra cada spec e encontrou bugs, um risco de segurança não fechado, uma
+redundância e um problema de UI silencioso, além de investigar a fundo o relato de que a
+atualização em tempo real do Kanban não funciona. Tasks de correção, em ordem recomendada de
+execução (11 é a mais crítica — risco de travar `db:migrate` em produção):
+
+| # | Task | Cobre |
+|---|------|-------|
+| [11](11-fix-current-account-automacao-pipeline.md) | `Current.account` ausente no contexto assíncrono de automação de pipeline | tasks 02, 04, 09 |
+| [12](12-fix-log-invalido-move-pipeline-item-stage.md) | Mensagem de log incorreta em `move_pipeline_item_stage` | task 04 |
+| [13](13-fix-strong-params-actions-pipeline.md) | Strong params de `actions`/`action_params` nunca filtram de verdade | tasks 04, 07 |
+| [14](14-fix-macro-pipeline-vazando-lista-conversa.md) | Macros de pipeline aparecendo na lista de macros de conversa | task 08 |
+| [15](15-fix-estado-obsoleto-inputs-automacao-pipeline.md) | Estado obsoleto nos inputs compostos de pipeline ao trocar de ação | task 05 |
+| [16](16-refactor-composable-selecao-pipeline.md) | Redundância de seleção de pipeline em 5 componentes (refactor) | tasks 05, 08 |
+| [17](17-limpeza-itens-menores-pipeline.md) | Limpeza: 4 itens menores agrupados | várias |
+| [18](18-diagnostico-tempo-real-kanban.md) | Diagnóstico ao vivo do tempo real (revisão estática não achou bug de código) | task 10 |
+
 ## Riscos consolidados (ver detalhe em cada task)
 
 1. Condição de corrida na criação de cards sem índice único no banco (mitigado na task 01).

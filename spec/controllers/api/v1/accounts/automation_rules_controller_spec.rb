@@ -222,6 +222,82 @@ RSpec.describe 'Api::V1::Accounts::AutomationRulesController', type: :request do
         expect(response.parsed_body['error']).to eq(I18n.t('errors.attachments.invalid'))
       end
 
+      it 'stores a hash-shaped action_params (not just an array of scalars) intact' do
+        pipeline = create(:pipeline, account: account)
+        stage = create(:pipeline_stage, pipeline: pipeline, account: account)
+
+        params[:actions] = [
+          {
+            'action_name': :create_pipeline_item,
+            'action_params': [
+              {
+                'pipeline_id': pipeline.id,
+                'pipeline_stage_id': stage.id,
+                'assignee_mode': 'conversation_assignee',
+                'title': 'From automation'
+              }
+            ]
+          }
+        ]
+
+        post "/api/v1/accounts/#{account.id}/automation_rules",
+             headers: administrator.create_new_auth_token,
+             params: params
+
+        expect(response).to have_http_status(:success)
+        automation_rule = account.automation_rules.first.reload
+        action = automation_rule.actions.find { |a| a['action_name'] == 'create_pipeline_item' }
+        stored_params = action['action_params'].first
+
+        expect(stored_params).to be_a(Hash)
+        expect(stored_params['pipeline_id'].to_i).to eq(pipeline.id)
+        expect(stored_params['pipeline_stage_id'].to_i).to eq(stage.id)
+        expect(stored_params['assignee_mode']).to eq('conversation_assignee')
+        expect(stored_params['title']).to eq('From automation')
+      end
+
+      it 'drops unexpected keys inside a hash-shaped action_params, keeping only the known allowlist' do
+        pipeline = create(:pipeline, account: account)
+        stage = create(:pipeline_stage, pipeline: pipeline, account: account)
+
+        params[:actions] = [
+          {
+            'action_name': :create_pipeline_item,
+            'action_params': [
+              {
+                'pipeline_stage_id': stage.id,
+                'assignee_mode': 'conversation_assignee',
+                'unexpected_key': 'should be dropped'
+              }
+            ]
+          }
+        ]
+
+        post "/api/v1/accounts/#{account.id}/automation_rules",
+             headers: administrator.create_new_auth_token,
+             params: params
+
+        expect(response).to have_http_status(:success)
+        automation_rule = account.automation_rules.first.reload
+        action = automation_rule.actions.find { |a| a['action_name'] == 'create_pipeline_item' }
+        stored_params = action['action_params'].first
+
+        expect(stored_params).not_to have_key('unexpected_key')
+        expect(stored_params['pipeline_stage_id'].to_i).to eq(stage.id)
+      end
+
+      it 'keeps a scalar array action_params (add_label) intact after going through the permit allowlist' do
+        post "/api/v1/accounts/#{account.id}/automation_rules",
+             headers: administrator.create_new_auth_token,
+             params: params
+
+        expect(response).to have_http_status(:success)
+        automation_rule = account.automation_rules.first.reload
+        action = automation_rule.actions.find { |a| a['action_name'] == 'add_label' }
+
+        expect(action['action_params']).to eq(%w[support priority_customer])
+      end
+
       it 'stores the original blob_id in action_params after create' do
         blob = ActiveStorage::Blob.create_and_upload!(
           io: Rails.root.join('spec/assets/avatar.png').open,

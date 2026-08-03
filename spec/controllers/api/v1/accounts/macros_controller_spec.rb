@@ -115,6 +115,22 @@ RSpec.describe 'Api::V1::Accounts::MacrosController', type: :request do
         expect(json_response['payload']['created_by']['id']).to eql(administrator.id)
       end
 
+      it 'creates a pipeline macro and exposes macro_type in the response' do
+        params[:macro_type] = 'pipeline_item'
+        params[:actions] = [
+          { 'action_name' => 'move_pipeline_item_stage', 'action_params' => [{ 'target_stage_id' => 1 }] }
+        ]
+
+        post "/api/v1/accounts/#{account.id}/macros",
+             params: params,
+             headers: administrator.create_new_auth_token
+
+        expect(response).to have_http_status(:success)
+        json_response = response.parsed_body
+        expect(json_response['payload']['macro_type']).to eq('pipeline_item')
+        expect(account.macros.last.pipeline_item?).to be true
+      end
+
       it 'sets visibility default to personal for agent' do
         post "/api/v1/accounts/#{account.id}/macros",
              params: params,
@@ -504,6 +520,119 @@ RSpec.describe 'Api::V1::Accounts::MacrosController', type: :request do
           expect(conversation.reload.assignee).to be_nil
         end
       end
+    end
+  end
+
+  describe 'POST /api/v1/accounts/{account.id}/macros/{macro.id}/execute with pipeline_item_ids' do
+    include ActiveJob::TestHelper
+
+    let!(:macro) do
+      create(:macro, account: account, created_by: administrator, updated_by: administrator, macro_type: :pipeline_item,
+                     visibility: :global,
+                     actions: [{ 'action_name' => 'update_pipeline_item', 'action_params' => [{ 'title' => 'Updated via macro' }] }])
+    end
+    let(:allowed_pipeline) { create(:pipeline, account: account) }
+    let(:allowed_stage) { allowed_pipeline.pipeline_stages.find_by(stage_type: :start) }
+    let(:allowed_item) { create(:pipeline_item, pipeline_stage: allowed_stage, account: account) }
+    let(:forbidden_pipeline) { create(:pipeline, account: account) }
+    let(:forbidden_stage) { forbidden_pipeline.pipeline_stages.find_by(stage_type: :start) }
+    let(:forbidden_item) { create(:pipeline_item, pipeline_stage: forbidden_stage, account: account) }
+
+    before do
+      allowed_pipeline.add_members([agent.id])
+      # agent is intentionally NOT a member of forbidden_pipeline
+    end
+
+    it 'enqueues MacrosPipelineExecutionJob with only the authorized item ids' do
+      expect(MacrosPipelineExecutionJob).to receive(:perform_later)
+        .with(macro, pipeline_item_ids: [allowed_item.id], user: agent)
+
+      post "/api/v1/accounts/#{account.id}/macros/#{macro.id}/execute",
+           params: { pipeline_item_ids: [allowed_item.id, forbidden_item.id] },
+           headers: agent.create_new_auth_token
+
+      expect(response).to have_http_status(:success)
+    end
+
+    it 'runs the macro only against the item from a pipeline the agent has access to' do
+      perform_enqueued_jobs do
+        post "/api/v1/accounts/#{account.id}/macros/#{macro.id}/execute",
+             params: { pipeline_item_ids: [allowed_item.id, forbidden_item.id] },
+             headers: agent.create_new_auth_token
+      end
+
+      expect(allowed_item.reload.title).to eq('Updated via macro')
+      expect(forbidden_item.reload.title).not_to eq('Updated via macro')
+    end
+
+    it 'stores a hash-shaped action_params for a pipeline macro intact' do
+      params = {
+        'name': 'Move card to won',
+        'macro_type': 'pipeline_item',
+        'actions': [
+          {
+            'action_name': :move_pipeline_item_stage,
+            'action_params': [{ 'target_stage_id': allowed_stage.id }]
+          }
+        ]
+      }
+
+      post "/api/v1/accounts/#{account.id}/macros",
+           params: params,
+           headers: administrator.create_new_auth_token
+
+      expect(response).to have_http_status(:success)
+      created_macro = account.macros.order(:id).last
+      action = created_macro.actions.find { |a| a['action_name'] == 'move_pipeline_item_stage' }
+      expect(action['action_params'].first).to be_a(Hash)
+      expect(action['action_params'].first['target_stage_id'].to_i).to eq(allowed_stage.id)
+    end
+
+    it 'drops unexpected keys inside a hash-shaped action_params, keeping only the known allowlist' do
+      params = {
+        'name': 'Move card to won',
+        'macro_type': 'pipeline_item',
+        'actions': [
+          {
+            'action_name': :move_pipeline_item_stage,
+            'action_params': [{ 'target_stage_id': allowed_stage.id, 'unexpected_key': 'should be dropped' }]
+          }
+        ]
+      }
+
+      post "/api/v1/accounts/#{account.id}/macros",
+           params: params,
+           headers: administrator.create_new_auth_token
+
+      expect(response).to have_http_status(:success)
+      created_macro = account.macros.order(:id).last
+      action = created_macro.actions.find { |a| a['action_name'] == 'move_pipeline_item_stage' }
+
+      expect(action['action_params'].first).not_to have_key('unexpected_key')
+      expect(action['action_params'].first['target_stage_id'].to_i).to eq(allowed_stage.id)
+    end
+
+    it 'keeps a scalar array action_params (add_pipeline_item_label labels) intact after going through the permit allowlist' do
+      params = {
+        'name': 'Label pipeline card',
+        'macro_type': 'pipeline_item',
+        'actions': [
+          {
+            'action_name': :add_pipeline_item_label,
+            'action_params': %w[quente frio]
+          }
+        ]
+      }
+
+      post "/api/v1/accounts/#{account.id}/macros",
+           params: params,
+           headers: administrator.create_new_auth_token
+
+      expect(response).to have_http_status(:success)
+      created_macro = account.macros.order(:id).last
+      action = created_macro.actions.find { |a| a['action_name'] == 'add_pipeline_item_label' }
+
+      expect(action['action_params']).to eq(%w[quente frio])
     end
   end
 

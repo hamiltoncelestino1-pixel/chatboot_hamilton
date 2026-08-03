@@ -4,6 +4,7 @@
 #
 #  id            :bigint           not null, primary key
 #  actions       :jsonb            not null
+#  macro_type    :integer          default("conversation"), not null
 #  name          :string           not null
 #  visibility    :integer          default("personal")
 #  created_at    :datetime         not null
@@ -27,12 +28,21 @@ class Macro < ApplicationRecord
   has_many_attached :files
 
   enum visibility: { personal: 0, global: 1 }
+  enum macro_type: { conversation: 0, pipeline_item: 1 }
 
   validate :json_actions_format
 
-  ACTIONS_ATTRS = %w[send_message add_label assign_team assign_agent mute_conversation change_status remove_label remove_assigned_agent
-                     remove_assigned_team resolve_conversation snooze_conversation change_priority send_email_transcript
-                     send_attachment add_private_note send_webhook_event].freeze
+  CONVERSATION_ACTIONS_ATTRS = %w[send_message add_label assign_team assign_agent mute_conversation change_status remove_label
+                                  remove_assigned_agent remove_assigned_team resolve_conversation snooze_conversation
+                                  change_priority send_email_transcript send_attachment add_private_note
+                                  send_webhook_event].freeze
+
+  # No create_pipeline_item here: a macro always runs against a card that already exists
+  # (it's the target of the execution), unlike an automation rule (task 04) where the card
+  # may not exist yet when the rule fires.
+  PIPELINE_ACTIONS_ATTRS = %w[move_pipeline_item_stage assign_pipeline_item_agent assign_pipeline_item_team
+                              add_pipeline_item_label remove_pipeline_item_label update_pipeline_item
+                              export_pipeline_item].freeze
 
   def set_visibility(user, params)
     self.visibility = params[:visibility]
@@ -68,8 +78,9 @@ class Macro < ApplicationRecord
   def json_actions_format
     return if actions.blank?
 
+    allowed_actions = pipeline_item? ? PIPELINE_ACTIONS_ATTRS : CONVERSATION_ACTIONS_ATTRS
     attributes = actions.map { |obj, _| obj['action_name'] }
-    actions = attributes - ACTIONS_ATTRS
+    actions = attributes - allowed_actions
 
     errors.add(:actions, "Macro execution actions #{actions.join(',')} not supported.") if actions.any?
   end

@@ -6,10 +6,11 @@ class MacrosAPI extends ApiClient {
     super('macros', { accountScoped: true });
   }
 
-  executeMacro({ macroId, conversationIds }) {
-    return axios.post(`${this.url}/${macroId}/execute`, {
-      conversation_ids: conversationIds,
-    });
+  executeMacro({ macroId, conversationIds, pipelineItemIds }) {
+    const payload = pipelineItemIds
+      ? { pipeline_item_ids: pipelineItemIds }
+      : { conversation_ids: conversationIds };
+    return axios.post(`${this.url}/${macroId}/execute`, payload);
   }
 }
 

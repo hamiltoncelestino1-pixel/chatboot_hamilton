@@ -7,6 +7,14 @@ import {
   isCustomAttribute,
 } from 'dashboard/helper/automationHelper';
 
+const PIPELINE_ACTION_INPUT_TYPES = [
+  'pipeline_create_item',
+  'pipeline_stage_select',
+  'pipeline_assignee_select',
+  'pipeline_label_select',
+  'pipeline_update_fields',
+];
+
 export function useEditableAutomation() {
   const { getConditionDropdownValues, getActionDropdownValues } =
     useAutomationValues();
@@ -94,6 +102,12 @@ export function useEditableAutomation() {
         ),
         message: params[0].message,
       };
+    }
+    if (PIPELINE_ACTION_INPUT_TYPES.includes(inputType)) {
+      // Pipeline action components resolve their own pipeline/stage/agent/team
+      // options straight from the kanban store, so the persisted hash (already
+      // scalar ids) just needs unwrapping from its array-of-one, not hydration.
+      return params[0] || {};
     }
     return [...params];
   };

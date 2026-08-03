@@ -138,6 +138,7 @@ const DEFAULT_KANBAN_BOARD_SETTINGS = {
     createdAtRange: null,
     updatedAtRange: null,
     valueRange: null,
+    labelTitles: null,
   },
   sort: { field: 'created_at', order: 'desc' },
   showOnlyMine: false,

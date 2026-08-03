@@ -105,6 +105,16 @@ RSpec.describe AutomationRule do
       rule = FactoryBot.build(:automation_rule, params)
       expect(rule.valid?).to be true
     end
+
+    it 'allows stage_id, pipeline_id and value as valid pipeline condition attributes' do
+      params[:conditions] = [
+        { attribute_key: 'stage_id', filter_operator: 'equal_to', values: [1], query_operator: 'AND' },
+        { attribute_key: 'pipeline_id', filter_operator: 'equal_to', values: [1], query_operator: 'AND' },
+        { attribute_key: 'value', filter_operator: 'is_greater_than', values: [100], query_operator: nil }
+      ]
+      rule = FactoryBot.build(:automation_rule, params)
+      expect(rule.valid?).to be true
+    end
   end
 
   describe 'reauthorizable' do

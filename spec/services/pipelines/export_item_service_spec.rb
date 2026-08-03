@@ -43,7 +43,7 @@ RSpec.describe Pipelines::ExportItemService do
     end
 
     it 'positions the item at the end of the target stage' do
-      existing = create(:pipeline_item, pipeline_stage: target_stage, account: account, position: 3)
+      create(:pipeline_item, pipeline_stage: target_stage, account: account, position: 3)
       build_service.perform
       expect(item.reload.position).to eq(4)
     end
@@ -83,6 +83,12 @@ RSpec.describe Pipelines::ExportItemService do
       other_stage = create(:pipeline_stage, account: account)
       service = build_service(target_stage_id: other_stage.id)
       expect { service.perform }.to raise_error(Pipelines::ExportItemService::InvalidTargetStageError)
+    end
+
+    it 'raises ActiveRecord::RecordInvalid when the contact already has a card in the target pipeline' do
+      create(:pipeline_item, pipeline_stage: target_stage, account: account, contact: contact)
+
+      expect { build_service.perform }.to raise_error(ActiveRecord::RecordInvalid)
     end
 
     it 'raises SamePipelineError when target pipeline is the same as source pipeline' do

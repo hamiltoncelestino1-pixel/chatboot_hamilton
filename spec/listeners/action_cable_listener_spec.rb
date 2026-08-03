@@ -231,4 +231,38 @@ describe ActionCableListener do
       listener.conversation_updated(event)
     end
   end
+
+  describe '#pipeline_item_created' do
+    let(:event_name) { :'pipeline_item.created' }
+    let(:pipeline) { create(:pipeline, account: account) }
+    let(:stage) { pipeline.pipeline_stages.find_by(stage_type: :start) }
+    let!(:pipeline_item) { create(:pipeline_item, pipeline_stage: stage, account: account) }
+    let!(:event) { Events::Base.new(event_name, Time.zone.now, pipeline_item: pipeline_item) }
+
+    it 'broadcasts to the whole account' do
+      expect(ActionCableBroadcastJob).to receive(:perform_later).with(
+        ["account_#{account.id}"],
+        'pipeline_item.created',
+        pipeline_item.push_event_data.merge(account_id: account.id)
+      )
+      listener.pipeline_item_created(event)
+    end
+  end
+
+  describe '#pipeline_item_updated' do
+    let(:event_name) { :'pipeline_item.updated' }
+    let(:pipeline) { create(:pipeline, account: account) }
+    let(:stage) { pipeline.pipeline_stages.find_by(stage_type: :start) }
+    let!(:pipeline_item) { create(:pipeline_item, pipeline_stage: stage, account: account) }
+    let!(:event) { Events::Base.new(event_name, Time.zone.now, pipeline_item: pipeline_item) }
+
+    it 'broadcasts to the whole account' do
+      expect(ActionCableBroadcastJob).to receive(:perform_later).with(
+        ["account_#{account.id}"],
+        'pipeline_item.updated',
+        pipeline_item.push_event_data.merge(account_id: account.id)
+      )
+      listener.pipeline_item_updated(event)
+    end
+  end
 end

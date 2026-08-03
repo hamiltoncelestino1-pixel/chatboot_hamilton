@@ -127,6 +127,7 @@ pt_BR:
       assignee_not_member: O responsável precisa ser um agente atribuído ao pipeline
       invalid_target_stage: "A stage selecionada não pertence à pipeline de destino."
       export_same_pipeline: "Não é possível exportar um card para a pipeline à qual ele já pertence."
+      duplicate_contact_in_pipeline: "Este contato já possui um card neste pipeline."
     mfa:
       already_enabled: MFA já está habilitado
       not_enabled: MFA não está habilitado

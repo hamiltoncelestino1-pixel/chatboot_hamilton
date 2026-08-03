@@ -25,13 +25,20 @@ const dragging = ref(false);
 const macros = useMapGetter('macros/getMacros');
 const uiFlags = useMapGetter('macros/getUIFlags');
 
+// macros/getMacros returns every macro in the account regardless of macro_type (backend and
+// Vuex store don't filter), so this list must exclude pipeline macros itself - mirrors the
+// inverse filter in KanbanRunMacroMenu.vue (macro_type === 'pipeline_item').
+const conversationMacros = computed(() =>
+  (macros.value ?? []).filter(macro => macro.macro_type === 'conversation')
+);
+
 const MACROS_ORDER_KEY = 'macros_display_order';
 
 const orderedMacros = computed({
   get: () => {
     // Get saved order array and current macros
     const savedOrder = uiSettings.value?.[MACROS_ORDER_KEY] ?? [];
-    const currentMacros = macros.value ?? [];
+    const currentMacros = conversationMacros.value;
 
     // Return unmodified macros if not present or macro is not available
     if (!savedOrder.length || !currentMacros.length) {
@@ -67,7 +74,7 @@ onMounted(() => {
 
 <template>
   <div>
-    <div v-if="!uiFlags.isFetching && !macros.length" class="p-3">
+    <div v-if="!uiFlags.isFetching && !conversationMacros.length" class="p-3">
       <p class="flex flex-col items-center justify-center h-full">
         {{ $t('MACROS.LIST.404') }}
       </p>
@@ -89,7 +96,7 @@ onMounted(() => {
       <Spinner class="size-5" />
     </div>
     <Draggable
-      v-if="!uiFlags.isFetching && macros.length"
+      v-if="!uiFlags.isFetching && conversationMacros.length"
       v-model="orderedMacros"
       class="p-1"
       animation="200"

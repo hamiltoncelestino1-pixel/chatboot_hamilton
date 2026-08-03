@@ -247,4 +247,100 @@ describe AutomationRuleListener do
       end
     end
   end
+
+  describe 'pipeline_item_created' do
+    let(:pipeline) { create(:pipeline, account: account) }
+    let(:stage) { pipeline.pipeline_stages.find_by(stage_type: :start) }
+    let(:pipeline_item) { create(:pipeline_item, pipeline_stage: stage, account: account) }
+    let!(:automation_rule) { create(:automation_rule, event_name: 'pipeline_item_created', account: account) }
+    let(:event) { Events::Base.new('pipeline_item_created', Time.zone.now, { pipeline_item: pipeline_item }) }
+
+    before do
+      allow(AutomationRules::PipelineConditionsFilterService).to receive(:new).and_return(conditions_filter_service)
+      allow(AutomationRules::PipelineActionService).to receive(:new).and_return(action_service)
+    end
+
+    context 'when matching rules are present' do
+      it 'calls AutomationRules::PipelineActionService if conditions match' do
+        allow(condition_match).to receive(:present?).and_return(true)
+        listener.pipeline_item_created(event)
+        expect(AutomationRules::PipelineActionService).to have_received(:new).with(automation_rule, account, pipeline_item)
+      end
+
+      it 'does not call AutomationRules::PipelineActionService if conditions do not match' do
+        allow(condition_match).to receive(:present?).and_return(false)
+        listener.pipeline_item_created(event)
+        expect(AutomationRules::PipelineActionService).not_to have_received(:new)
+      end
+
+      it 'does not call AutomationRules::PipelineActionService if performed by automation' do
+        event.data[:performed_by] = automation_rule
+        allow(condition_match).to receive(:present?).and_return(true)
+        listener.pipeline_item_created(event)
+        expect(AutomationRules::PipelineActionService).not_to have_received(:new)
+      end
+    end
+  end
+
+  describe 'pipeline_item_stage_changed' do
+    let(:pipeline) { create(:pipeline, account: account) }
+    let(:stage) { pipeline.pipeline_stages.find_by(stage_type: :start) }
+    let(:won_stage) { pipeline.pipeline_stages.find_by(stage_type: :won) }
+    let(:pipeline_item) { create(:pipeline_item, pipeline_stage: won_stage, account: account) }
+    let!(:automation_rule) { create(:automation_rule, event_name: 'pipeline_item_stage_changed', account: account) }
+    let(:event) do
+      Events::Base.new('pipeline_item_stage_changed', Time.zone.now, { pipeline_item: pipeline_item, previous_stage_id: stage.id })
+    end
+
+    before do
+      allow(AutomationRules::PipelineConditionsFilterService).to receive(:new).and_return(conditions_filter_service)
+      allow(AutomationRules::PipelineActionService).to receive(:new).and_return(action_service)
+    end
+
+    context 'when matching rules are present' do
+      it 'calls AutomationRules::PipelineActionService if conditions match' do
+        allow(condition_match).to receive(:present?).and_return(true)
+        listener.pipeline_item_stage_changed(event)
+        expect(AutomationRules::PipelineActionService).to have_received(:new).with(automation_rule, account, pipeline_item)
+      end
+
+      it 'does not call AutomationRules::PipelineActionService if performed by automation' do
+        event.data[:performed_by] = automation_rule
+        allow(condition_match).to receive(:present?).and_return(true)
+        listener.pipeline_item_stage_changed(event)
+        expect(AutomationRules::PipelineActionService).not_to have_received(:new)
+      end
+    end
+  end
+
+  describe 'anti-loop guard across a 2-rule pipeline cycle' do
+    include ActiveJob::TestHelper
+
+    let!(:pipeline) { create(:pipeline, account: account) }
+    let!(:start_stage) { pipeline.pipeline_stages.find_by(stage_type: :start) }
+    let!(:won_stage) { pipeline.pipeline_stages.find_by(stage_type: :won) }
+
+    before do
+      # Rule A: a new card moves straight to won_stage.
+      create(:automation_rule, account: account, event_name: 'pipeline_item_created', conditions: [],
+                               actions: [{ 'action_name' => 'move_pipeline_item_stage', 'action_params' => [{ 'target_stage_id' => won_stage.id }] }])
+      # Rule B: whenever a card's stage changes, move it back to start_stage.
+      create(:automation_rule, account: account, event_name: 'pipeline_item_stage_changed', conditions: [],
+                               actions: [
+                                 { 'action_name' => 'move_pipeline_item_stage', 'action_params' => [{ 'target_stage_id' => start_stage.id }] }
+                               ])
+    end
+
+    it 'runs rule A once and stops before rule B, instead of looping' do
+      item = nil
+      perform_enqueued_jobs do
+        item = create(:pipeline_item, pipeline_stage: start_stage, account: account)
+      end
+
+      # Rule A ran (unblocked: the creating event was not performed_by an automation rule).
+      # Rule B would have moved it back to start_stage, but the guard blocks it because the
+      # stage_changed event it would react to was itself performed_by rule_a.
+      expect(item.reload.pipeline_stage_id).to eq(won_stage.id)
+    end
+  end
 end

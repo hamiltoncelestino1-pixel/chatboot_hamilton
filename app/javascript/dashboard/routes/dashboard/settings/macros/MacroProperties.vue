@@ -17,11 +17,20 @@ export default {
       type: String,
       default: 'global',
     },
+    macroType: {
+      type: String,
+      default: 'conversation',
+    },
   },
-  emits: ['update:name', 'update:visibility', 'submit'],
+  emits: ['update:name', 'update:visibility', 'update:macroType', 'submit'],
   methods: {
     isActive(key) {
       return this.macroVisibility === key
+        ? 'bg-n-blue-2 dark:bg-n-blue-1 border-n-blue-3 dark:border-n-blue-4'
+        : 'bg-white dark:bg-n-solid-2 border-n-weak dark:border-n-strong';
+    },
+    isTypeActive(key) {
+      return this.macroType === key
         ? 'bg-n-blue-2 dark:bg-n-blue-1 border-n-blue-3 dark:border-n-blue-4'
         : 'bg-white dark:bg-n-solid-2 border-n-weak dark:border-n-strong';
     },
@@ -30,6 +39,9 @@ export default {
     },
     onUpdateVisibility(value) {
       this.$emit('update:visibility', value);
+    },
+    onUpdateMacroType(value) {
+      this.$emit('update:macroType', value);
     },
   },
 };
@@ -48,6 +60,51 @@ export default {
         :class="{ error: v$.macro.name.$error }"
         @update:model-value="onUpdateName"
       />
+    </div>
+    <div class="mt-2">
+      <p class="block m-0 text-sm font-medium leading-[1.8] text-n-slate-12">
+        {{ $t('MACROS.EDITOR.MACRO_TYPE.LABEL') }}
+      </p>
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-3">
+        <button
+          class="p-2 relative rounded-md border border-solid justify-between items-start gap-2 flex flex-col text-start cursor-default"
+          :class="isTypeActive('conversation')"
+          @click="onUpdateMacroType('conversation')"
+        >
+          <div class="flex items-center gap-2 min-w-0 justify-between w-full">
+            <p class="block m-0 text-heading-3 text-n-slate-12 line-clamp-1">
+              {{ $t('MACROS.EDITOR.MACRO_TYPE.CONVERSATION.LABEL') }}
+            </p>
+            <Icon
+              v-if="macroType === 'conversation'"
+              icon="i-lucide-circle-check-big"
+              class="text-n-brand size-4"
+            />
+          </div>
+          <p class="text-n-slate-11 text-label-small">
+            {{ $t('MACROS.EDITOR.MACRO_TYPE.CONVERSATION.DESCRIPTION') }}
+          </p>
+        </button>
+        <button
+          class="p-2 relative rounded-md border border-solid justify-between items-start gap-2 flex flex-col text-start cursor-default"
+          :class="isTypeActive('pipeline_item')"
+          @click="onUpdateMacroType('pipeline_item')"
+        >
+          <div class="flex items-center gap-2 min-w-0 justify-between w-full">
+            <p class="block m-0 text-heading-3 text-n-slate-12 line-clamp-1">
+              {{ $t('MACROS.EDITOR.MACRO_TYPE.PIPELINE_ITEM.LABEL') }}
+            </p>
+            <Icon
+              v-if="macroType === 'pipeline_item'"
+              icon="i-lucide-circle-check-big"
+              class="text-n-brand size-4"
+            />
+          </div>
+          <p class="text-n-slate-11 text-label-small">
+            {{ $t('MACROS.EDITOR.MACRO_TYPE.PIPELINE_ITEM.DESCRIPTION') }}
+          </p>
+        </button>
+      </div>
     </div>
     <div class="mt-2">
       <p class="block m-0 text-sm font-medium leading-[1.8] text-n-slate-12">

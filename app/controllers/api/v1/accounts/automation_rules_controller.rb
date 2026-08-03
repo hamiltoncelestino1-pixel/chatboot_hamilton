@@ -1,5 +1,6 @@
 class Api::V1::Accounts::AutomationRulesController < Api::V1::Accounts::BaseController
   include AttachmentConcern
+  include PermittedActionParams
 
   before_action :check_authorization
   before_action :fetch_automation_rule, only: [:show, :update, :destroy, :clone]
@@ -11,7 +12,7 @@ class Api::V1::Accounts::AutomationRulesController < Api::V1::Accounts::BaseCont
   def show; end
 
   def create
-    blobs, actions, error = validate_and_prepare_attachments(params[:actions])
+    blobs, actions, error = validate_and_prepare_attachments(permitted_actions(params[:actions]))
     return render_could_not_create_error(error) if error
 
     @automation_rule = Current.account.automation_rules.new(automation_rules_permit)
@@ -25,12 +26,13 @@ class Api::V1::Accounts::AutomationRulesController < Api::V1::Accounts::BaseCont
   end
 
   def update
-    blobs, actions, error = validate_and_prepare_attachments(params[:actions], @automation_rule)
+    raw_actions = params[:actions]
+    blobs, actions, error = validate_and_prepare_attachments(permitted_actions(raw_actions), @automation_rule)
     return render_could_not_create_error(error) if error
 
     ActiveRecord::Base.transaction do
       @automation_rule.assign_attributes(automation_rules_permit)
-      @automation_rule.actions = actions if params[:actions]
+      @automation_rule.actions = actions if raw_actions
       @automation_rule.conditions = params[:conditions] if params[:conditions]
       @automation_rule.save!
       blobs.each { |blob| @automation_rule.files.attach(blob) }
@@ -57,8 +59,7 @@ class Api::V1::Accounts::AutomationRulesController < Api::V1::Accounts::BaseCont
   def automation_rules_permit
     params.permit(
       :name, :description, :event_name, :active,
-      conditions: [:attribute_key, :filter_operator, :query_operator, :custom_attribute_type, { values: [] }],
-      actions: [:action_name, { action_params: [] }]
+      conditions: [:attribute_key, :filter_operator, :query_operator, :custom_attribute_type, { values: [] }]
     )
   end
 

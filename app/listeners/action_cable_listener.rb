@@ -173,6 +173,20 @@ class ActionCableListener < BaseListener
     broadcast(account, [user.pubsub_token], CONVERSATION_MENTIONED, conversation.push_event_data)
   end
 
+  def pipeline_item_created(event)
+    pipeline_item = event.data[:pipeline_item]
+    account = pipeline_item.account
+
+    broadcast(account, [account_token(account)], PIPELINE_ITEM_CREATED, pipeline_item.push_event_data)
+  end
+
+  def pipeline_item_updated(event)
+    pipeline_item = event.data[:pipeline_item]
+    account = pipeline_item.account
+
+    broadcast(account, [account_token(account)], PIPELINE_ITEM_UPDATED, pipeline_item.push_event_data)
+  end
+
   private
 
   def account_token(account)

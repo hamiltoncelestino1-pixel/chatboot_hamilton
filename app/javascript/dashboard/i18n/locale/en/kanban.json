@@ -63,6 +63,8 @@
       "VALUE_LABEL": "Value",
       "MIN": "Min",
       "MAX": "Max",
+      "LABEL_LABEL": "Labels",
+      "LABEL_PLACEHOLDER": "Filter by label...",
       "CLEAR": "Clear filters"
     },
     "ITEM": {
@@ -87,7 +89,8 @@
       },
       "CONVERSATION": {
         "SEARCH_PLACEHOLDER": "Link a conversation...",
-        "CLEAR": "Unlink conversation"
+        "CLEAR": "Unlink conversation",
+        "VIEW": "View Conversation"
       },
       "MOVE_ERROR": "Failed to move card. Please try again.",
       "ASSIGNEE_LABEL": "Assignee",
@@ -127,6 +130,12 @@
         "DELETE_SUCCESS": "Card deleted successfully.",
         "ERROR": "Something went wrong. Please try again."
       }
+    },
+    "RUN_MACRO": {
+      "BUTTON": "Run macro",
+      "EMPTY_STATE": "No pipeline macros available.",
+      "SUCCESS": "Macro executed successfully.",
+      "ERROR": "Failed to run macro. Please try again."
     }
   }
 }

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_07_31_120000) do
+ActiveRecord::Schema[7.1].define(version: 2026_08_01_100000) do
   # These extensions should be enabled to support this database
   enable_extension "pg_stat_statements"
   enable_extension "pg_trgm"
@@ -969,6 +969,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_07_31_120000) do
     t.jsonb "actions", default: {}, null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.integer "macro_type", default: 0, null: false
     t.index ["account_id"], name: "index_macros_on_account_id"
   end
 
@@ -1087,11 +1088,14 @@ ActiveRecord::Schema[7.1].define(version: 2026_07_31_120000) do
     t.bigint "assignee_id"
     t.bigint "team_id"
     t.jsonb "custom_attributes", default: {}, null: false
+    t.bigint "pipeline_id", null: false
     t.index ["account_id", "contact_id"], name: "index_pipeline_items_on_account_id_and_contact_id"
     t.index ["account_id"], name: "index_pipeline_items_on_account_id"
     t.index ["assignee_id"], name: "index_pipeline_items_on_assignee_id"
     t.index ["contact_id"], name: "index_pipeline_items_on_contact_id"
     t.index ["conversation_id"], name: "index_pipeline_items_on_conversation_id"
+    t.index ["pipeline_id", "contact_id"], name: "index_pipeline_items_on_pipeline_id_and_contact_id", unique: true
+    t.index ["pipeline_id"], name: "index_pipeline_items_on_pipeline_id"
     t.index ["pipeline_stage_id", "position"], name: "index_pipeline_items_on_pipeline_stage_id_and_position"
     t.index ["pipeline_stage_id"], name: "index_pipeline_items_on_pipeline_stage_id"
     t.index ["team_id"], name: "index_pipeline_items_on_team_id"
@@ -1384,6 +1388,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_07_31_120000) do
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "inboxes", "portals"
+  add_foreign_key "pipeline_items", "pipelines"
   add_foreign_key "pipeline_items", "teams"
   add_foreign_key "pipeline_items", "users", column: "assignee_id"
   add_foreign_key "pipeline_members", "pipelines"

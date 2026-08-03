@@ -95,4 +95,63 @@ describe('useEditableAutomation', () => {
       },
     ]);
   });
+
+  it('unwraps pipeline action params from their persisted array-of-one', () => {
+    const automation = {
+      event_name: 'conversation_created',
+      conditions: [],
+      actions: [
+        {
+          action_name: 'create_pipeline_item',
+          action_params: [
+            {
+              pipeline_id: 5,
+              pipeline_stage_id: 12,
+              assignee_mode: 'conversation_assignee',
+            },
+          ],
+        },
+      ],
+    };
+    const automationActionTypes = [
+      { key: 'create_pipeline_item', inputType: 'pipeline_create_item' },
+    ];
+
+    const { formatAutomation } = useEditableAutomation();
+    const result = formatAutomation(automation, [], {}, automationActionTypes);
+
+    expect(result.actions).toEqual([
+      {
+        action_name: 'create_pipeline_item',
+        action_params: {
+          pipeline_id: 5,
+          pipeline_stage_id: 12,
+          assignee_mode: 'conversation_assignee',
+        },
+      },
+    ]);
+  });
+
+  it('leaves a freshly reset pipeline action untouched (empty array, not yet configured)', () => {
+    const automation = {
+      event_name: 'conversation_created',
+      conditions: [],
+      actions: [
+        {
+          action_name: 'move_pipeline_item_stage',
+          action_params: [],
+        },
+      ],
+    };
+    const automationActionTypes = [
+      { key: 'move_pipeline_item_stage', inputType: 'pipeline_stage_select' },
+    ];
+
+    const { formatAutomation } = useEditableAutomation();
+    const result = formatAutomation(automation, [], {}, automationActionTypes);
+
+    expect(result.actions).toEqual([
+      { action_name: 'move_pipeline_item_stage', action_params: [] },
+    ]);
+  });
 });
