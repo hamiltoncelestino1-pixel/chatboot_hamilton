@@ -63,6 +63,8 @@
       "VALUE_LABEL": "Valor",
       "MIN": "Mín",
       "MAX": "Máx",
+      "LABEL_LABEL": "Etiquetas",
+      "LABEL_PLACEHOLDER": "Filtrar por etiqueta...",
       "CLEAR": "Limpar filtros"
     },
     "ITEM": {

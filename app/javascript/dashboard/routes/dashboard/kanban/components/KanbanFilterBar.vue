@@ -1,11 +1,12 @@
 <script setup>
-import { computed } from 'vue';
+import { ref, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useDebounceFn, useToggle } from '@vueuse/core';
 import { vOnClickOutside } from '@vueuse/components';
 import { useStore, useMapGetter } from 'dashboard/composables/store';
 import { useUISettings } from 'dashboard/composables/useUISettings';
 import NextButton from 'dashboard/components-next/button/Button.vue';
+import LabelDropdown from 'shared/components/ui/label/LabelDropdown.vue';
 
 const { t } = useI18n();
 const store = useStore();
@@ -18,9 +19,22 @@ const activeFilters = useMapGetter('kanban/getActiveFilters');
 const showOnlyMine = useMapGetter('kanban/getShowOnlyMine');
 const isFilterActive = useMapGetter('kanban/isFilterActive');
 const getPipelineMembers = useMapGetter('pipelineMembers/getPipelineMembers');
+const pipelineLabels = useMapGetter('labels/getPipelineLabels');
 
 const members = computed(() =>
   activePipeline.value ? getPipelineMembers.value(activePipeline.value.id) : []
+);
+
+const showLabelPicker = ref(false);
+const toggleLabelPicker = () => {
+  showLabelPicker.value = !showLabelPicker.value;
+};
+
+const selectedLabelTitles = computed(
+  () => activeFilters.value.labelTitles || []
+);
+const selectedLabelObjects = computed(() =>
+  pipelineLabels.value.filter(l => selectedLabelTitles.value.includes(l.title))
 );
 
 const persist = () => {
@@ -71,6 +85,21 @@ const onValueMax = e => {
     valueRange: { ...(activeFilters.value.valueRange || {}), max },
   });
 };
+
+const applyLabelTitles = titles => {
+  applyFilter({ labelTitles: titles.length ? titles : null });
+};
+
+const onAddLabel = label => {
+  if (selectedLabelTitles.value.includes(label.title)) return;
+  applyLabelTitles([...selectedLabelTitles.value, label.title]);
+};
+
+const onRemoveLabel = title => {
+  applyLabelTitles(
+    selectedLabelTitles.value.filter(existingTitle => existingTitle !== title)
+  );
+};
 </script>
 
 <template>
@@ -104,7 +133,7 @@ const onValueMax = e => {
       <div
         v-if="isOpen"
         v-on-click-outside="() => toggleOpen()"
-        class="mt-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 shadow-lg w-80 rounded-xl p-4 absolute z-40 top-full ltr:left-0 rtl:right-0 flex flex-col gap-3 overflow-hidden"
+        class="mt-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 shadow-lg w-80 rounded-xl p-4 absolute z-40 top-full ltr:left-0 rtl:right-0 flex flex-col gap-3"
       >
         <!-- Responsável -->
         <div class="flex flex-col gap-1">
@@ -223,6 +252,44 @@ const onValueMax = e => {
               class="w-full text-sm rounded-md border border-slate-200 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-200 px-2 py-1"
               @input="onValueMax"
             />
+          </div>
+        </div>
+
+        <!-- Etiquetas -->
+        <div class="flex flex-col gap-1">
+          <span class="text-xs text-n-slate-11">{{
+            t('KANBAN.FILTER.LABEL_LABEL')
+          }}</span>
+          <div class="relative flex flex-wrap items-center gap-1">
+            <button
+              class="flex items-center gap-1 px-2 py-0.5 text-xs rounded border border-dashed border-slate-300 dark:border-slate-600 text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+              @click="toggleLabelPicker"
+            >
+              <span class="i-lucide-plus size-3" />
+              {{ t('KANBAN.FILTER.LABEL_PLACEHOLDER') }}
+            </button>
+            <woot-label
+              v-for="label in selectedLabelObjects"
+              :key="label.title"
+              :title="label.title"
+              :color="label.color"
+              show-close
+              variant="smooth"
+              @remove="onRemoveLabel"
+            />
+            <div
+              v-if="showLabelPicker"
+              v-on-click-outside="() => (showLabelPicker = false)"
+              class="absolute top-full ltr:left-0 rtl:right-0 mt-1 z-[9999] w-56 border border-n-strong rounded-lg bg-n-alpha-3 backdrop-blur-[100px] shadow-lg p-2"
+            >
+              <LabelDropdown
+                :account-labels="pipelineLabels"
+                :selected-labels="selectedLabelTitles"
+                :allow-creation="false"
+                @add="onAddLabel"
+                @remove="onRemoveLabel"
+              />
+            </div>
           </div>
         </div>
 

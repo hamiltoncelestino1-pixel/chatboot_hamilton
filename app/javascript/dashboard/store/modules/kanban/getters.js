@@ -59,8 +59,13 @@ export const getters = {
   getFilteredSortedItemsForStage:
     ($state, $getters) => (stageId, currentUserId) => {
       let items = $getters.getItemsForStage(stageId);
-      const { assigneeId, createdAtRange, updatedAtRange, valueRange } =
-        $state.activeFilters;
+      const {
+        assigneeId,
+        createdAtRange,
+        updatedAtRange,
+        valueRange,
+        labelTitles,
+      } = $state.activeFilters;
 
       if ($state.showOnlyMine && currentUserId) {
         items = items.filter(i => i.assignee?.id === currentUserId);
@@ -81,6 +86,11 @@ export const getters = {
           if (valueRange.max != null && v > valueRange.max) return false;
           return true;
         });
+      }
+      if (labelTitles?.length) {
+        items = items.filter(i =>
+          (i.label_list || []).some(title => labelTitles.includes(title))
+        );
       }
 
       const { field, order } = $state.activeSort;
