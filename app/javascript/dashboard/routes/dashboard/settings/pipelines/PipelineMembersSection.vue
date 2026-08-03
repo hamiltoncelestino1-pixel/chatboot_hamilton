@@ -19,6 +19,7 @@ const selectedAgentIds = ref([]);
 const isUpdating = ref(false);
 const enableAutoAssignment = ref(false);
 const maxAssignmentLimit = ref(0);
+const syncAssignments = ref(false);
 
 const allAgents = computed(() => getters['agents/getAgents'].value);
 const currentMembers = computed(
@@ -65,6 +66,7 @@ onMounted(async () => {
   if (p) {
     enableAutoAssignment.value = p.enable_auto_assignment ?? false;
     maxAssignmentLimit.value = p.max_assignment_limit ?? 0;
+    syncAssignments.value = p.sync_assignments ?? false;
   }
 });
 
@@ -92,6 +94,19 @@ const handleToggleAutoAssignment = async value => {
     enableAutoAssignment.value = value;
   } catch {
     enableAutoAssignment.value = !value;
+    useAlert(t('PIPELINE_MGMT.AGENTS.API.ERROR'));
+  }
+};
+
+const handleToggleSyncAssignments = async value => {
+  try {
+    await store.dispatch('kanban/updatePipeline', {
+      id: props.pipelineId,
+      sync_assignments: value,
+    });
+    syncAssignments.value = value;
+  } catch {
+    syncAssignments.value = !value;
     useAlert(t('PIPELINE_MGMT.AGENTS.API.ERROR'));
   }
 };
@@ -156,5 +171,12 @@ const handleUpdateMaxAssignmentLimit = async () => {
         </div>
       </template>
     </SettingsToggleSection>
+
+    <SettingsToggleSection
+      v-model="syncAssignments"
+      :header="t('PIPELINE_MGMT.AGENTS.SYNC_ASSIGNMENTS.TITLE')"
+      :description="t('PIPELINE_MGMT.AGENTS.SYNC_ASSIGNMENTS.DESCRIPTION')"
+      @update:model-value="handleToggleSyncAssignments"
+    />
   </div>
 </template>

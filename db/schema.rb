@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_08_01_100000) do
+ActiveRecord::Schema[7.1].define(version: 2026_08_03_100000) do
   # These extensions should be enabled to support this database
   enable_extension "pg_stat_statements"
   enable_extension "pg_trgm"
@@ -1134,6 +1134,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_08_01_100000) do
     t.datetime "updated_at", null: false
     t.boolean "enable_auto_assignment", default: false, null: false
     t.integer "max_assignment_limit", default: 0, null: false
+    t.boolean "sync_assignments", default: false, null: false
     t.index ["account_id", "name"], name: "index_pipelines_on_account_id_and_name", unique: true
     t.index ["account_id", "position"], name: "index_pipelines_on_account_id_and_position"
     t.index ["account_id"], name: "index_pipelines_on_account_id"

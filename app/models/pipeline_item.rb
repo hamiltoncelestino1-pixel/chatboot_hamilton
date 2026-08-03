@@ -140,7 +140,8 @@ class PipelineItem < ApplicationRecord
   def dispatch_updated_event
     Rails.configuration.dispatcher.dispatch(
       Events::Types::PIPELINE_ITEM_UPDATED, Time.zone.now,
-      pipeline_item: self, performed_by: Current.executed_by
+      pipeline_item: self, performed_by: Current.executed_by,
+      changed_attributes: previous_changes
     )
   end
 
