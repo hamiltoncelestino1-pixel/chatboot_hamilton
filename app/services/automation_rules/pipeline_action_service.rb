@@ -11,6 +11,7 @@ class AutomationRules::PipelineActionService
     @rule = rule
     @account = account
     @pipeline_item = pipeline_item
+    Current.account = @account
     Current.executed_by = rule
   end
 

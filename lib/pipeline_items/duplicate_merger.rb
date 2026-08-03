@@ -42,6 +42,12 @@ class PipelineItems::DuplicateMerger
     winning_item = winner
     losing_items = losers
 
+    # PipelineItem#assignee_must_be_pipeline_member (run by the save! below) reads
+    # Current.account to check User#administrator?. Outside a request context (rake task,
+    # migration) that's nil, which would make it reject the same admin assignee that
+    # assignee_valid_for_pipeline? already approved above.
+    Current.account = winning_item.account
+
     ActiveRecord::Base.transaction do
       stage_merged_notes(winning_item, losing_items)
       stage_conversation(winning_item, losing_items)
@@ -57,6 +63,8 @@ class PipelineItems::DuplicateMerger
     end
 
     { winner_id: winning_item.id, loser_ids: losing_items.map(&:id) }
+  ensure
+    Current.account = nil
   end
 
   private

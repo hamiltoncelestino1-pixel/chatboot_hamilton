@@ -202,6 +202,18 @@ RSpec.describe PipelineItems::DuplicateMerger do
       expect(Rails.logger).to have_received(:warn).with(/not a pipeline member/)
     end
 
+    it "adopts the loser's assignee when they are an administrator not explicitly a pipeline member" do
+      admin = create(:user, account: account, role: :administrator)
+      loser = item_for(stage(:start), assignee: admin)
+      winner = item_for(stage(:won))
+
+      expect { described_class.new([loser, winner]).merge! }.not_to raise_error
+      winner.reload
+
+      expect(winner.assignee_id).to eq(admin.id)
+      expect(Current.account).to be_nil
+    end
+
     it "adopts the loser's team_id when the winner has none" do
       team = create(:team, account: account)
       loser = item_for(stage(:start), team: team)

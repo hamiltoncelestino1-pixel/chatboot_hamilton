@@ -587,6 +587,53 @@ RSpec.describe 'Api::V1::Accounts::MacrosController', type: :request do
       expect(action['action_params'].first).to be_a(Hash)
       expect(action['action_params'].first['target_stage_id'].to_i).to eq(allowed_stage.id)
     end
+
+    it 'drops unexpected keys inside a hash-shaped action_params, keeping only the known allowlist' do
+      params = {
+        'name': 'Move card to won',
+        'macro_type': 'pipeline_item',
+        'actions': [
+          {
+            'action_name': :move_pipeline_item_stage,
+            'action_params': [{ 'target_stage_id': allowed_stage.id, 'unexpected_key': 'should be dropped' }]
+          }
+        ]
+      }
+
+      post "/api/v1/accounts/#{account.id}/macros",
+           params: params,
+           headers: administrator.create_new_auth_token
+
+      expect(response).to have_http_status(:success)
+      created_macro = account.macros.order(:id).last
+      action = created_macro.actions.find { |a| a['action_name'] == 'move_pipeline_item_stage' }
+
+      expect(action['action_params'].first).not_to have_key('unexpected_key')
+      expect(action['action_params'].first['target_stage_id'].to_i).to eq(allowed_stage.id)
+    end
+
+    it 'keeps a scalar array action_params (add_pipeline_item_label labels) intact after going through the permit allowlist' do
+      params = {
+        'name': 'Label pipeline card',
+        'macro_type': 'pipeline_item',
+        'actions': [
+          {
+            'action_name': :add_pipeline_item_label,
+            'action_params': %w[quente frio]
+          }
+        ]
+      }
+
+      post "/api/v1/accounts/#{account.id}/macros",
+           params: params,
+           headers: administrator.create_new_auth_token
+
+      expect(response).to have_http_status(:success)
+      created_macro = account.macros.order(:id).last
+      action = created_macro.actions.find { |a| a['action_name'] == 'add_pipeline_item_label' }
+
+      expect(action['action_params']).to eq(%w[quente frio])
+    end
   end
 
   describe 'DELETE /api/v1/accounts/{account.id}/macros/{macro.id}' do

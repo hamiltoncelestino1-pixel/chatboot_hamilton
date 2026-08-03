@@ -46,6 +46,10 @@ class PipelineItem < ApplicationRecord
   belongs_to :conversation, optional: true
   belongs_to :assignee, class_name: 'User', optional: true
   belongs_to :team, optional: true
+  # Own FK column so pipeline_id can be queried/indexed directly (card-uniqueness scope, kanban
+  # real-time filter) without joining through pipeline_stage. Intentionally not the public read
+  # path for #pipeline, though - see the `delegate` below, which overrides this association's
+  # own reader on purpose.
   belongs_to :pipeline, optional: true
 
   validates :contact_id, presence: true
@@ -60,17 +64,21 @@ class PipelineItem < ApplicationRecord
 
   before_validation :set_pipeline_id_from_stage
 
-  after_create :dispatch_created_event
-  after_update :dispatch_stage_changed_event, if: :saved_change_to_pipeline_stage_id?
-  after_update :dispatch_updated_event, if: :broadcast_relevant_change?
+  after_create_commit :dispatch_created_event
+  after_update_commit :dispatch_stage_changed_event, if: :saved_change_to_pipeline_stage_id?
+  after_update_commit :dispatch_updated_event, if: :broadcast_relevant_change?
 
+  # Deliberately overrides the belongs_to :pipeline reader above: pipeline_stage is the
+  # source of truth for which pipeline a card is in (pipeline_id is kept in sync via
+  # set_pipeline_id_from_stage below, purely for the FK/index use cases). Keeping both is
+  # intentional, not an oversight - see the comment on the belongs_to.
   delegate :pipeline, to: :pipeline_stage
 
   def push_event_data
     {
       id: id,
       title: title,
-      value: value,
+      value: json_safe_value,
       notes: notes,
       position: position,
       pipeline_stage_id: pipeline_stage_id,
@@ -86,6 +94,12 @@ class PipelineItem < ApplicationRecord
       label_list: label_list,
       custom_attributes: custom_attributes
     }
+  end
+
+  # ActionCableBroadcastJob is enqueued via Sidekiq's strict_args mode, which rejects
+  # BigDecimal (the raw type for a decimal column) as a non-native-JSON job argument.
+  def json_safe_value
+    value&.to_f
   end
 
   # Deliberately not Contact#push_event_data: that uses `thumbnail`, but the Kanban UI

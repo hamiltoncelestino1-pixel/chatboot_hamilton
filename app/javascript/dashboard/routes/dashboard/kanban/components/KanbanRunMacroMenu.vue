@@ -3,23 +3,38 @@ import { ref, computed, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useStore, useMapGetter } from 'dashboard/composables/store';
 import { useAlert } from 'dashboard/composables';
+import DropdownMenu from 'dashboard/components-next/dropdown-menu/DropdownMenu.vue';
 
 const props = defineProps({
   pipelineItemIds: { type: Array, required: true },
   showLabel: { type: Boolean, default: false },
   buttonClass: { type: String, default: '' },
+  openUpward: { type: Boolean, default: false },
 });
 
 const { t } = useI18n();
 const store = useStore();
 const macros = useMapGetter('macros/getMacros');
-const activePipeline = useMapGetter('kanban/getActivePipeline');
 
 const showMenu = ref(false);
 const executingMacroId = ref(null);
 
 const pipelineMacros = computed(() =>
   macros.value.filter(macro => macro.macro_type === 'pipeline_item')
+);
+
+const macroMenuItems = computed(() =>
+  pipelineMacros.value.map(macro => ({
+    label: macro.name,
+    action: 'run',
+    value: macro.id,
+    macro,
+    icon:
+      executingMacroId.value === macro.id
+        ? 'i-lucide-loader animate-spin'
+        : 'i-lucide-play',
+    disabled: !!executingMacroId.value,
+  }))
 );
 
 onMounted(() => {
@@ -45,11 +60,13 @@ const runMacro = async macro => {
       macroId: macro.id,
       pipelineItemIds: props.pipelineItemIds,
     });
-    // The macro mutates cards server-side (stage/assignee/team/labels/fields) - refetch
-    // so the board reflects the change without requiring a manual reload.
-    if (activePipeline.value) {
-      await store.dispatch('kanban/fetchItems', activePipeline.value.id);
-    }
+    // macros/execute only enqueues MacrosPipelineExecutionJob - the cards haven't been
+    // mutated yet by the time this resolves. Deliberately not refetching here: a REST
+    // fetchItems() fired at this point races the job's own per-card real-time broadcasts
+    // (pipeline_item.updated) with a stale snapshot, and SET_ITEMS only adds an item to a
+    // stage's order without removing it from a stale one, so the loser of that race gets
+    // stuck showing the card in its old column. The board updates via the WebSocket
+    // broadcasts alone, same as manual drag-and-drop relies on for other sessions.
     useAlert(t('KANBAN.RUN_MACRO.SUCCESS'));
   } catch (error) {
     useAlert(t('KANBAN.RUN_MACRO.ERROR'));
@@ -74,28 +91,20 @@ const runMacro = async macro => {
       <span v-if="showLabel">{{ t('KANBAN.RUN_MACRO.BUTTON') }}</span>
     </button>
 
-    <div
+    <DropdownMenu
       v-if="showMenu"
-      class="absolute right-0 z-[9999] mt-1 w-56 border border-slate-200 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 shadow-lg p-1"
-      @click.stop
-    >
-      <p v-if="!pipelineMacros.length" class="px-2 py-2 text-xs text-slate-400">
-        {{ t('KANBAN.RUN_MACRO.EMPTY_STATE') }}
-      </p>
-      <button
-        v-for="macro in pipelineMacros"
-        :key="macro.id"
-        class="flex items-center justify-between w-full px-2 py-1.5 text-sm text-left text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-md transition-colors disabled:opacity-50"
-        :disabled="!!executingMacroId"
-        @click="runMacro(macro)"
-      >
-        <span class="truncate">{{ macro.name }}</span>
-        <span
-          v-if="executingMacroId === macro.id"
-          class="i-lucide-loader size-3.5 animate-spin flex-shrink-0"
-        />
-        <span v-else class="i-lucide-play size-3.5 flex-shrink-0" />
-      </button>
-    </div>
+      :menu-sections="[
+        {
+          items: macroMenuItems,
+          emptyState: t('KANBAN.RUN_MACRO.EMPTY_STATE'),
+        },
+      ]"
+      :class="
+        openUpward
+          ? 'mb-1 ltr:right-0 rtl:left-0 bottom-full'
+          : 'mt-1 ltr:right-0 rtl:left-0 top-full'
+      "
+      @action="({ macro }) => runMacro(macro)"
+    />
   </div>
 </template>

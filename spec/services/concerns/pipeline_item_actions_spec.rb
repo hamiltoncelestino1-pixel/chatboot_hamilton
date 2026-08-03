@@ -63,6 +63,25 @@ RSpec.describe PipelineItemActions do
 
       expect(item.reload.team_id).to eq(team.id)
     end
+
+    it 'clears the team_id when given nil' do
+      team = create(:team, account: account)
+      item.update!(team_id: team.id)
+
+      includer.assign_pipeline_team(item, nil)
+
+      expect(item.reload.team_id).to be_nil
+    end
+
+    it 'logs and does not assign a team that belongs to another account' do
+      other_account_team = create(:team, account: create(:account))
+      allow(Rails.logger).to receive(:info)
+
+      includer.assign_pipeline_team(item, other_account_team.id)
+
+      expect(item.reload.team_id).to be_nil
+      expect(Rails.logger).to have_received(:info).with(/does not belong to/)
+    end
   end
 
   describe '#add_pipeline_label' do

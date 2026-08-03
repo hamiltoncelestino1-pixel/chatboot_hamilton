@@ -260,6 +260,20 @@ RSpec.describe AutomationRules::ActionService do
         expect { described_class.new(rule, account, conversation).perform }.not_to raise_error
         expect(PipelineItem.where(contact_id: conversation.contact_id, pipeline_id: pipeline.id)).to be_empty
       end
+
+      it 'logs the correct message and does not move the card when the target stage does not belong to the pipeline' do
+        other_stage = create(:pipeline_stage, account: account)
+        rule.update!(actions: [{
+                       action_name: 'move_pipeline_item_stage',
+                       action_params: [{ pipeline_id: pipeline.id, target_stage_id: other_stage.id }]
+                     }])
+        item = create(:pipeline_item, pipeline_stage: start_stage, account: account, contact: conversation.contact)
+
+        expect(Rails.logger).to receive(:info).with(/does not belong to/)
+        described_class.new(rule, account, conversation).perform
+
+        expect(item.reload.pipeline_stage_id).to eq(start_stage.id)
+      end
     end
 
     describe '#perform with assign_pipeline_item_agent action' do
@@ -284,6 +298,17 @@ RSpec.describe AutomationRules::ActionService do
 
       it 'does nothing when the contact has no card in the pipeline' do
         expect { described_class.new(rule, account, conversation).perform }.not_to raise_error
+      end
+
+      it 'assigns an administrator who is not an explicit pipeline member, without raising' do
+        admin = create(:user, account: account, role: :administrator)
+        conversation.update!(assignee: admin)
+        item = create(:pipeline_item, pipeline_stage: stage, account: account, contact: conversation.contact)
+
+        expect { described_class.new(rule, account, conversation).perform }.not_to raise_error
+
+        expect(item.reload.assignee_id).to eq(admin.id)
+        expect(Current.account).to be_nil
       end
     end
 

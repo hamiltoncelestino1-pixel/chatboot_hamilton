@@ -1,126 +1,103 @@
-<script>
+<script setup>
+import { computed, onMounted, ref } from 'vue';
+import { useFunctionGetter } from 'dashboard/composables/store';
+import { usePipelineSelector } from 'dashboard/composables/usePipelineSelector';
 import SingleSelect from 'dashboard/components-next/filter/inputs/SingleSelect.vue';
 
-export default {
-  components: {
-    SingleSelect,
-  },
-  props: {
-    modelValue: { type: [Object, Array], default: () => ({}) },
-    actionName: { type: String, required: true },
-    dropdownMaxHeight: { type: String, default: 'max-h-80' },
-  },
-  emits: ['update:modelValue'],
-  data() {
-    return {
-      pipelineId: null,
-      targetPipelineId: null,
-      targetStageId: null,
-    };
-  },
-  computed: {
-    isExport() {
-      return this.actionName === 'export_pipeline_item';
-    },
-    pipelines() {
-      return this.$store.getters['kanban/getPipelines'];
-    },
-    pipelineOptions() {
-      return this.pipelines.map(pipeline => ({
-        id: pipeline.id,
-        name: pipeline.name,
-      }));
-    },
-    selectedPipeline: {
-      get() {
-        return this.pipelineOptions.find(p => p.id === this.pipelineId) || null;
-      },
-      set(option) {
-        this.pipelineId = option?.id || null;
-        if (!this.isExport) {
-          this.targetStageId = null;
-        }
-        this.updateValue();
-      },
-    },
-    targetPipelineOptions() {
-      return this.pipelineOptions;
-    },
-    selectedTargetPipeline: {
-      get() {
-        return (
-          this.targetPipelineOptions.find(
-            p => p.id === this.targetPipelineId
-          ) || null
-        );
-      },
-      set(option) {
-        this.targetPipelineId = option?.id || null;
-        this.targetStageId = null;
-        this.updateValue();
-      },
-    },
-    stageSourcePipelineId() {
-      return this.isExport ? this.targetPipelineId : this.pipelineId;
-    },
-    stageOptions() {
-      if (!this.stageSourcePipelineId) return [];
-      return this.$store.getters['kanban/getStagesForPipeline'](
-        this.stageSourcePipelineId
-      ).map(stage => ({ id: stage.id, name: stage.name }));
-    },
-    selectedStage: {
-      get() {
-        return this.stageOptions.find(s => s.id === this.targetStageId) || null;
-      },
-      set(option) {
-        this.targetStageId = option?.id || null;
-        this.updateValue();
-      },
-    },
-  },
-  watch: {
-    pipelines(list) {
-      if (!this.pipelineId && list.length) {
-        this.defaultToFirstPipeline();
-      }
-    },
-  },
-  mounted() {
-    if (!this.pipelines.length) {
-      this.$store.dispatch('kanban/fetchPipelines');
-    }
-    const data = Array.isArray(this.modelValue) ? {} : this.modelValue || {};
-    this.pipelineId = data.pipeline_id ? Number(data.pipeline_id) : null;
-    this.targetPipelineId = data.target_pipeline_id
-      ? Number(data.target_pipeline_id)
-      : null;
-    this.targetStageId = data.target_stage_id
-      ? Number(data.target_stage_id)
-      : null;
+const props = defineProps({
+  modelValue: { type: [Object, Array], default: () => ({}) },
+  actionName: { type: String, required: true },
+  dropdownMaxHeight: { type: String, default: 'max-h-80' },
+});
+const emit = defineEmits(['update:modelValue']);
 
-    if (!this.pipelineId) {
-      this.defaultToFirstPipeline();
-    }
-  },
-  methods: {
-    defaultToFirstPipeline() {
-      if (!this.pipelines.length) return;
-      this.pipelineId = this.pipelines[0].id;
-      this.updateValue();
-    },
-    updateValue() {
-      const payload = { pipeline_id: this.pipelineId };
-      if (this.isExport) {
-        payload.target_pipeline_id = this.targetPipelineId;
-        payload.target_stage_id = this.targetStageId;
-      } else {
-        payload.target_stage_id = this.targetStageId;
-      }
-      this.$emit('update:modelValue', payload);
-    },
-  },
+const isExport = computed(() => props.actionName === 'export_pipeline_item');
+
+const targetPipelineId = ref(null);
+const targetStageId = ref(null);
+
+const { pipelineId, pipelineOptions, defaultToFirstPipeline, onAutoSelect } =
+  usePipelineSelector();
+
+const updateValue = () => {
+  const payload = { pipeline_id: pipelineId.value };
+  if (isExport.value) {
+    payload.target_pipeline_id = targetPipelineId.value;
+    payload.target_stage_id = targetStageId.value;
+  } else {
+    payload.target_stage_id = targetStageId.value;
+  }
+  emit('update:modelValue', payload);
 };
+onAutoSelect(updateValue);
+
+const selectedPipeline = computed({
+  get: () =>
+    pipelineOptions.value.find(option => option.id === pipelineId.value) ||
+    null,
+  set: option => {
+    pipelineId.value = option?.id || null;
+    if (!isExport.value) {
+      targetStageId.value = null;
+    }
+    updateValue();
+  },
+});
+
+// export_pipeline_item's target pipeline is a plain manual picker - unlike the source
+// pipeline, it has no autoselect-first-pipeline behavior, so it doesn't go through
+// usePipelineSelector; it just reuses the same pipelineOptions list.
+const targetPipelineOptions = computed(() => pipelineOptions.value);
+const selectedTargetPipeline = computed({
+  get: () =>
+    targetPipelineOptions.value.find(
+      option => option.id === targetPipelineId.value
+    ) || null,
+  set: option => {
+    targetPipelineId.value = option?.id || null;
+    targetStageId.value = null;
+    updateValue();
+  },
+});
+
+const stageSourcePipelineId = computed(() =>
+  isExport.value ? targetPipelineId.value : pipelineId.value
+);
+const stagesForSource = useFunctionGetter(
+  'kanban/getStagesForPipeline',
+  stageSourcePipelineId
+);
+const stageOptions = computed(() => {
+  if (!stageSourcePipelineId.value) return [];
+  return stagesForSource.value.map(stage => ({
+    id: stage.id,
+    name: stage.name,
+  }));
+});
+const selectedStage = computed({
+  get: () =>
+    stageOptions.value.find(option => option.id === targetStageId.value) ||
+    null,
+  set: option => {
+    targetStageId.value = option?.id || null;
+    updateValue();
+  },
+});
+
+onMounted(() => {
+  const data = Array.isArray(props.modelValue) ? {} : props.modelValue || {};
+  pipelineId.value = data.pipeline_id ? Number(data.pipeline_id) : null;
+  targetPipelineId.value = data.target_pipeline_id
+    ? Number(data.target_pipeline_id)
+    : null;
+  targetStageId.value = data.target_stage_id
+    ? Number(data.target_stage_id)
+    : null;
+
+  if (!pipelineId.value) {
+    defaultToFirstPipeline();
+  }
+});
 </script>
 
 <template>

@@ -94,6 +94,10 @@ export const generateConditionOptions = (options, key = 'id') => {
   });
 };
 
+// Pipeline actions (move_pipeline_item_stage, assign_pipeline_item_agent, etc.) have no entry
+// in actionsMap by design: their inputs (AutomationActionPipelineStageInput and friends) fetch
+// pipelines/stages/agents/labels/teams directly from the store themselves instead of receiving
+// them as a dropdownValues prop, so there's no branch to add here for those action names.
 export const getActionOptions = ({
   agents,
   teams,

@@ -1,174 +1,144 @@
-<script>
+<script setup>
+import { computed, onMounted, ref } from 'vue';
+import { useI18n } from 'vue-i18n';
+import {
+  useMapGetter,
+  useFunctionGetter,
+  useStore,
+} from 'dashboard/composables/store';
+import { usePipelineSelector } from 'dashboard/composables/usePipelineSelector';
 import SingleSelect from 'dashboard/components-next/filter/inputs/SingleSelect.vue';
 import NextInput from 'dashboard/components-next/input/Input.vue';
 
-export default {
-  components: {
-    SingleSelect,
-    NextInput,
-  },
-  props: {
-    modelValue: { type: [Object, Array], default: () => ({}) },
-    dropdownMaxHeight: { type: String, default: 'max-h-80' },
-  },
-  emits: ['update:modelValue'],
-  data() {
-    return {
-      pipelineId: null,
-      pipelineStageId: null,
-      assigneeMode: 'none',
-      teamMode: 'none',
-      title: '',
-      value: '',
-      notes: '',
-    };
-  },
-  computed: {
-    pipelines() {
-      return this.$store.getters['kanban/getPipelines'];
-    },
-    pipelineOptions() {
-      return this.pipelines.map(pipeline => ({
-        id: pipeline.id,
-        name: pipeline.name,
-      }));
-    },
-    selectedPipeline: {
-      get() {
-        return this.pipelineOptions.find(p => p.id === this.pipelineId) || null;
-      },
-      set(option) {
-        this.pipelineId = option?.id || null;
-        this.pipelineStageId = null;
-        this.updateValue();
-      },
-    },
-    stageOptions() {
-      if (!this.pipelineId) return [];
-      return this.$store.getters['kanban/getStagesForPipeline'](
-        this.pipelineId
-      ).map(stage => ({ id: stage.id, name: stage.name }));
-    },
-    selectedStage: {
-      get() {
-        return (
-          this.stageOptions.find(s => s.id === this.pipelineStageId) || null
-        );
-      },
-      set(option) {
-        this.pipelineStageId = option?.id || null;
-        this.updateValue();
-      },
-    },
-    agents() {
-      return this.$store.getters['agents/getVerifiedAgents'];
-    },
-    teams() {
-      return this.$store.getters['teams/getTeams'];
-    },
-    assigneeModeOptions() {
-      return [
-        {
-          id: 'conversation_assignee',
-          name: this.$t(
-            'AUTOMATION.ACTION.PIPELINE.ASSIGNEE_MODE.CONVERSATION_ASSIGNEE'
-          ),
-        },
-        {
-          id: 'none',
-          name: this.$t('AUTOMATION.ACTION.PIPELINE.ASSIGNEE_MODE.NONE'),
-        },
-        ...this.agents.map(agent => ({
-          id: String(agent.id),
-          name: agent.name,
-        })),
-      ];
-    },
-    selectedAssigneeMode: {
-      get() {
-        return (
-          this.assigneeModeOptions.find(o => o.id === this.assigneeMode) || null
-        );
-      },
-      set(option) {
-        this.assigneeMode = option?.id || 'none';
-        this.updateValue();
-      },
-    },
-    teamModeOptions() {
-      return [
-        {
-          id: 'conversation_team',
-          name: this.$t(
-            'AUTOMATION.ACTION.PIPELINE.TEAM_MODE.CONVERSATION_TEAM'
-          ),
-        },
-        {
-          id: 'none',
-          name: this.$t('AUTOMATION.ACTION.PIPELINE.TEAM_MODE.NONE'),
-        },
-        ...this.teams.map(team => ({ id: String(team.id), name: team.name })),
-      ];
-    },
-    selectedTeamMode: {
-      get() {
-        return this.teamModeOptions.find(o => o.id === this.teamMode) || null;
-      },
-      set(option) {
-        this.teamMode = option?.id || 'none';
-        this.updateValue();
-      },
-    },
-  },
-  watch: {
-    pipelines(list) {
-      if (!this.pipelineId && list.length) {
-        this.defaultToFirstPipeline();
-      }
-    },
-  },
-  mounted() {
-    if (!this.pipelines.length) {
-      this.$store.dispatch('kanban/fetchPipelines');
-    }
-    const data = Array.isArray(this.modelValue) ? {} : this.modelValue || {};
-    this.pipelineId = data.pipeline_id ? Number(data.pipeline_id) : null;
-    this.pipelineStageId = data.pipeline_stage_id
-      ? Number(data.pipeline_stage_id)
-      : null;
-    this.assigneeMode = data.assignee_mode || 'none';
-    this.teamMode = data.team_mode || 'none';
-    this.title = data.title || '';
-    this.value = data.value || '';
-    this.notes = data.notes || '';
+const props = defineProps({
+  modelValue: { type: [Object, Array], default: () => ({}) },
+  dropdownMaxHeight: { type: String, default: 'max-h-80' },
+});
+const emit = defineEmits(['update:modelValue']);
 
-    if (!this.pipelineId) {
-      this.defaultToFirstPipeline();
-    }
-  },
-  methods: {
-    defaultToFirstPipeline() {
-      if (!this.pipelines.length) return;
-      this.pipelineId = this.pipelines[0].id;
-      const [firstStage] = this.$store.getters['kanban/getStagesForPipeline'](
-        this.pipelineId
-      );
-      this.pipelineStageId = firstStage?.id || null;
-      this.updateValue();
-    },
-    updateValue() {
-      this.$emit('update:modelValue', {
-        pipeline_id: this.pipelineId,
-        pipeline_stage_id: this.pipelineStageId,
-        assignee_mode: this.assigneeMode,
-        team_mode: this.teamMode,
-        title: this.title || null,
-        value: this.value || null,
-        notes: this.notes || null,
-      });
-    },
-  },
+const { t } = useI18n();
+const store = useStore();
+
+const pipelineStageId = ref(null);
+const assigneeMode = ref('none');
+const teamMode = ref('none');
+const title = ref('');
+const value = ref('');
+const notes = ref('');
+
+const { pipelineId, pipelineOptions, defaultToFirstPipeline, onAutoSelect } =
+  usePipelineSelector();
+
+const updateValue = () => {
+  emit('update:modelValue', {
+    pipeline_id: pipelineId.value,
+    pipeline_stage_id: pipelineStageId.value,
+    assignee_mode: assigneeMode.value,
+    team_mode: teamMode.value,
+    title: title.value || null,
+    value: value.value || null,
+    notes: notes.value || null,
+  });
 };
+
+// On autoselect (mount or once the pipeline list finishes loading), also default to that
+// pipeline's first stage - mirrors the extra step the original defaultToFirstPipeline did,
+// which the other 4 pipeline inputs don't need.
+onAutoSelect(() => {
+  const [firstStage] = store.getters['kanban/getStagesForPipeline'](
+    pipelineId.value
+  );
+  pipelineStageId.value = firstStage?.id || null;
+  updateValue();
+});
+
+const selectedPipeline = computed({
+  get: () =>
+    pipelineOptions.value.find(option => option.id === pipelineId.value) ||
+    null,
+  set: option => {
+    pipelineId.value = option?.id || null;
+    pipelineStageId.value = null;
+    updateValue();
+  },
+});
+
+const stagesForPipeline = useFunctionGetter(
+  'kanban/getStagesForPipeline',
+  pipelineId
+);
+const stageOptions = computed(() => {
+  if (!pipelineId.value) return [];
+  return stagesForPipeline.value.map(stage => ({
+    id: stage.id,
+    name: stage.name,
+  }));
+});
+const selectedStage = computed({
+  get: () =>
+    stageOptions.value.find(option => option.id === pipelineStageId.value) ||
+    null,
+  set: option => {
+    pipelineStageId.value = option?.id || null;
+    updateValue();
+  },
+});
+
+const agents = useMapGetter('agents/getVerifiedAgents');
+const teams = useMapGetter('teams/getTeams');
+
+const assigneeModeOptions = computed(() => [
+  {
+    id: 'conversation_assignee',
+    name: t('AUTOMATION.ACTION.PIPELINE.ASSIGNEE_MODE.CONVERSATION_ASSIGNEE'),
+  },
+  { id: 'none', name: t('AUTOMATION.ACTION.PIPELINE.ASSIGNEE_MODE.NONE') },
+  ...agents.value.map(agent => ({ id: String(agent.id), name: agent.name })),
+]);
+const selectedAssigneeMode = computed({
+  get: () =>
+    assigneeModeOptions.value.find(
+      option => option.id === assigneeMode.value
+    ) || null,
+  set: option => {
+    assigneeMode.value = option?.id || 'none';
+    updateValue();
+  },
+});
+
+const teamModeOptions = computed(() => [
+  {
+    id: 'conversation_team',
+    name: t('AUTOMATION.ACTION.PIPELINE.TEAM_MODE.CONVERSATION_TEAM'),
+  },
+  { id: 'none', name: t('AUTOMATION.ACTION.PIPELINE.TEAM_MODE.NONE') },
+  ...teams.value.map(team => ({ id: String(team.id), name: team.name })),
+]);
+const selectedTeamMode = computed({
+  get: () =>
+    teamModeOptions.value.find(option => option.id === teamMode.value) || null,
+  set: option => {
+    teamMode.value = option?.id || 'none';
+    updateValue();
+  },
+});
+
+onMounted(() => {
+  const data = Array.isArray(props.modelValue) ? {} : props.modelValue || {};
+  pipelineId.value = data.pipeline_id ? Number(data.pipeline_id) : null;
+  pipelineStageId.value = data.pipeline_stage_id
+    ? Number(data.pipeline_stage_id)
+    : null;
+  assigneeMode.value = data.assignee_mode || 'none';
+  teamMode.value = data.team_mode || 'none';
+  title.value = data.title || '';
+  value.value = data.value || '';
+  notes.value = data.notes || '';
+
+  if (!pipelineId.value) {
+    defaultToFirstPipeline();
+  }
+});
 </script>
 
 <template>

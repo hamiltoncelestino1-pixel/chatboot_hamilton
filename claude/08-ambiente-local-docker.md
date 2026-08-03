@@ -126,3 +126,15 @@ git ls-files -z --deleted | xargs -0 git checkout --
 ### 5. Aviso `bin/rails: shebang line ending with \r`
 Mesmo problema de CRLF, mas em arquivos `.rb`. É só **aviso** — o Ruby executa mesmo
 assim. Pode ignorar (ou normalizar para LF se quiser limpar).
+
+### 6. `sidekiq` não recarrega sozinho / Vite às vezes não reaplica um `<script setup>` já montado
+`rails` e `vite` recarregam automaticamente em dev (reloader/HMR). O worker `sidekiq`, não —
+é um processo Ruby de longa duração, então mudanças em `app/models/*.rb`, `app/listeners/*.rb`,
+`app/jobs/*.rb` ou qualquer coisa que rode em background job só valem depois de
+`docker restart chatwoot-noble-sidekiq-1` (junto com `chatwoot-noble-rails-1`, já que o próprio
+request HTTP também referencia essas classes). Para mudanças de frontend, o HMR do Vite às vezes
+não reaplica corretamente um componente que já estava montado na tela antes do reload — se depois
+de editar um `.vue` o comportamento antigo persistir no navegador mesmo com o código certo no
+disco, reinicie `chatwoot-noble-vite-1` e dê um hard refresh (Ctrl+Shift+R) na aba, recarregando
+o fluxo do zero em vez de continuar na instância de componente já montada. Achado durante as
+tasks de correção do épico de pipeline (claude/pipeline_tasks/11-18.md).

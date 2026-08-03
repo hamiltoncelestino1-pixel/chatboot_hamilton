@@ -5,6 +5,7 @@ class AutomationRules::ActionService < ActionService
     super(conversation)
     @rule = rule
     @account = account
+    Current.account = @account
     Current.executed_by = rule
   end
 
@@ -89,7 +90,7 @@ class AutomationRules::ActionService < ActionService
     return log_no_pipeline_item('move_pipeline_item_stage', params[:pipeline_id]) if item.blank?
 
     target_stage = move_stage(item, params[:target_stage_id])
-    log_no_pipeline_item('move_pipeline_item_stage', params[:pipeline_id]) if target_stage.blank?
+    log_invalid_target_stage(params[:target_stage_id], item) if target_stage.blank?
   end
 
   def assign_pipeline_item_agent(params)
@@ -163,6 +164,13 @@ class AutomationRules::ActionService < ActionService
     Rails.logger.info(
       "[AutomationRules::ActionService] #{action_name}: no pipeline_item found for pipeline_id=#{pipeline_id}, " \
       "contact_id=#{@conversation.contact_id}"
+    )
+  end
+
+  def log_invalid_target_stage(target_stage_id, item)
+    Rails.logger.info(
+      "[AutomationRules::ActionService] target_stage_id=#{target_stage_id} does not belong to " \
+      "pipeline_item##{item.id}'s pipeline (pipeline_id=#{item.pipeline_id})"
     )
   end
 end

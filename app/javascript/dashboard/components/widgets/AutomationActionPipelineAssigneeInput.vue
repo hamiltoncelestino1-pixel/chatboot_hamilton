@@ -1,142 +1,99 @@
-<script>
+<script setup>
+import { computed, onMounted, ref } from 'vue';
+import { useI18n } from 'vue-i18n';
+import { useMapGetter } from 'dashboard/composables/store';
+import { usePipelineSelector } from 'dashboard/composables/usePipelineSelector';
 import SingleSelect from 'dashboard/components-next/filter/inputs/SingleSelect.vue';
 
-export default {
-  components: {
-    SingleSelect,
-  },
-  props: {
-    modelValue: { type: [Object, Array], default: () => ({}) },
-    actionName: { type: String, required: true },
-    dropdownMaxHeight: { type: String, default: 'max-h-80' },
-  },
-  emits: ['update:modelValue'],
-  data() {
-    return {
-      pipelineId: null,
-      assigneeMode: 'none',
-      teamMode: 'none',
-    };
-  },
-  computed: {
-    isTeam() {
-      return this.actionName === 'assign_pipeline_item_team';
-    },
-    pipelines() {
-      return this.$store.getters['kanban/getPipelines'];
-    },
-    pipelineOptions() {
-      return this.pipelines.map(pipeline => ({
-        id: pipeline.id,
-        name: pipeline.name,
-      }));
-    },
-    selectedPipeline: {
-      get() {
-        return this.pipelineOptions.find(p => p.id === this.pipelineId) || null;
-      },
-      set(option) {
-        this.pipelineId = option?.id || null;
-        this.updateValue();
-      },
-    },
-    agents() {
-      return this.$store.getters['agents/getVerifiedAgents'];
-    },
-    teams() {
-      return this.$store.getters['teams/getTeams'];
-    },
-    assigneeModeOptions() {
-      return [
-        {
-          id: 'conversation_assignee',
-          name: this.$t(
-            'AUTOMATION.ACTION.PIPELINE.ASSIGNEE_MODE.CONVERSATION_ASSIGNEE'
-          ),
-        },
-        {
-          id: 'none',
-          name: this.$t('AUTOMATION.ACTION.PIPELINE.ASSIGNEE_MODE.NONE'),
-        },
-        ...this.agents.map(agent => ({
-          id: String(agent.id),
-          name: agent.name,
-        })),
-      ];
-    },
-    selectedAssigneeMode: {
-      get() {
-        return (
-          this.assigneeModeOptions.find(o => o.id === this.assigneeMode) || null
-        );
-      },
-      set(option) {
-        this.assigneeMode = option?.id || 'none';
-        this.updateValue();
-      },
-    },
-    teamModeOptions() {
-      return [
-        {
-          id: 'conversation_team',
-          name: this.$t(
-            'AUTOMATION.ACTION.PIPELINE.TEAM_MODE.CONVERSATION_TEAM'
-          ),
-        },
-        {
-          id: 'none',
-          name: this.$t('AUTOMATION.ACTION.PIPELINE.TEAM_MODE.NONE'),
-        },
-        ...this.teams.map(team => ({ id: String(team.id), name: team.name })),
-      ];
-    },
-    selectedTeamMode: {
-      get() {
-        return this.teamModeOptions.find(o => o.id === this.teamMode) || null;
-      },
-      set(option) {
-        this.teamMode = option?.id || 'none';
-        this.updateValue();
-      },
-    },
-  },
-  watch: {
-    pipelines(list) {
-      if (!this.pipelineId && list.length) {
-        this.defaultToFirstPipeline();
-      }
-    },
-  },
-  mounted() {
-    if (!this.pipelines.length) {
-      this.$store.dispatch('kanban/fetchPipelines');
-    }
-    const data = Array.isArray(this.modelValue) ? {} : this.modelValue || {};
-    this.pipelineId = data.pipeline_id ? Number(data.pipeline_id) : null;
-    this.assigneeMode = data.assignee_mode || 'none';
-    this.teamMode = data.team_mode || 'none';
+const props = defineProps({
+  modelValue: { type: [Object, Array], default: () => ({}) },
+  actionName: { type: String, required: true },
+  dropdownMaxHeight: { type: String, default: 'max-h-80' },
+});
+const emit = defineEmits(['update:modelValue']);
 
-    if (!this.pipelineId) {
-      this.defaultToFirstPipeline();
-    }
-  },
-  methods: {
-    defaultToFirstPipeline() {
-      if (!this.pipelines.length) return;
-      this.pipelineId = this.pipelines[0].id;
-      this.updateValue();
-    },
-    updateValue() {
-      const payload = { pipeline_id: this.pipelineId };
-      if (this.isTeam) {
-        payload.team_mode = this.teamMode;
-      } else {
-        payload.assignee_mode = this.assigneeMode;
-      }
-      this.$emit('update:modelValue', payload);
-    },
-  },
+const { t } = useI18n();
+
+const isTeam = computed(() => props.actionName === 'assign_pipeline_item_team');
+
+const assigneeMode = ref('none');
+const teamMode = ref('none');
+
+const { pipelineId, pipelineOptions, defaultToFirstPipeline, onAutoSelect } =
+  usePipelineSelector();
+
+const updateValue = () => {
+  const payload = { pipeline_id: pipelineId.value };
+  if (isTeam.value) {
+    payload.team_mode = teamMode.value;
+  } else {
+    payload.assignee_mode = assigneeMode.value;
+  }
+  emit('update:modelValue', payload);
 };
+onAutoSelect(updateValue);
+
+const selectedPipeline = computed({
+  get: () =>
+    pipelineOptions.value.find(option => option.id === pipelineId.value) ||
+    null,
+  set: option => {
+    pipelineId.value = option?.id || null;
+    updateValue();
+  },
+});
+
+const agents = useMapGetter('agents/getVerifiedAgents');
+const teams = useMapGetter('teams/getTeams');
+
+const assigneeModeOptions = computed(() => [
+  {
+    id: 'conversation_assignee',
+    name: t('AUTOMATION.ACTION.PIPELINE.ASSIGNEE_MODE.CONVERSATION_ASSIGNEE'),
+  },
+  { id: 'none', name: t('AUTOMATION.ACTION.PIPELINE.ASSIGNEE_MODE.NONE') },
+  ...agents.value.map(agent => ({ id: String(agent.id), name: agent.name })),
+]);
+
+const selectedAssigneeMode = computed({
+  get: () =>
+    assigneeModeOptions.value.find(
+      option => option.id === assigneeMode.value
+    ) || null,
+  set: option => {
+    assigneeMode.value = option?.id || 'none';
+    updateValue();
+  },
+});
+
+const teamModeOptions = computed(() => [
+  {
+    id: 'conversation_team',
+    name: t('AUTOMATION.ACTION.PIPELINE.TEAM_MODE.CONVERSATION_TEAM'),
+  },
+  { id: 'none', name: t('AUTOMATION.ACTION.PIPELINE.TEAM_MODE.NONE') },
+  ...teams.value.map(team => ({ id: String(team.id), name: team.name })),
+]);
+
+const selectedTeamMode = computed({
+  get: () =>
+    teamModeOptions.value.find(option => option.id === teamMode.value) || null,
+  set: option => {
+    teamMode.value = option?.id || 'none';
+    updateValue();
+  },
+});
+
+onMounted(() => {
+  const data = Array.isArray(props.modelValue) ? {} : props.modelValue || {};
+  pipelineId.value = data.pipeline_id ? Number(data.pipeline_id) : null;
+  assigneeMode.value = data.assignee_mode || 'none';
+  teamMode.value = data.team_mode || 'none';
+
+  if (!pipelineId.value) {
+    defaultToFirstPipeline();
+  }
+});
 </script>
 
 <template>

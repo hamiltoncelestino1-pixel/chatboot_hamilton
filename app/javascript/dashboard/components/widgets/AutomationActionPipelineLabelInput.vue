@@ -1,88 +1,56 @@
-<script>
+<script setup>
+import { computed, onMounted, ref } from 'vue';
+import { useMapGetter } from 'dashboard/composables/store';
+import { usePipelineSelector } from 'dashboard/composables/usePipelineSelector';
 import SingleSelect from 'dashboard/components-next/filter/inputs/SingleSelect.vue';
 import MultiSelect from 'dashboard/components-next/filter/inputs/MultiSelect.vue';
 
-export default {
-  components: {
-    SingleSelect,
-    MultiSelect,
-  },
-  props: {
-    modelValue: { type: [Object, Array], default: () => ({}) },
-    dropdownMaxHeight: { type: String, default: 'max-h-80' },
-  },
-  emits: ['update:modelValue'],
-  data() {
-    return {
-      pipelineId: null,
-      selectedLabels: [],
-    };
-  },
-  computed: {
-    pipelines() {
-      return this.$store.getters['kanban/getPipelines'];
-    },
-    pipelineOptions() {
-      return this.pipelines.map(pipeline => ({
-        id: pipeline.id,
-        name: pipeline.name,
-      }));
-    },
-    selectedPipeline: {
-      get() {
-        return this.pipelineOptions.find(p => p.id === this.pipelineId) || null;
-      },
-      set(option) {
-        this.pipelineId = option?.id || null;
-        this.updateValue();
-      },
-    },
-    pipelineLabels() {
-      return this.$store.getters['labels/getPipelineLabels'];
-    },
-    labelOptions() {
-      return this.pipelineLabels.map(label => ({
-        id: label.title,
-        name: label.title,
-      }));
-    },
-  },
-  watch: {
-    pipelines(list) {
-      if (!this.pipelineId && list.length) {
-        this.defaultToFirstPipeline();
-      }
-    },
-  },
-  mounted() {
-    if (!this.pipelines.length) {
-      this.$store.dispatch('kanban/fetchPipelines');
-    }
-    const data = Array.isArray(this.modelValue) ? {} : this.modelValue || {};
-    this.pipelineId = data.pipeline_id ? Number(data.pipeline_id) : null;
-    this.selectedLabels = (data.labels || []).map(title => ({
-      id: title,
-      name: title,
-    }));
+const props = defineProps({
+  modelValue: { type: [Object, Array], default: () => ({}) },
+  dropdownMaxHeight: { type: String, default: 'max-h-80' },
+});
+const emit = defineEmits(['update:modelValue']);
 
-    if (!this.pipelineId) {
-      this.defaultToFirstPipeline();
-    }
-  },
-  methods: {
-    defaultToFirstPipeline() {
-      if (!this.pipelines.length) return;
-      this.pipelineId = this.pipelines[0].id;
-      this.updateValue();
-    },
-    updateValue() {
-      this.$emit('update:modelValue', {
-        pipeline_id: this.pipelineId,
-        labels: this.selectedLabels.map(label => label.id),
-      });
-    },
-  },
+const selectedLabels = ref([]);
+
+const { pipelineId, pipelineOptions, defaultToFirstPipeline, onAutoSelect } =
+  usePipelineSelector();
+
+const updateValue = () => {
+  emit('update:modelValue', {
+    pipeline_id: pipelineId.value,
+    labels: selectedLabels.value.map(label => label.id),
+  });
 };
+onAutoSelect(updateValue);
+
+const selectedPipeline = computed({
+  get: () =>
+    pipelineOptions.value.find(option => option.id === pipelineId.value) ||
+    null,
+  set: option => {
+    pipelineId.value = option?.id || null;
+    updateValue();
+  },
+});
+
+const pipelineLabels = useMapGetter('labels/getPipelineLabels');
+const labelOptions = computed(() =>
+  pipelineLabels.value.map(label => ({ id: label.title, name: label.title }))
+);
+
+onMounted(() => {
+  const data = Array.isArray(props.modelValue) ? {} : props.modelValue || {};
+  pipelineId.value = data.pipeline_id ? Number(data.pipeline_id) : null;
+  selectedLabels.value = (data.labels || []).map(title => ({
+    id: title,
+    name: title,
+  }));
+
+  if (!pipelineId.value) {
+    defaultToFirstPipeline();
+  }
+});
 </script>
 
 <template>

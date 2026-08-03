@@ -87,7 +87,8 @@
       },
       "CONVERSATION": {
         "SEARCH_PLACEHOLDER": "Vincular uma conversa...",
-        "CLEAR": "Desvincular conversa"
+        "CLEAR": "Desvincular conversa",
+        "VIEW": "Ver Conversa"
       },
       "MOVE_ERROR": "Falha ao mover card. Tente novamente.",
       "ASSIGNEE_LABEL": "Responsável",

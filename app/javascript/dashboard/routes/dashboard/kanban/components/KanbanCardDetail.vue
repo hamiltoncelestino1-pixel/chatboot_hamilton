@@ -10,6 +10,7 @@ import TagInput from 'dashboard/components-next/taginput/TagInput.vue';
 import PipelineItemLabels from './PipelineItemLabels.vue';
 import AccordionItem from 'dashboard/components/Accordion/AccordionItem.vue';
 import KanbanRunMacroMenu from './KanbanRunMacroMenu.vue';
+import ButtonV4 from 'dashboard/components-next/button/Button.vue';
 
 const props = defineProps({
   item: { type: Object, default: null },
@@ -319,6 +320,50 @@ const handleDelete = async () => {
             </div>
           </div>
 
+          <div
+            v-if="item.contact"
+            class="p-3 bg-woot-50 dark:bg-woot-900/20 rounded-lg"
+          >
+            <p
+              class="text-xs font-medium text-woot-700 dark:text-woot-300 mb-1.5"
+            >
+              {{ t('KANBAN.ITEM.LINKED_CONVERSATION') }}
+            </p>
+            <div
+              v-if="item.conversation_id"
+              class="flex items-center justify-between gap-2"
+            >
+              <span class="text-sm text-woot-700 dark:text-woot-300 truncate">
+                #{{ item.conversation_id }}
+              </span>
+              <div class="flex items-center gap-1 flex-shrink-0">
+                <ButtonV4
+                  size="xs"
+                  faded
+                  icon="i-lucide-external-link"
+                  :label="t('KANBAN.ITEM.CONVERSATION.VIEW')"
+                  @click="openLinkedConversation"
+                />
+                <button
+                  class="p-1 text-slate-400 hover:text-red-500 transition-colors"
+                  :title="t('KANBAN.ITEM.CONVERSATION.CLEAR')"
+                  @click="clearConversation"
+                >
+                  <span class="i-lucide-x size-4" />
+                </button>
+              </div>
+            </div>
+            <TagInput
+              v-else
+              mode="single"
+              :placeholder="t('KANBAN.ITEM.CONVERSATION.SEARCH_PLACEHOLDER')"
+              :menu-items="conversationMenuItems"
+              show-dropdown
+              :auto-open-dropdown="false"
+              @add="onSelectConversation"
+            />
+          </div>
+
           <div>
             <label
               class="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1"
@@ -519,71 +564,31 @@ const handleDelete = async () => {
               :placeholder="t('KANBAN.ITEM.NOTES_PLACEHOLDER')"
             />
           </div>
-
-          <div
-            v-if="item.contact"
-            class="p-3 bg-woot-50 dark:bg-woot-900/20 rounded-lg"
-          >
-            <p
-              class="text-xs font-medium text-woot-700 dark:text-woot-300 mb-1.5"
-            >
-              {{ t('KANBAN.ITEM.LINKED_CONVERSATION') }}
-            </p>
-            <div
-              v-if="item.conversation_id"
-              class="flex items-center justify-between"
-            >
-              <a
-                href="#"
-                class="text-sm text-woot-600 dark:text-woot-400 hover:underline"
-                @click.prevent="openLinkedConversation"
-              >
-                #{{ item.conversation_id }}
-              </a>
-              <button
-                class="p-1 text-slate-400 hover:text-red-500 transition-colors"
-                :title="t('KANBAN.ITEM.CONVERSATION.CLEAR')"
-                @click="clearConversation"
-              >
-                <span class="i-lucide-x size-4" />
-              </button>
-            </div>
-            <TagInput
-              v-else
-              mode="single"
-              :placeholder="t('KANBAN.ITEM.CONVERSATION.SEARCH_PLACEHOLDER')"
-              :menu-items="conversationMenuItems"
-              show-dropdown
-              :auto-open-dropdown="false"
-              @add="onSelectConversation"
-            />
-          </div>
         </div>
 
         <div
-          class="flex items-center justify-between px-5 py-4 border-t border-slate-100 dark:border-slate-700"
+          class="flex items-center justify-between px-5 py-4 border-t border-slate-100 dark:border-slate-700 flex-wrap gap-2"
         >
-          <div class="flex items-center gap-2">
+          <div class="flex items-center gap-1">
             <button
-              class="px-3 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors flex items-center gap-1"
+              v-tooltip="t('KANBAN.ITEM.DELETE')"
+              class="p-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
               :disabled="uiFlags.isDeleting"
               @click="handleDelete"
             >
               <span class="i-lucide-trash-2 size-4" />
-              {{ t('KANBAN.ITEM.DELETE') }}
             </button>
             <button
               v-tooltip="t('KANBAN.ITEM.EXPORT.BUTTON')"
-              class="px-3 py-2 text-sm text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors flex items-center gap-1"
+              class="p-2 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
               @click="emit('export', item)"
             >
               <span class="i-lucide-arrow-right-left size-4" />
-              {{ t('KANBAN.ITEM.EXPORT.SUBMIT') }}
             </button>
             <KanbanRunMacroMenu
               :pipeline-item-ids="[item.id]"
-              show-label
-              button-class="px-3 py-2 text-sm text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors flex items-center gap-1"
+              open-upward
+              button-class="p-2 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
             />
           </div>
 

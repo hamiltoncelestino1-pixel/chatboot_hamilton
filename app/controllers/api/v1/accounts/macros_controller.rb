@@ -1,5 +1,6 @@
 class Api::V1::Accounts::MacrosController < Api::V1::Accounts::BaseController
   include AttachmentConcern
+  include PermittedActionParams
 
   before_action :fetch_macro, only: [:show, :update, :destroy, :execute]
   before_action :check_authorization, only: [:show, :update, :destroy, :execute]
@@ -13,7 +14,7 @@ class Api::V1::Accounts::MacrosController < Api::V1::Accounts::BaseController
   end
 
   def create
-    blobs, actions, error = validate_and_prepare_attachments(params[:actions])
+    blobs, actions, error = validate_and_prepare_attachments(permitted_actions(params[:actions]))
     return render_could_not_create_error(error) if error
 
     @macro = Current.account.macros.new(macros_with_user.merge(created_by_id: current_user.id))
@@ -27,7 +28,7 @@ class Api::V1::Accounts::MacrosController < Api::V1::Accounts::BaseController
   end
 
   def update
-    blobs, actions, error = validate_and_prepare_attachments(params[:actions], @macro)
+    blobs, actions, error = validate_and_prepare_attachments(permitted_actions(params[:actions]), @macro)
     return render_could_not_create_error(error) if error
 
     ActiveRecord::Base.transaction do
@@ -72,10 +73,7 @@ class Api::V1::Accounts::MacrosController < Api::V1::Accounts::BaseController
   end
 
   def permitted_params
-    params.permit(
-      :name, :visibility, :macro_type,
-      actions: [:action_name, { action_params: [] }]
-    )
+    params.permit(:name, :visibility, :macro_type)
   end
 
   def macros_with_user

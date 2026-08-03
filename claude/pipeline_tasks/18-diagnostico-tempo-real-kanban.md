@@ -103,3 +103,61 @@ estática (ambiente/processo, ou um detalhe só visível em runtime).
   para ela, com o achado desta investigação como base.
 - Se a causa for só ambiental, `claude/08-ambiente-local-docker.md` atualizado com a lição
   aprendida (gotcha novo), e nenhuma mudança de código necessária.
+
+## Resultado do diagnóstico (2026-08-03)
+
+Causa raiz encontrada e corrigida direto nesta sessão (sem abrir task 19 separada — o achado surgiu
+de QA ao vivo da task 16, não do roteiro acima executado à parte, mas cobre exatamente o sintoma
+que esta task descreve). Dois bugs distintos, o segundo só ficou visível depois do primeiro corrigido.
+
+### Causa raiz 1 — broadcast de `pipeline_item` derrubava a própria gravação
+
+`app/models/pipeline_item.rb` disparava o dispatch do evento em `after_create`/`after_update`
+(dentro da transação), não em `after_create_commit`/`after_update_commit` como `Conversation`/
+`Contact` já faziam. `push_event_data` devolvia `value:` como `BigDecimal` cru (coluna
+`decimal(15,2)`, inclusive no default `0.0`) — o Sidekiq deste projeto roda em modo `strict_args`
+(padrão desde a v7) e rejeita `BigDecimal` como argumento de job, então
+`ActionCableBroadcastJob.perform_later(...)` sempre lançava `ArgumentError` ao tentar enfileirar o
+broadcast de **qualquer** card criado/atualizado. Como o dispatch rodava dentro da transação
+(`after_create`, não `_commit`), essa exceção **revertia a gravação inteira** — o card nunca era
+persistido, não só o broadcast falhava.
+
+Reproduzido ao vivo via `rails runner` chamando a action exata de uma automation rule: antes do
+fix, `ArgumentError` + `PipelineItem.count == 0`; depois do fix, card criado normalmente.
+
+**Corrigido em:**
+- `app/models/pipeline_item.rb` — `after_create`/`after_update` → `after_create_commit`/
+  `after_update_commit`; `push_event_data` usa `value: json_safe_value` (`value&.to_f`) em vez de
+  `value: value`.
+
+Isso resolve tanto "automação/macro não cria ou move o card" (o card nunca era salvo) quanto "o
+Kanban não atualiza em tempo real" (o broadcast, quando chegava a rodar, também falhava) — as duas
+faces do mesmo bug.
+
+### Causa raiz 2 — corrida entre refetch manual e o tempo real (só apareceu depois da causa 1 corrigida)
+
+Com o tempo real já funcionando, surgiu um segundo sintoma: rodar uma macro em **todos os cards de
+uma etapa** (botão no cabeçalho da coluna, `KanbanColumn.vue` → `KanbanRunMacroMenu.vue`, mesmo
+componente usado no card individual) só movia visualmente o **último** card processado — os demais
+ficavam presos na coluna antiga, embora o backend tivesse movido todos (confirmado atualizando a
+página).
+
+`KanbanRunMacroMenu.vue#runMacro` despachava `kanban/fetchItems` (REST) logo depois de
+`macros/execute` resolver — mas `macros/execute` só enfileira o `MacrosPipelineExecutionJob`, não
+espera ele terminar. Esse refetch buscava uma foto do board **antes** do job mover os cards,
+competindo com os broadcasts em tempo real (um por card). Como a mutation `SET_ITEMS`
+(`store/modules/kanban/mutations.js`) só adiciona um id na ordem da coluna nova sem remover da
+antiga, o card cujo update em tempo real "perdia" a corrida contra a foto desatualizada ficava
+duplicado entre as duas colunas, visualmente preso na antiga. Com 1 card só, o WebSocket quase
+sempre ganhava a corrida — por isso parecia funcionar sempre no card individual.
+
+**Corrigido em:**
+- `app/javascript/dashboard/routes/dashboard/kanban/components/KanbanRunMacroMenu.vue` — removida
+  a chamada `kanban/fetchItems` de dentro do `runMacro()`; o board se atualiza só via WebSocket
+  (mesmo padrão já usado pelo drag-and-drop manual, que nunca fez refetch).
+
+### Lição para `claude/08-ambiente-local-docker.md`
+
+Ainda vale reiniciar `sidekiq` depois de mudar `app/models/*.rb`/`app/listeners/*.rb` em dev (o
+worker não recarrega sozinho) — mas neste caso específico a causa raiz era um bug de código, não
+só um processo desatualizado.

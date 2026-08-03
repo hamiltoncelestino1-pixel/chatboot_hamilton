@@ -41,6 +41,16 @@ RSpec.describe AutomationRules::PipelineActionService do
 
       expect(item.reload.assignee_id).to eq(agent.id)
     end
+
+    it 'assigns an administrator who is not an explicit pipeline member, without raising' do
+      admin = create(:user, account: account, role: :administrator)
+      rule.update!(actions: [{ action_name: 'assign_pipeline_item_agent', action_params: [{ assignee_mode: admin.id.to_s }] }])
+
+      expect { described_class.new(rule, account, item).perform }.not_to raise_error
+
+      expect(item.reload.assignee_id).to eq(admin.id)
+      expect(Current.account).to be_nil
+    end
   end
 
   describe '#perform with assign_pipeline_item_team action' do

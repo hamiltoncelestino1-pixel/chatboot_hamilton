@@ -211,18 +211,21 @@ export default {
       />
       <AutomationActionPipelineStageInput
         v-if="inputType === 'pipeline_stage_select'"
+        :key="action_name"
         v-model="action_params"
         :action-name="action_name"
         :dropdown-max-height="dropdownMaxHeight"
       />
       <AutomationActionPipelineAssigneeInput
         v-if="inputType === 'pipeline_assignee_select'"
+        :key="action_name"
         v-model="action_params"
         :action-name="action_name"
         :dropdown-max-height="dropdownMaxHeight"
       />
       <AutomationActionPipelineLabelInput
         v-if="inputType === 'pipeline_label_select'"
+        :key="action_name"
         v-model="action_params"
         :dropdown-max-height="dropdownMaxHeight"
       />

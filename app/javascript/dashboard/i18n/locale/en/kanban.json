@@ -87,7 +87,8 @@
       },
       "CONVERSATION": {
         "SEARCH_PLACEHOLDER": "Link a conversation...",
-        "CLEAR": "Unlink conversation"
+        "CLEAR": "Unlink conversation",
+        "VIEW": "View Conversation"
       },
       "MOVE_ERROR": "Failed to move card. Please try again.",
       "ASSIGNEE_LABEL": "Assignee",

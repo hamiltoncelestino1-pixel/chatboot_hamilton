@@ -19,6 +19,8 @@ module PipelineItemActions
   end
 
   def assign_pipeline_team(pipeline_item, team_id)
+    return log_invalid_team(pipeline_item, team_id) if team_id.present? && !team_belongs_to_account?(pipeline_item, team_id)
+
     pipeline_item.update!(team_id: team_id)
   end
 
@@ -69,5 +71,16 @@ module PipelineItemActions
 
   def next_position_for_stage(stage)
     (stage.pipeline_items.maximum(:position) || -1) + 1
+  end
+
+  def team_belongs_to_account?(pipeline_item, team_id)
+    pipeline_item.account.team_ids.include?(team_id.to_i)
+  end
+
+  def log_invalid_team(pipeline_item, team_id)
+    Rails.logger.info(
+      "[PipelineItemActions] assign_pipeline_team: team_id=#{team_id} does not belong to " \
+      "account_id=#{pipeline_item.account_id}, skipping"
+    )
   end
 end

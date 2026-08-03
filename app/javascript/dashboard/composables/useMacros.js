@@ -49,6 +49,10 @@ export const useMacros = () => {
           name: t(`MACROS.PRIORITY_TYPES.${item.i18nKey}`),
         }));
       default:
+        // Pipeline actions (move_pipeline_item_stage, assign_pipeline_item_agent, etc.) fall
+        // through here on purpose: their inputs fetch pipelines/stages/agents/labels/teams
+        // directly from the store themselves instead of reading dropdownValues, so there's no
+        // case to add here for those action names.
         return [];
     }
   };
