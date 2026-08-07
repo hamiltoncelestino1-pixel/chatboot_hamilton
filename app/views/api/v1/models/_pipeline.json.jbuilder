@@ -6,5 +6,6 @@ json.account_id resource.account_id
 json.stages_count resource.pipeline_stages.size
 json.enable_auto_assignment resource.enable_auto_assignment
 json.max_assignment_limit resource.max_assignment_limit
+json.sync_assignments resource.sync_assignments
 json.created_at resource.created_at
 json.updated_at resource.updated_at

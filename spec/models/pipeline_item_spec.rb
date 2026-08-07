@@ -155,7 +155,8 @@ RSpec.describe PipelineItem do
       item.update!(pipeline_stage: other_stage)
 
       expect(Rails.configuration.dispatcher).to have_received(:dispatch)
-        .with(Events::Types::PIPELINE_ITEM_UPDATED, kind_of(Time), pipeline_item: item, performed_by: nil)
+        .with(Events::Types::PIPELINE_ITEM_UPDATED, kind_of(Time),
+              pipeline_item: item, performed_by: nil, changed_attributes: kind_of(Hash))
     end
 
     it 'dispatches PIPELINE_ITEM_UPDATED when the assignee changes' do
@@ -166,7 +167,8 @@ RSpec.describe PipelineItem do
       item.update!(assignee: agent)
 
       expect(Rails.configuration.dispatcher).to have_received(:dispatch)
-        .with(Events::Types::PIPELINE_ITEM_UPDATED, kind_of(Time), pipeline_item: item, performed_by: nil)
+        .with(Events::Types::PIPELINE_ITEM_UPDATED, kind_of(Time),
+              pipeline_item: item, performed_by: nil, changed_attributes: kind_of(Hash))
     end
 
     it 'dispatches PIPELINE_ITEM_UPDATED when the team changes' do
@@ -176,7 +178,8 @@ RSpec.describe PipelineItem do
       item.update!(team: team)
 
       expect(Rails.configuration.dispatcher).to have_received(:dispatch)
-        .with(Events::Types::PIPELINE_ITEM_UPDATED, kind_of(Time), pipeline_item: item, performed_by: nil)
+        .with(Events::Types::PIPELINE_ITEM_UPDATED, kind_of(Time),
+              pipeline_item: item, performed_by: nil, changed_attributes: kind_of(Hash))
     end
 
     it 'does not dispatch PIPELINE_ITEM_UPDATED for updates that do not touch stage/assignee/team' do

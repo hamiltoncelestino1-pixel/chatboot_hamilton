@@ -77,6 +77,10 @@
         "MAX_LIMIT_LABEL": "Maximum opportunities per agent",
         "MAX_LIMIT_HELP": "0 means unlimited"
       },
+      "SYNC_ASSIGNMENTS": {
+        "TITLE": "Sync assignments",
+        "DESCRIPTION": "Keep the assignee and team in sync between a card and its linked conversation, in both directions."
+      },
       "API": {
         "SUCCESS": "Agents updated successfully.",
         "ERROR": "Something went wrong. Please try again."

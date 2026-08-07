@@ -8,6 +8,7 @@
 #  max_assignment_limit   :integer          default(0), not null
 #  name                   :string(255)      not null
 #  position               :integer          default(0), not null
+#  sync_assignments       :boolean          default(FALSE), not null
 #  created_at             :datetime         not null
 #  updated_at             :datetime         not null
 #  account_id             :bigint           not null
