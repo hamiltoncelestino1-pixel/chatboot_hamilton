@@ -1,4 +1,7 @@
 class Macros::ExecutionService < ActionService
+  include PipelineItemActions
+  include ConversationPipelineActions
+
   def initialize(macro, conversation, user)
     super(conversation)
     @macro = macro

@@ -22,7 +22,7 @@ class PipelineItemPolicy < ApplicationPolicy
   end
 
   def destroy?
-    @account_user.administrator?
+    @account_user.administrator? || Current.user.assigned_pipelines.include?(record.pipeline)
   end
 
   def reorder?

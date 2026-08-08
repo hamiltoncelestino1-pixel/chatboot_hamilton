@@ -153,7 +153,9 @@
       "CONVERSATION_UPDATED": "Conversa Atualizada",
       "MESSAGE_CREATED": "Mensagem Criada",
       "CONVERSATION_RESOLVED": "Conversa Resolvida",
-      "CONVERSATION_OPENED": "Conversa Aberta"
+      "CONVERSATION_OPENED": "Conversa Aberta",
+      "PIPELINE_ITEM_CREATED": "Card do Pipeline Criado",
+      "PIPELINE_ITEM_STAGE_CHANGED": "Estágio do Card do Pipeline Alterado"
     },
     "ACTIONS": {
       "ASSIGN_AGENT": "Atribuir ao Agente",
@@ -211,7 +213,10 @@
       "ASSIGNEE_NAME": "Agente atribuído",
       "TEAM_NAME": "Time",
       "PRIORITY": "Prioridade",
-      "LABELS": "Etiquetas"
+      "LABELS": "Etiquetas",
+      "PIPELINE": "Pipeline",
+      "STAGE": "Estágio",
+      "VALUE": "Valor"
     }
   }
 }

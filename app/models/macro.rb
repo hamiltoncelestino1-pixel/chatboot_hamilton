@@ -35,14 +35,20 @@ class Macro < ApplicationRecord
   CONVERSATION_ACTIONS_ATTRS = %w[send_message add_label assign_team assign_agent mute_conversation change_status remove_label
                                   remove_assigned_agent remove_assigned_team resolve_conversation snooze_conversation
                                   change_priority send_email_transcript send_attachment add_private_note
-                                  send_webhook_event].freeze
+                                  send_webhook_event create_pipeline_item move_pipeline_item_stage
+                                  assign_pipeline_item_agent assign_pipeline_item_team add_pipeline_item_label
+                                  remove_pipeline_item_label update_pipeline_item export_pipeline_item].freeze
 
   # No create_pipeline_item here: a macro always runs against a card that already exists
   # (it's the target of the execution), unlike an automation rule (task 04) where the card
   # may not exist yet when the rule fires.
   PIPELINE_ACTIONS_ATTRS = %w[move_pipeline_item_stage assign_pipeline_item_agent assign_pipeline_item_team
                               add_pipeline_item_label remove_pipeline_item_label update_pipeline_item
-                              export_pipeline_item].freeze
+                              export_pipeline_item send_webhook_event
+                              send_message add_label assign_team assign_agent mute_conversation change_status
+                              remove_label remove_assigned_agent remove_assigned_team resolve_conversation
+                              snooze_conversation change_priority send_email_transcript send_attachment
+                              add_private_note].freeze
 
   def set_visibility(user, params)
     self.visibility = params[:visibility]

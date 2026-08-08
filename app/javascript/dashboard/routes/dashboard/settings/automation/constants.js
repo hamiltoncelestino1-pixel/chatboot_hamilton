@@ -844,6 +844,160 @@ export const AUTOMATIONS = {
       },
     ],
   },
+  // pipeline_item_created/pipeline_item_stage_changed (task 09's native pipeline triggers):
+  // stage_id lists every stage of every pipeline in the account rather than cascading from a
+  // pipeline_id condition on a sibling row - the generic condition-row component has no way
+  // for one row to know another row's selected value, so this is the simplest option that
+  // doesn't require new cross-row logic. Combining pipeline_id = X AND stage_id = Y conditions
+  // achieves the same result, since the backend already evaluates both with AND.
+  pipeline_item_created: {
+    conditions: [
+      {
+        key: 'pipeline_id',
+        name: 'PIPELINE',
+        inputType: 'search_select',
+        filterOperators: OPERATOR_TYPES_3,
+      },
+      {
+        key: 'stage_id',
+        name: 'STAGE',
+        inputType: 'search_select',
+        filterOperators: OPERATOR_TYPES_3,
+      },
+      {
+        key: 'value',
+        name: 'VALUE',
+        inputType: 'plain_text',
+        filterOperators: OPERATOR_TYPES_2,
+      },
+      {
+        key: 'assignee_id',
+        name: 'ASSIGNEE_NAME',
+        inputType: 'search_select',
+        filterOperators: OPERATOR_TYPES_3,
+      },
+      {
+        key: 'team_id',
+        name: 'TEAM_NAME',
+        inputType: 'search_select',
+        filterOperators: OPERATOR_TYPES_3,
+      },
+      {
+        key: 'labels',
+        name: 'LABELS',
+        inputType: 'multi_select',
+        filterOperators: OPERATOR_TYPES_3,
+      },
+    ],
+    actions: [
+      {
+        key: 'move_pipeline_item_stage',
+        name: 'MOVE_PIPELINE_ITEM_STAGE',
+      },
+      {
+        key: 'assign_pipeline_item_agent',
+        name: 'ASSIGN_PIPELINE_ITEM_AGENT',
+      },
+      {
+        key: 'assign_pipeline_item_team',
+        name: 'ASSIGN_PIPELINE_ITEM_TEAM',
+      },
+      {
+        key: 'add_pipeline_item_label',
+        name: 'ADD_PIPELINE_ITEM_LABEL',
+      },
+      {
+        key: 'remove_pipeline_item_label',
+        name: 'REMOVE_PIPELINE_ITEM_LABEL',
+      },
+      {
+        key: 'update_pipeline_item',
+        name: 'UPDATE_PIPELINE_ITEM',
+      },
+      {
+        key: 'export_pipeline_item',
+        name: 'EXPORT_PIPELINE_ITEM',
+      },
+      {
+        key: 'send_webhook_event',
+        name: 'SEND_WEBHOOK_EVENT',
+      },
+    ],
+  },
+  pipeline_item_stage_changed: {
+    conditions: [
+      {
+        key: 'pipeline_id',
+        name: 'PIPELINE',
+        inputType: 'search_select',
+        filterOperators: OPERATOR_TYPES_3,
+      },
+      {
+        key: 'stage_id',
+        name: 'STAGE',
+        inputType: 'search_select',
+        filterOperators: OPERATOR_TYPES_3,
+      },
+      {
+        key: 'value',
+        name: 'VALUE',
+        inputType: 'plain_text',
+        filterOperators: OPERATOR_TYPES_2,
+      },
+      {
+        key: 'assignee_id',
+        name: 'ASSIGNEE_NAME',
+        inputType: 'search_select',
+        filterOperators: OPERATOR_TYPES_3,
+      },
+      {
+        key: 'team_id',
+        name: 'TEAM_NAME',
+        inputType: 'search_select',
+        filterOperators: OPERATOR_TYPES_3,
+      },
+      {
+        key: 'labels',
+        name: 'LABELS',
+        inputType: 'multi_select',
+        filterOperators: OPERATOR_TYPES_3,
+      },
+    ],
+    actions: [
+      {
+        key: 'move_pipeline_item_stage',
+        name: 'MOVE_PIPELINE_ITEM_STAGE',
+      },
+      {
+        key: 'assign_pipeline_item_agent',
+        name: 'ASSIGN_PIPELINE_ITEM_AGENT',
+      },
+      {
+        key: 'assign_pipeline_item_team',
+        name: 'ASSIGN_PIPELINE_ITEM_TEAM',
+      },
+      {
+        key: 'add_pipeline_item_label',
+        name: 'ADD_PIPELINE_ITEM_LABEL',
+      },
+      {
+        key: 'remove_pipeline_item_label',
+        name: 'REMOVE_PIPELINE_ITEM_LABEL',
+      },
+      {
+        key: 'update_pipeline_item',
+        name: 'UPDATE_PIPELINE_ITEM',
+      },
+      {
+        key: 'export_pipeline_item',
+        name: 'EXPORT_PIPELINE_ITEM',
+      },
+      {
+        key: 'send_webhook_event',
+        name: 'SEND_WEBHOOK_EVENT',
+      },
+    ],
+  },
 };
 
 export const AUTOMATION_RULE_EVENTS = [
@@ -866,6 +1020,14 @@ export const AUTOMATION_RULE_EVENTS = [
   {
     key: 'conversation_opened',
     value: 'CONVERSATION_OPENED',
+  },
+  {
+    key: 'pipeline_item_created',
+    value: 'PIPELINE_ITEM_CREATED',
+  },
+  {
+    key: 'pipeline_item_stage_changed',
+    value: 'PIPELINE_ITEM_STAGE_CHANGED',
   },
 ];
 

@@ -91,6 +91,34 @@ execução (11 é a mais crítica — risco de travar `db:migrate` em produção
 | [17](17-limpeza-itens-menores-pipeline.md) | Limpeza: 4 itens menores agrupados | várias |
 | [18](18-diagnostico-tempo-real-kanban.md) | Diagnóstico ao vivo do tempo real (revisão estática não achou bug de código) | task 10 |
 
+## Ajustes de uso real pós-lançamento (2026-08-07) — Grupo E
+
+Depois de usar o sistema em produção, o cliente pediu 4 ajustes que a investigação (3 agentes
+Explore + leitura direta) mostrou serem, em boa parte, lacunas de UI sobre um backend que já
+existia — não trabalho do zero. Tasks, em ordem recomendada:
+
+| # | Task | Cobre |
+|---|------|-------|
+| [22](22-policy-delete-card-agentes.md) | Policy: agentes membros do pipeline podem deletar card (hoje só admin) | isolada |
+| [23](23-webhook-nativo-pipeline.md) | Backend: `send_webhook_event` nativo de pipeline (plumbing compartilhado) | isolada |
+| [24](24-frontend-gatilho-nativo-automacao.md) | Frontend: gatilho de automação por pipeline+stage (backend já existia desde a task 09) | 23 |
+| [25](25-i18n-gatilho-nativo-automacao.md) | i18n `automation.json` (en+pt_BR) para a task 24 | 24 |
+| [26](26-macro-conversa-acoes-pipeline.md) | Backend: macro de conversa executando ações de pipeline (extrai concern de `AutomationRules::ActionService`) | — |
+| [27](27-macro-pipeline-acoes-conversa.md) | Backend: macro de pipeline executando ações na conversa vinculada (delega para `Macros::ExecutionService`) | 23 |
+| [28](28-fix-macros-controller-execute-macro-type.md) | Backend: `MacrosController#execute` valida `macro_type` vs parâmetro (bug latente encontrado na investigação) | — |
+| [29](29-frontend-i18n-macro-acoes-cruzadas.md) | Frontend + i18n: expor ações cruzadas de macro (`macros.json` en+pt_BR) | 26, 27, 23 |
+
+Decisões confirmadas com o cliente para este grupo:
+- Delete de card: agente **membro do pipeline** pode deletar qualquer card daquele pipeline
+  (não precisa ser o assignee do card específico) — mesmo critério de `assigned_pipelines` já
+  usado em `PipelinePolicy#show?`.
+- Webhook a partir de pipeline é **ação individual** (dentro de uma automação/macro específica),
+  não uma extensão do sistema de assinatura global `Webhook`/`ALLOWED_WEBHOOK_EVENTS` — os dois
+  sistemas continuam separados.
+- Gatilho de automação por pipeline+stage não precisou de mudança de schema — já é modelado como
+  `event_name` genérico + `conditions` (`pipeline_id`/`stage_id`), mecanismo que já existia
+  desde a task 09.
+
 ## Riscos consolidados (ver detalhe em cada task)
 
 1. Condição de corrida na criação de cards sem índice único no banco (mitigado na task 01).

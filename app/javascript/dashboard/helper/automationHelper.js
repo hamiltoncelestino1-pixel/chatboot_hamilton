@@ -134,6 +134,8 @@ export const getConditionOptions = ({
   type,
   priorityOptions,
   messageTypeOptions,
+  pipelines,
+  pipelineStages,
 }) => {
   if (isCustomAttributeCheckbox(customAttributes, type)) {
     return booleanFilterOptions;
@@ -157,6 +159,8 @@ export const getConditionOptions = ({
     private_note: booleanFilterOptions,
     priority: priorityOptions,
     labels: generateConditionOptions(labels, 'title'),
+    pipeline_id: pipelines,
+    stage_id: pipelineStages,
   };
 
   return conditionFilterMaps[type];

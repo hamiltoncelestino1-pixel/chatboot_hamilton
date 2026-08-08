@@ -115,6 +115,25 @@ RSpec.describe AutomationRules::PipelineActionService do
     end
   end
 
+  describe '#perform with send_webhook_event action' do
+    it 'sends the webhook with the pipeline item data and the automation event label' do
+      rule.update!(actions: [{ action_name: 'send_webhook_event', action_params: ['https://example.com'] }])
+
+      expect(WebhookJob).to receive(:perform_later).with(
+        'https://example.com',
+        hash_including(id: item.id, event: 'automation_event.pipeline_item_stage_changed')
+      )
+      described_class.new(rule, account, item).perform
+    end
+
+    it 'does not send the webhook when the url is blank' do
+      rule.update!(actions: [{ action_name: 'send_webhook_event', action_params: [] }])
+
+      expect(WebhookJob).not_to receive(:perform_later)
+      described_class.new(rule, account, item).perform
+    end
+  end
+
   describe 'per-action rescue' do
     it 'logs via ChatwootExceptionTracker and keeps running the remaining actions when one action fails' do
       outsider = create(:user, account: account, role: :agent)

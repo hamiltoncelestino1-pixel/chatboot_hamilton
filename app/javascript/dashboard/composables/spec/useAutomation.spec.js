@@ -36,6 +36,7 @@ describe('useAutomation', () => {
             : [{ id: 2, name: 'Contact Attribute' }];
         },
       },
+      'kanban/getStagesForPipeline': { value: () => [] },
     });
     useMapGetter.mockImplementation(getter => {
       const getterMap = {
@@ -46,6 +47,7 @@ describe('useAutomation', () => {
         'labels/getLabels': labels,
         'teams/getTeams': teams,
         'sla/getSLA': slaPolicies,
+        'kanban/getPipelines': [],
       };
       return { value: getterMap[getter] };
     });
@@ -202,6 +204,8 @@ describe('useAutomation', () => {
     automationTypes.conversation_updated = { conditions: [] };
     automationTypes.conversation_opened = { conditions: [] };
     automationTypes.conversation_resolved = { conditions: [] };
+    automationTypes.pipeline_item_created = { conditions: [] };
+    automationTypes.pipeline_item_stage_changed = { conditions: [] };
 
     automationHelper.generateCustomAttributeTypes.mockReturnValue([]);
     automationHelper.generateCustomAttributes.mockReturnValue([]);
