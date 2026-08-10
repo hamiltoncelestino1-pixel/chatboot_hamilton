@@ -102,6 +102,27 @@ class PipelineItem < ApplicationRecord
     value&.to_f
   end
 
+  def webhook_data
+    {
+      id: id,
+      title: title,
+      value: value,
+      notes: notes,
+      pipeline_id: pipeline_id,
+      pipeline_name: pipeline&.name,
+      pipeline_stage_id: pipeline_stage_id,
+      pipeline_stage_name: pipeline_stage&.name,
+      assignee_id: assignee_id,
+      assignee_name: assignee&.name,
+      team_id: team_id,
+      team_name: team&.name,
+      contact_id: contact_id,
+      conversation_id: conversation_id,
+      created_at: created_at,
+      updated_at: updated_at
+    }
+  end
+
   # Deliberately not Contact#push_event_data: that uses `thumbnail`, but the Kanban UI
   # (mirroring the pipeline_item API jbuilder) expects `avatar_url`.
   def contact_push_event_data

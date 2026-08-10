@@ -19,7 +19,7 @@ module PipelineItemActions
   end
 
   def assign_pipeline_team(pipeline_item, team_id)
-    return log_invalid_team(pipeline_item, team_id) if team_id.present? && !team_belongs_to_account?(pipeline_item, team_id)
+    return log_invalid_team(pipeline_item, team_id) if team_id.present? && !pipeline_team_belongs_to_account?(pipeline_item, team_id)
 
     pipeline_item.update!(team_id: team_id)
   end
@@ -67,13 +67,30 @@ module PipelineItemActions
     team_mode
   end
 
+  # Named distinctly from ActionService's own send_webhook_event (see module comment above) -
+  # each consumer (AutomationRules::PipelineActionService, Macros::PipelineExecutionService)
+  # wraps this with its own event_label, mirroring the conversation-side split between
+  # "automation_event.#{@rule.event_name}" and 'macro.executed'.
+  def send_pipeline_webhook_event(pipeline_item, url_params, event_label)
+    return if url_params.blank? || url_params[0].blank?
+
+    payload = pipeline_item.webhook_data.merge(event: event_label)
+    WebhookJob.perform_later(url_params[0], payload)
+  end
+
   private
 
   def next_position_for_stage(stage)
     (stage.pipeline_items.maximum(:position) || -1) + 1
   end
 
-  def team_belongs_to_account?(pipeline_item, team_id)
+  # Named distinctly from ActionService's own private team_belongs_to_account?(team_ids) -
+  # both are private instance methods, so once a class includes this module alongside
+  # inheriting from ActionService (AutomationRules::ActionService, Macros::ExecutionService,
+  # task 26), a same-named method here would silently shadow ActionService's version for
+  # every implicit-receiver call inside conversation-level actions like #assign_team,
+  # regardless of which class the call originates in.
+  def pipeline_team_belongs_to_account?(pipeline_item, team_id)
     pipeline_item.account.team_ids.include?(team_id.to_i)
   end
 

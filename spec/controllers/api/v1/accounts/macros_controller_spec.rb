@@ -407,7 +407,12 @@ RSpec.describe 'Api::V1::Accounts::MacrosController', type: :request do
                  headers: administrator.create_new_auth_token
           end
 
-          expect(conversation.messages.activity.last.content).to eq("Assigned to #{user_1.name} by #{administrator.name}")
+          # The macro's own assign_team action (first in the actions list, see the before
+          # block above) runs before assign_agent, so by this point the conversation already
+          # has a team - hence the "via %{team_name}" wording (config/locales/en.yml,
+          # conversations.activity.team.assigned_with_assignee) instead of the plain
+          # assignee-only message.
+          expect(conversation.messages.activity.last.content).to eq("Assigned to #{user_1.name} via #{team.name} by #{administrator.name}")
         end
 
         it 'Assign the agent when he is not inbox member' do
@@ -519,6 +524,18 @@ RSpec.describe 'Api::V1::Accounts::MacrosController', type: :request do
 
           expect(conversation.reload.assignee).to be_nil
         end
+
+        it 'returns 422 and enqueues no job when pipeline_item_ids is sent for a conversation macro' do
+          expect(MacrosExecutionJob).not_to receive(:perform_later)
+          expect(MacrosPipelineExecutionJob).not_to receive(:perform_later)
+
+          post "/api/v1/accounts/#{account.id}/macros/#{macro.id}/execute",
+               params: { pipeline_item_ids: [1] },
+               headers: administrator.create_new_auth_token
+
+          expect(response).to have_http_status(:unprocessable_entity)
+          expect(response.parsed_body['error']).to eq(I18n.t('errors.macros.execute.conversation_ids_required'))
+        end
       end
     end
   end
@@ -552,6 +569,18 @@ RSpec.describe 'Api::V1::Accounts::MacrosController', type: :request do
            headers: agent.create_new_auth_token
 
       expect(response).to have_http_status(:success)
+    end
+
+    it 'returns 422 and enqueues no job when conversation_ids is sent for a pipeline macro' do
+      expect(MacrosExecutionJob).not_to receive(:perform_later)
+      expect(MacrosPipelineExecutionJob).not_to receive(:perform_later)
+
+      post "/api/v1/accounts/#{account.id}/macros/#{macro.id}/execute",
+           params: { conversation_ids: [1] },
+           headers: agent.create_new_auth_token
+
+      expect(response).to have_http_status(:unprocessable_entity)
+      expect(response.parsed_body['error']).to eq(I18n.t('errors.macros.execute.pipeline_item_ids_required'))
     end
 
     it 'runs the macro only against the item from a pipeline the agent has access to' do

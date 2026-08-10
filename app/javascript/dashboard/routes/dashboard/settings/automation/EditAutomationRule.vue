@@ -1,6 +1,6 @@
 <script setup>
-import { ref, watch } from 'vue';
-import { useMapGetter } from 'dashboard/composables/store';
+import { ref, onMounted, watch } from 'vue';
+import { useStore, useMapGetter } from 'dashboard/composables/store';
 import { useAutomation } from 'dashboard/composables/useAutomation';
 import { useEditableAutomation } from 'dashboard/composables/useEditableAutomation';
 import AutomationRuleForm from './AutomationRuleForm.vue';
@@ -15,6 +15,7 @@ const props = defineProps({
 
 const emit = defineEmits(['saveAutomation']);
 
+const store = useStore();
 const allCustomAttributes = useMapGetter('attributes/getAttributes');
 const formRef = ref(null);
 
@@ -57,6 +58,10 @@ watch(
   },
   { immediate: true }
 );
+
+onMounted(() => {
+  store.dispatch('kanban/fetchPipelines');
+});
 
 defineExpose({ open, close });
 </script>

@@ -9,10 +9,12 @@ import { useAlert } from 'dashboard/composables';
 import actionQueryGenerator from 'dashboard/helper/actionQueryGenerator.js';
 import { useMacros } from 'dashboard/composables/useMacros';
 
-// Object-shaped action_params (pipeline_create_item excluded - macros never create a
-// card, see pipeline_tasks/06) persist as an array-of-one; unwrap to a plain object for
+// Object-shaped action_params persist as an array-of-one; unwrap to a plain object for
 // editing, mirroring the same fix applied to useEditableAutomation.js in task 05.
+// pipeline_create_item included since pipeline_tasks/26 (a conversation macro can now
+// create a pipeline card too, unlike a pipeline macro - see pipeline_tasks/06).
 const PIPELINE_MACRO_INPUT_TYPES = [
+  'pipeline_create_item',
   'pipeline_stage_select',
   'pipeline_assignee_select',
   'pipeline_label_select',

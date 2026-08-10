@@ -154,7 +154,9 @@
       "CONVERSATION_UPDATED": "Conversation Updated",
       "MESSAGE_CREATED": "Message Created",
       "CONVERSATION_RESOLVED": "Conversation Resolved",
-      "CONVERSATION_OPENED": "Conversation Opened"
+      "CONVERSATION_OPENED": "Conversation Opened",
+      "PIPELINE_ITEM_CREATED": "Pipeline Card Created",
+      "PIPELINE_ITEM_STAGE_CHANGED": "Pipeline Card Stage Changed"
     },
     "ACTIONS": {
       "ASSIGN_AGENT": "Assign to Agent",
@@ -213,7 +215,10 @@
       "ASSIGNEE_NAME": "Assignee",
       "TEAM_NAME": "Team",
       "PRIORITY": "Priority",
-      "LABELS": "Labels"
+      "LABELS": "Labels",
+      "PIPELINE": "Pipeline",
+      "STAGE": "Stage",
+      "VALUE": "Value"
     }
   }
 }

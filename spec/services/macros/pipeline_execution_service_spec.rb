@@ -107,6 +107,44 @@ RSpec.describe Macros::PipelineExecutionService do
     end
   end
 
+  describe '#perform with send_webhook_event action' do
+    it 'sends the webhook with the pipeline item data and the macro event label' do
+      macro = macro_with([{ action_name: 'send_webhook_event', action_params: ['https://example.com'] }])
+
+      expect(WebhookJob).to receive(:perform_later).with(
+        'https://example.com',
+        hash_including(id: item.id, event: 'macro.executed')
+      )
+      described_class.new(macro, item, admin).perform
+    end
+
+    it 'does not send the webhook when the url is blank' do
+      macro = macro_with([{ action_name: 'send_webhook_event', action_params: [] }])
+
+      expect(WebhookJob).not_to receive(:perform_later)
+      described_class.new(macro, item, admin).perform
+    end
+  end
+
+  describe '#perform with a conversation action (add_label)' do
+    it 'applies the action to the linked conversation' do
+      conversation = create(:conversation, account: account, contact: contact)
+      item.update!(conversation: conversation)
+      macro = macro_with([{ action_name: 'add_label', action_params: %w[quente] }])
+
+      described_class.new(macro, item, admin).perform
+
+      expect(conversation.reload.label_list).to include('quente')
+    end
+
+    it 'does nothing and does not raise when the card has no linked conversation' do
+      expect(item.conversation).to be_nil
+      macro = macro_with([{ action_name: 'add_label', action_params: %w[quente] }])
+
+      expect { described_class.new(macro, item, admin).perform }.not_to raise_error
+    end
+  end
+
   describe 'per-action rescue' do
     it 'logs via ChatwootExceptionTracker and keeps running the remaining actions when one action fails' do
       # Not a pipeline member, so assigning them violates PipelineItem's

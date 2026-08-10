@@ -27,6 +27,23 @@ export default function useAutomationValues() {
   const labels = useMapGetter('labels/getLabels');
   const teams = useMapGetter('teams/getTeams');
   const slaPolicies = useMapGetter('sla/getSLA');
+  const pipelines = useMapGetter('kanban/getPipelines');
+
+  const pipelineOptions = computed(() =>
+    pipelines.value.map(pipeline => ({ id: pipeline.id, name: pipeline.name }))
+  );
+
+  // Every stage of every pipeline, label disambiguated as "<Pipeline> — <Stage>" - see the
+  // comment on pipeline_item_created/pipeline_item_stage_changed in ./automation/constants.js
+  // for why this doesn't cascade from a sibling pipeline_id condition row.
+  const pipelineStageOptions = computed(() =>
+    pipelines.value.flatMap(pipeline =>
+      getters['kanban/getStagesForPipeline'].value(pipeline.id).map(stage => ({
+        id: stage.id,
+        name: `${pipeline.name} — ${stage.name}`,
+      }))
+    )
+  );
 
   const booleanFilterOptions = computed(() => [
     { id: true, name: t('FILTER.ATTRIBUTE_LABELS.TRUE') },
@@ -112,6 +129,8 @@ export default function useAutomationValues() {
       languages,
       countries,
       type,
+      pipelines: pipelineOptions.value,
+      pipelineStages: pipelineStageOptions.value,
     });
   };
 

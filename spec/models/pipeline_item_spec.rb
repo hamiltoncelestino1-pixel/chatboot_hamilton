@@ -238,4 +238,49 @@ RSpec.describe PipelineItem do
       expect(data[:team]).to be_nil
     end
   end
+
+  describe '#webhook_data' do
+    let(:agent) { create(:user, account: account, role: :agent) }
+    let(:team) { create(:team, account: account) }
+    let(:conversation) { create(:conversation, account: account, contact: contact) }
+    let(:item) do
+      create(:pipeline_member, pipeline: pipeline, user: agent)
+      create(:pipeline_item, pipeline_stage: stage, account: account, contact: contact, conversation: conversation,
+                             assignee: agent, team: team, title: 'Deal', value: 100, notes: 'follow up')
+    end
+
+    it 'returns the expected flat hash' do
+      data = item.webhook_data
+
+      expect(data).to eq(
+        id: item.id,
+        title: 'Deal',
+        value: item.value,
+        notes: 'follow up',
+        pipeline_id: pipeline.id,
+        pipeline_name: pipeline.name,
+        pipeline_stage_id: stage.id,
+        pipeline_stage_name: stage.name,
+        assignee_id: agent.id,
+        assignee_name: agent.name,
+        team_id: team.id,
+        team_name: team.name,
+        contact_id: contact.id,
+        conversation_id: conversation.id,
+        created_at: item.created_at,
+        updated_at: item.updated_at
+      )
+    end
+
+    it 'returns nil assignee/team names when absent' do
+      item_without_assignee = create(:pipeline_item, pipeline_stage: stage, account: account, contact: contact)
+
+      data = item_without_assignee.webhook_data
+
+      expect(data[:assignee_id]).to be_nil
+      expect(data[:assignee_name]).to be_nil
+      expect(data[:team_id]).to be_nil
+      expect(data[:team_name]).to be_nil
+    end
+  end
 end

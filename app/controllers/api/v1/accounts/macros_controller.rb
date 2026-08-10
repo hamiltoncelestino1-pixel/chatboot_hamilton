@@ -49,9 +49,14 @@ class Api::V1::Accounts::MacrosController < Api::V1::Accounts::BaseController
   end
 
   def execute
-    if params[:pipeline_item_ids].present?
+    case @macro.macro_type
+    when 'pipeline_item'
+      return render_could_not_create_error(I18n.t('errors.macros.execute.pipeline_item_ids_required')) if params[:pipeline_item_ids].blank?
+
       ::MacrosPipelineExecutionJob.perform_later(@macro, pipeline_item_ids: authorized_pipeline_item_ids, user: Current.user)
     else
+      return render_could_not_create_error(I18n.t('errors.macros.execute.conversation_ids_required')) if params[:conversation_ids].blank?
+
       ::MacrosExecutionJob.perform_later(@macro, conversation_ids: params[:conversation_ids], user: Current.user)
     end
 

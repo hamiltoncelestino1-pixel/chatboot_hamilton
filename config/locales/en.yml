@@ -147,6 +147,10 @@ en:
       duplicate_contact_in_pipeline: "This contact already has a card in this pipeline."
     pipeline_stage:
       cannot_delete_special_stage: This stage is required and cannot be deleted
+    macros:
+      execute:
+        pipeline_item_ids_required: pipeline_item_ids is required to execute a pipeline macro
+        conversation_ids_required: conversation_ids is required to execute a conversation macro
     mfa:
       already_enabled: MFA is already enabled
       not_enabled: MFA is not enabled
