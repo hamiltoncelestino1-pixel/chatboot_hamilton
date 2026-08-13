@@ -76,6 +76,10 @@ class Api::V1::Accounts::PipelineItemsController < Api::V1::Accounts::BaseContro
 
   private
 
+  def check_authorization
+    authorize(@item || PipelineItem)
+  end
+
   def nested_pipeline_index
     @pipeline = policy_scope(Current.account.pipelines).find(params[:pipeline_id])
     @items = pipeline_items_scope
