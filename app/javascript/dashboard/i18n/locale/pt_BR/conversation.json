@@ -363,7 +363,8 @@
       "MACROS": "Macros",
       "LINEAR_ISSUES": "Problemas do Linear vinculados",
       "SHOPIFY_ORDERS": "Pedidos do Shopify",
-      "OPPORTUNITIES": "Oportunidades"
+      "OPPORTUNITIES": "Oportunidades",
+      "TASKS": "Tarefas"
     },
     "OPPORTUNITIES": {
       "EMPTY_STATE": "Nenhuma oportunidade vinculada a esta conversa",

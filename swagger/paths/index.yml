@@ -628,6 +628,32 @@
   delete:
     $ref: ./application/pipelines/members/delete.yml
 
+# Tasks
+
+/api/v1/accounts/{account_id}/tasks:
+  parameters:
+    - $ref: '#/components/parameters/account_id'
+  get:
+    $ref: ./application/tasks/index.yml
+  post:
+    $ref: ./application/tasks/create.yml
+/api/v1/accounts/{account_id}/tasks/{task_id}:
+  parameters:
+    - $ref: '#/components/parameters/account_id'
+    - $ref: '#/components/parameters/task_id'
+  get:
+    $ref: ./application/tasks/show.yml
+  patch:
+    $ref: ./application/tasks/update.yml
+  delete:
+    $ref: ./application/tasks/delete.yml
+/api/v1/accounts/{account_id}/tasks/{task_id}/complete:
+  parameters:
+    - $ref: '#/components/parameters/account_id'
+    - $ref: '#/components/parameters/task_id'
+  patch:
+    $ref: ./application/tasks/complete.yml
+
 ### Custom Filters goes here
 
 # Custom Filters

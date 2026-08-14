@@ -58,6 +58,17 @@ Exemplo completo e real (controller, views, rotas, YAMLs de Swagger, rake task, 
    - **Parâmetro de path novo** (se houver): `swagger/parameters/<nome>.yml`, registrado em
      `swagger/parameters/index.yml`.
 
+   **Se a `tag` usada for nova** (nenhum endpoint existente usa esse nome ainda), tem um
+   **5º registro obrigatório** que não segue o padrão `$ref`/pasta acima: `swagger/index.yml`
+   mantém, à parte de tudo isso, uma lista mestra `tags:` (nome + description) e um
+   `x-tagGroups:` (quais tags aparecem em cada grupo do menu — Platform/Application/Client/
+   Others) que o Swagger UI usa pra montar a navegação lateral. Uma tag nova só citada nos
+   YAMLs de operação **funciona** (o Skooma valida a resposta normalmente, o
+   `swagger:build` não erra) mas **não aparece no menu do Swagger UI** — o JSON gerado tem os
+   paths certos, só não há como navegar até eles pela UI. Adicionar a tag em `swagger/index.yml`
+   nos dois lugares (bloco `tags:` e dentro do grupo certo em `x-tagGroups:`, normalmente
+   `Application` pra endpoints de conta) antes de considerar a documentação pronta.
+
 6. **Rodar o build do Swagger** antes de considerar o endpoint pronto:
    ```bash
    bundle exec rails swagger:build

@@ -9,6 +9,7 @@ export const DEFAULT_CONVERSATION_SIDEBAR_ITEMS_ORDER = Object.freeze([
   { name: 'contact_notes' },
   { name: 'previous_conversation' },
   { name: 'opportunities' },
+  { name: 'tasks' },
   { name: 'conversation_participants' },
   { name: 'linear_issues' },
   { name: 'shopify_orders' },

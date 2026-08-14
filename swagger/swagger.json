@@ -8741,6 +8741,259 @@
         }
       }
     },
+    "/api/v1/accounts/{account_id}/tasks": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/account_id"
+        }
+      ],
+      "get": {
+        "tags": [
+          "Tasks"
+        ],
+        "operationId": "list-tasks",
+        "summary": "List tasks",
+        "security": [
+          {
+            "userApiKey": []
+          }
+        ],
+        "description": "List tasks for the account. Pass ?contact_id=/?conversation_id=/?pipeline_item_id= to filter.",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/task"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/bad_request_error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Tasks"
+        ],
+        "operationId": "create-a-task",
+        "summary": "Create a task",
+        "security": [
+          {
+            "userApiKey": []
+          }
+        ],
+        "description": "Create a new task linked to a contact, and optionally a conversation or pipeline card",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/task_create_payload"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/task"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/bad_request_error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/accounts/{account_id}/tasks/{task_id}": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/account_id"
+        },
+        {
+          "$ref": "#/components/parameters/task_id"
+        }
+      ],
+      "get": {
+        "tags": [
+          "Tasks"
+        ],
+        "operationId": "show-a-task",
+        "summary": "Show a task",
+        "security": [
+          {
+            "userApiKey": []
+          }
+        ],
+        "description": "Show details of a task",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/task"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/bad_request_error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Tasks"
+        ],
+        "operationId": "update-a-task",
+        "summary": "Update a task",
+        "security": [
+          {
+            "userApiKey": []
+          }
+        ],
+        "description": "Update a task's title, due date, or assignee",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/task_update_payload"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/task"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/bad_request_error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Tasks"
+        ],
+        "operationId": "delete-a-task",
+        "summary": "Delete a task",
+        "security": [
+          {
+            "userApiKey": []
+          }
+        ],
+        "description": "Remove a task. Allowed for the task's assignee or an account administrator",
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/bad_request_error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/accounts/{account_id}/tasks/{task_id}/complete": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/account_id"
+        },
+        {
+          "$ref": "#/components/parameters/task_id"
+        }
+      ],
+      "patch": {
+        "tags": [
+          "Tasks"
+        ],
+        "operationId": "complete-a-task",
+        "summary": "Complete a task",
+        "security": [
+          {
+            "userApiKey": []
+          }
+        ],
+        "description": "Mark a task as completed",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/task"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/bad_request_error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/accounts/{account_id}/custom_filters": {
       "parameters": [
         {
@@ -12004,6 +12257,59 @@
           }
         }
       },
+      "task": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number",
+            "description": "The ID of the task"
+          },
+          "title": {
+            "type": "string",
+            "description": "The title of the task"
+          },
+          "due_date": {
+            "type": "number",
+            "description": "Unix timestamp of when the task is due"
+          },
+          "completed_at": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "description": "Unix timestamp of when the task was completed, if any"
+          },
+          "contact_id": {
+            "type": "number",
+            "description": "The ID of the contact this task belongs to"
+          },
+          "conversation_id": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "description": "The ID of the linked conversation, if any"
+          },
+          "pipeline_item_id": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "description": "The ID of the linked pipeline card, if any"
+          },
+          "assignee": {
+            "$ref": "#/components/schemas/agent"
+          },
+          "created_at": {
+            "type": "number",
+            "description": "Unix timestamp of when the task was created"
+          },
+          "updated_at": {
+            "type": "number",
+            "description": "Unix timestamp of when the task was last updated"
+          }
+        }
+      },
       "label": {
         "type": "object",
         "properties": {
@@ -13305,6 +13611,54 @@
           "stage_id",
           "ordered_ids"
         ]
+      },
+      "task_create_payload": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "description": "The title of the task"
+          },
+          "due_date": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the task is due"
+          },
+          "contact_id": {
+            "type": "number",
+            "description": "The ID of the contact this task belongs to"
+          },
+          "conversation_id": {
+            "type": "number",
+            "description": "The ID of an optional linked conversation"
+          },
+          "pipeline_item_id": {
+            "type": "number",
+            "description": "The ID of an optional linked pipeline card"
+          },
+          "assignee_id": {
+            "type": "number",
+            "description": "The ID of the responsible agent. Defaults to the current user if omitted"
+          }
+        }
+      },
+      "task_update_payload": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "description": "The title of the task"
+          },
+          "due_date": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the task is due"
+          },
+          "assignee_id": {
+            "type": "number",
+            "description": "The ID of the responsible agent"
+          }
+        }
       },
       "conversation_create_payload": {
         "type": "object",
@@ -16093,6 +16447,15 @@
         "required": true,
         "description": "The ID of the pipeline item"
       },
+      "task_id": {
+        "in": "path",
+        "name": "task_id",
+        "schema": {
+          "type": "integer"
+        },
+        "required": true,
+        "description": "The ID of the task"
+      },
       "inbox_id": {
         "in": "path",
         "name": "inbox_id",
@@ -16371,6 +16734,10 @@
       "description": "CRM Pipeline (Kanban) management APIs"
     },
     {
+      "name": "Tasks",
+      "description": "Follow-up task management APIs"
+    },
+    {
       "name": "Teams",
       "description": "Team management APIs"
     },
@@ -16434,6 +16801,7 @@
         "Messages",
         "Profile",
         "Pipelines",
+        "Tasks",
         "Reports",
         "Teams",
         "Webhooks",

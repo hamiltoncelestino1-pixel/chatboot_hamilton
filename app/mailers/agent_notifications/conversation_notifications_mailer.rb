@@ -55,14 +55,25 @@ class AgentNotifications::ConversationNotificationsMailer < ApplicationMailer
     send_mail_with_liquid(to: @agent.email, subject: subject) and return
   end
 
+  def task_due(task, agent, _secondary_actor)
+    return unless smtp_config_set_or_development?
+
+    @agent = agent
+    @task = task
+    subject = "#{@agent.available_name}, your task \"#{@task.title}\" is due"
+    @action_url = app_account_contact_url(account_id: @task.account_id, id: @task.contact_id)
+    send_mail_with_liquid(to: @agent.email, subject: subject) and return
+  end
+
   private
 
   def liquid_droppables
     super.merge({
                   user: @agent,
                   conversation: @conversation,
-                  inbox: @conversation.inbox,
-                  message: @message
+                  inbox: @conversation&.inbox,
+                  message: @message,
+                  task: @task
                 })
   end
 end

@@ -1,0 +1,22 @@
+tags:
+  - Tasks
+operationId: list-tasks
+summary: List tasks
+security:
+  - userApiKey: []
+description: List tasks for the account. Pass ?contact_id=/?conversation_id=/?pipeline_item_id= to filter.
+responses:
+  '200':
+    description: Success
+    content:
+      application/json:
+        schema:
+          type: array
+          items:
+            $ref: '#/components/schemas/task'
+  '401':
+    description: Unauthorized
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/bad_request_error'

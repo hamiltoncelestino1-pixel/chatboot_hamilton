@@ -52,6 +52,8 @@ class PipelineItem < ApplicationRecord
   # own reader on purpose.
   belongs_to :pipeline, optional: true
 
+  has_many :tasks, dependent: :nullify
+
   validates :contact_id, presence: true
   validates :pipeline_stage_id, presence: true
   validates :contact_id, uniqueness: {

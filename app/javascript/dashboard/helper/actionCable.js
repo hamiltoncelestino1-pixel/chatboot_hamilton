@@ -37,6 +37,10 @@ class ActionCableConnector extends BaseActionCableConnector {
       'copilot.message.created': this.onCopilotMessageCreated,
       'pipeline_item.created': this.onPipelineItemChanged,
       'pipeline_item.updated': this.onPipelineItemChanged,
+      'task.created': this.onTaskChanged,
+      'task.updated': this.onTaskChanged,
+      'task.completed': this.onTaskChanged,
+      'task.deleted': this.onTaskDeleted,
     };
   }
 
@@ -203,6 +207,14 @@ class ActionCableConnector extends BaseActionCableConnector {
 
   onPipelineItemChanged = data => {
     this.app.$store.dispatch('kanban/applyRealtimePipelineItem', data);
+  };
+
+  onTaskChanged = data => {
+    this.app.$store.dispatch('tasks/applyRealtimeTask', data);
+  };
+
+  onTaskDeleted = data => {
+    this.app.$store.dispatch('tasks/applyRealtimeTaskDeleted', data);
   };
 
   onCacheInvalidate = data => {

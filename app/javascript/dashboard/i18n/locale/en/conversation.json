@@ -366,7 +366,8 @@
       "MACROS": "Macros",
       "LINEAR_ISSUES": "Linked Linear Issues",
       "SHOPIFY_ORDERS": "Shopify Orders",
-      "OPPORTUNITIES": "Opportunities"
+      "OPPORTUNITIES": "Opportunities",
+      "TASKS": "Tasks"
     },
     "OPPORTUNITIES": {
       "EMPTY_STATE": "No opportunities linked to this conversation",

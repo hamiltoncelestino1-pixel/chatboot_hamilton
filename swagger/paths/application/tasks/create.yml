@@ -1,0 +1,26 @@
+tags:
+  - Tasks
+operationId: create-a-task
+summary: Create a task
+security:
+  - userApiKey: []
+description: Create a new task linked to a contact, and optionally a conversation or pipeline card
+requestBody:
+  required: true
+  content:
+    application/json:
+      schema:
+        $ref: '#/components/schemas/task_create_payload'
+responses:
+  '200':
+    description: Success
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/task'
+  '401':
+    description: Unauthorized
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/bad_request_error'

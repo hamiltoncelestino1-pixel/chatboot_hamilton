@@ -1,0 +1,37 @@
+type: object
+properties:
+  id:
+    type: number
+    description: The ID of the task
+  title:
+    type: string
+    description: The title of the task
+  due_date:
+    type: number
+    description: Unix timestamp of when the task is due
+  completed_at:
+    type:
+      - number
+      - 'null'
+    description: Unix timestamp of when the task was completed, if any
+  contact_id:
+    type: number
+    description: The ID of the contact this task belongs to
+  conversation_id:
+    type:
+      - number
+      - 'null'
+    description: The ID of the linked conversation, if any
+  pipeline_item_id:
+    type:
+      - number
+      - 'null'
+    description: The ID of the linked pipeline card, if any
+  assignee:
+    $ref: '#/components/schemas/agent'
+  created_at:
+    type: number
+    description: Unix timestamp of when the task was created
+  updated_at:
+    type: number
+    description: Unix timestamp of when the task was last updated

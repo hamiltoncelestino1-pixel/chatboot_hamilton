@@ -68,4 +68,10 @@ module Events::Types
   # changes). Fires on stage/assignee/team change - the fields that affect a card's
   # position/appearance on the board.
   PIPELINE_ITEM_UPDATED = 'pipeline_item.updated'
+
+  # task events
+  TASK_CREATED = 'task.created'
+  TASK_UPDATED = 'task.updated'
+  TASK_COMPLETED = 'task.completed'
+  TASK_DELETED = 'task.deleted'
 end

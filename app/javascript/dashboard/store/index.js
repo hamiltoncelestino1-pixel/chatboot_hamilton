@@ -60,6 +60,7 @@ import captainTools from './captain/tools';
 import captainCustomTools from './captain/customTools';
 import kanban from './modules/kanban';
 import pipelineMembers from './modules/pipelineMembers';
+import tasks from './modules/tasks';
 
 const plugins = [];
 
@@ -125,6 +126,7 @@ export default createStore({
     captainCustomTools,
     kanban,
     pipelineMembers,
+    tasks,
   },
   plugins,
 });

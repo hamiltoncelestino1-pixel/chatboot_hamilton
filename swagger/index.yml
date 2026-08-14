@@ -77,6 +77,8 @@ tags:
     description: Analytics and reporting APIs
   - name: Pipelines
     description: CRM Pipeline (Kanban) management APIs
+  - name: Tasks
+    description: Follow-up task management APIs
   - name: Teams
     description: Team management APIs
   - name: Webhooks
@@ -120,6 +122,7 @@ x-tagGroups:
       - Messages
       - Profile
       - Pipelines
+      - Tasks
       - Reports
       - Teams
       - Webhooks

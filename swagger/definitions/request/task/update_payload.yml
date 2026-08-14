@@ -1,0 +1,12 @@
+type: object
+properties:
+  title:
+    type: string
+    description: The title of the task
+  due_date:
+    type: string
+    format: date-time
+    description: When the task is due
+  assignee_id:
+    type: number
+    description: The ID of the responsible agent

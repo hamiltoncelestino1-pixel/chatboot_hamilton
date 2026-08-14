@@ -105,6 +105,9 @@
       "PIPELINE_LABEL": "Pipeline",
       "STAGE_LABEL": "Etapa",
       "CUSTOM_ATTRIBUTES_TITLE": "Campos personalizados",
+      "TASKS": {
+        "TITLE": "Tarefas"
+      },
       "ASSIGN_TO_ME": "Atribuir a mim",
       "CANCEL": "Cancelar",
       "SAVE": "Salvar",

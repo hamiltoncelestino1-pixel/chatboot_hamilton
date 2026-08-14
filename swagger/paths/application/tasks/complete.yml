@@ -1,0 +1,20 @@
+tags:
+  - Tasks
+operationId: complete-a-task
+summary: Complete a task
+security:
+  - userApiKey: []
+description: Mark a task as completed
+responses:
+  '200':
+    description: Success
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/task'
+  '401':
+    description: Unauthorized
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/bad_request_error'

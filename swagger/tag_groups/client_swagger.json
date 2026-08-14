@@ -2519,6 +2519,59 @@
           }
         }
       },
+      "task": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number",
+            "description": "The ID of the task"
+          },
+          "title": {
+            "type": "string",
+            "description": "The title of the task"
+          },
+          "due_date": {
+            "type": "number",
+            "description": "Unix timestamp of when the task is due"
+          },
+          "completed_at": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "description": "Unix timestamp of when the task was completed, if any"
+          },
+          "contact_id": {
+            "type": "number",
+            "description": "The ID of the contact this task belongs to"
+          },
+          "conversation_id": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "description": "The ID of the linked conversation, if any"
+          },
+          "pipeline_item_id": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "description": "The ID of the linked pipeline card, if any"
+          },
+          "assignee": {
+            "$ref": "#/components/schemas/agent"
+          },
+          "created_at": {
+            "type": "number",
+            "description": "Unix timestamp of when the task was created"
+          },
+          "updated_at": {
+            "type": "number",
+            "description": "Unix timestamp of when the task was last updated"
+          }
+        }
+      },
       "label": {
         "type": "object",
         "properties": {
@@ -3820,6 +3873,54 @@
           "stage_id",
           "ordered_ids"
         ]
+      },
+      "task_create_payload": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "description": "The title of the task"
+          },
+          "due_date": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the task is due"
+          },
+          "contact_id": {
+            "type": "number",
+            "description": "The ID of the contact this task belongs to"
+          },
+          "conversation_id": {
+            "type": "number",
+            "description": "The ID of an optional linked conversation"
+          },
+          "pipeline_item_id": {
+            "type": "number",
+            "description": "The ID of an optional linked pipeline card"
+          },
+          "assignee_id": {
+            "type": "number",
+            "description": "The ID of the responsible agent. Defaults to the current user if omitted"
+          }
+        }
+      },
+      "task_update_payload": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "description": "The title of the task"
+          },
+          "due_date": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the task is due"
+          },
+          "assignee_id": {
+            "type": "number",
+            "description": "The ID of the responsible agent"
+          }
+        }
       },
       "conversation_create_payload": {
         "type": "object",
@@ -6608,6 +6709,15 @@
         "required": true,
         "description": "The ID of the pipeline item"
       },
+      "task_id": {
+        "in": "path",
+        "name": "task_id",
+        "schema": {
+          "type": "integer"
+        },
+        "required": true,
+        "description": "The ID of the task"
+      },
       "inbox_id": {
         "in": "path",
         "name": "inbox_id",
@@ -6845,6 +6955,7 @@
         "Messages",
         "Profile",
         "Pipelines",
+        "Tasks",
         "Reports",
         "Teams",
         "Webhooks",
