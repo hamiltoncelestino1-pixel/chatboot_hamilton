@@ -106,7 +106,7 @@ class PipelineItem < ApplicationRecord
     {
       id: id,
       title: title,
-      value: value,
+      value: json_safe_value,
       notes: notes,
       pipeline_id: pipeline_id,
       pipeline_name: pipeline&.name,
