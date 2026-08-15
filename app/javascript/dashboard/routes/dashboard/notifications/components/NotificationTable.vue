@@ -45,6 +45,10 @@ export default {
   },
   methods: {
     dynamicTime,
+    actorAssignee(notificationItem) {
+      const actor = notificationItem.primary_actor;
+      return actor?.meta?.assignee || actor?.assignee || null;
+    },
   },
 };
 </script>
@@ -81,7 +85,10 @@ export default {
             <div
               class="overflow-hidden flex-view notification-contant--wrap whitespace-nowrap text-ellipsis"
             >
-              <h5 class="notification--title">
+              <h5
+                v-if="notificationItem.primary_actor_type === 'Conversation'"
+                class="notification--title"
+              >
                 {{
                   `#${
                     notificationItem.primary_actor
@@ -108,10 +115,10 @@ export default {
           </td>
           <td class="thumbnail--column">
             <Avatar
-              v-if="notificationItem.primary_actor.meta.assignee"
-              :src="notificationItem.primary_actor.meta.assignee.thumbnail"
+              v-if="actorAssignee(notificationItem)"
+              :src="actorAssignee(notificationItem).thumbnail"
               :size="28"
-              :name="notificationItem.primary_actor.meta.assignee.name"
+              :name="actorAssignee(notificationItem).name"
               rounded-full
             />
           </td>

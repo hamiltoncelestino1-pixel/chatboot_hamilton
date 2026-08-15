@@ -31,7 +31,7 @@ export default {
       const {
         primary_actor_id: primaryActorId,
         primary_actor_type: primaryActorType,
-        primary_actor: { id: conversationId },
+        primary_actor: primaryActor,
         notification_type: notificationType,
       } = notification;
 
@@ -45,8 +45,20 @@ export default {
         unreadCount: this.meta.unreadCount,
       });
 
+      if (!primaryActor) return;
+
+      // Tasks don't always have a conversation - fall back to the contact profile,
+      // same rule the task_due email notification uses for its action link.
+      if (primaryActorType === 'Task') {
+        const destination = primaryActor.conversation_id
+          ? `/app/accounts/${this.accountId}/conversations/${primaryActor.conversation_id}`
+          : `/app/accounts/${this.accountId}/contacts/${primaryActor.contact_id}`;
+        this.$router.push(destination);
+        return;
+      }
+
       this.$router.push(
-        `/app/accounts/${this.accountId}/conversations/${conversationId}`
+        `/app/accounts/${this.accountId}/conversations/${primaryActor.id}`
       );
     },
     onMarkAllDoneClick() {
