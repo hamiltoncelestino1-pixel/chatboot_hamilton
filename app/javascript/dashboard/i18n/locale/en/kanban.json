@@ -105,6 +105,9 @@
       "PIPELINE_LABEL": "Pipeline",
       "STAGE_LABEL": "Stage",
       "CUSTOM_ATTRIBUTES_TITLE": "Custom attributes",
+      "TASKS": {
+        "TITLE": "Tasks"
+      },
       "ASSIGN_TO_ME": "Assign to me",
       "CANCEL": "Cancel",
       "SAVE": "Save",

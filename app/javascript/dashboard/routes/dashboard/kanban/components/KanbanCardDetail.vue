@@ -11,6 +11,7 @@ import PipelineItemLabels from './PipelineItemLabels.vue';
 import AccordionItem from 'dashboard/components/Accordion/AccordionItem.vue';
 import KanbanRunMacroMenu from './KanbanRunMacroMenu.vue';
 import ButtonV4 from 'dashboard/components-next/button/Button.vue';
+import TaskList from 'dashboard/components-next/Tasks/TaskList.vue';
 
 const props = defineProps({
   item: { type: Object, default: null },
@@ -54,6 +55,7 @@ const assignee = ref(null);
 const team = ref(null);
 const customAttributeValues = ref({});
 const isAttributesOpen = ref(false);
+const isTasksOpen = ref(false);
 
 const pipelineItemAttributes = computed(() =>
   store.getters['attributes/getAttributesByModel']('pipeline_item_attribute')
@@ -503,6 +505,18 @@ const handleDelete = async () => {
                 </select>
               </div>
             </div>
+          </AccordionItem>
+
+          <AccordionItem
+            :title="t('KANBAN.ITEM.TASKS.TITLE')"
+            :is-open="isTasksOpen"
+            compact
+            @toggle="isTasksOpen = !isTasksOpen"
+          >
+            <TaskList
+              :contact-id="item.contact.id"
+              :pipeline-item-id="item.id"
+            />
           </AccordionItem>
 
           <div>

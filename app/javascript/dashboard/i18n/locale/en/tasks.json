@@ -1,0 +1,22 @@
+{
+  "TASKS": {
+    "EMPTY_STATE": "No tasks yet",
+    "CREATE": "Add task",
+    "EDIT": "Edit task",
+    "SAVE": "Save",
+    "OVERDUE": "Overdue",
+    "TITLE_LABEL": "Title",
+    "TITLE_PLACEHOLDER": "Task title",
+    "DUE_DATE_LABEL": "Due date",
+    "DUE_DATE_PLACEHOLDER": "Select due date",
+    "PAST_DUE_WARNING": "This due date is more than 3 days in the past — no reminder will be sent",
+    "ASSIGNEE_LABEL": "Assignee",
+    "ASSIGNEE_PLACEHOLDER": "Assign an agent",
+    "CANCEL": "Cancel",
+    "API": {
+      "CREATE_SUCCESS": "Task created",
+      "UPDATE_SUCCESS": "Task updated",
+      "ERROR": "Could not save task"
+    }
+  }
+}

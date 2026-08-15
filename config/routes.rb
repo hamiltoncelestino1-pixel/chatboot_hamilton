@@ -287,6 +287,10 @@ Rails.application.routes.draw do
             resource :labels, only: [:index, :create], module: :pipeline_items
           end
 
+          resources :tasks, only: [:index, :create, :show, :update, :destroy] do
+            member { patch :complete }
+          end
+
           # Assignment V2 Routes
           resources :assignment_policies do
             resources :inboxes, only: [:index, :create, :destroy], module: :assignment_policies
@@ -588,6 +592,7 @@ Rails.application.routes.draw do
   resource :app, only: [:index] do
     resources :accounts do
       resources :conversations, only: [:show]
+      resources :contacts, only: [:show]
     end
   end
 

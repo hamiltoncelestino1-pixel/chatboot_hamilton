@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_08_03_100000) do
+ActiveRecord::Schema[7.1].define(version: 2026_08_14_120000) do
   # These extensions should be enabled to support this database
   enable_extension "pg_stat_statements"
   enable_extension "pg_trgm"
@@ -1296,6 +1296,26 @@ ActiveRecord::Schema[7.1].define(version: 2026_08_03_100000) do
     t.index ["name"], name: "index_tags_on_name", unique: true
   end
 
+  create_table "tasks", force: :cascade do |t|
+    t.string "title", null: false
+    t.datetime "due_date", null: false
+    t.datetime "completed_at"
+    t.datetime "reminder_sent_at"
+    t.bigint "account_id", null: false
+    t.bigint "contact_id", null: false
+    t.bigint "conversation_id"
+    t.bigint "pipeline_item_id"
+    t.bigint "assignee_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["account_id"], name: "index_tasks_on_account_id"
+    t.index ["assignee_id"], name: "index_tasks_on_assignee_id"
+    t.index ["contact_id"], name: "index_tasks_on_contact_id"
+    t.index ["conversation_id"], name: "index_tasks_on_conversation_id"
+    t.index ["due_date"], name: "index_tasks_on_due_date_pending_reminder", where: "((completed_at IS NULL) AND (reminder_sent_at IS NULL))"
+    t.index ["pipeline_item_id"], name: "index_tasks_on_pipeline_item_id"
+  end
+
   create_table "team_members", force: :cascade do |t|
     t.bigint "team_id", null: false
     t.bigint "user_id", null: false
@@ -1394,6 +1414,11 @@ ActiveRecord::Schema[7.1].define(version: 2026_08_03_100000) do
   add_foreign_key "pipeline_items", "users", column: "assignee_id"
   add_foreign_key "pipeline_members", "pipelines"
   add_foreign_key "pipeline_members", "users"
+  add_foreign_key "tasks", "accounts"
+  add_foreign_key "tasks", "contacts"
+  add_foreign_key "tasks", "conversations"
+  add_foreign_key "tasks", "pipeline_items"
+  add_foreign_key "tasks", "users", column: "assignee_id"
   create_trigger("accounts_after_insert_row_tr", :generated => true, :compatibility => 1).
       on("accounts").
       after(:insert).

@@ -1,0 +1,16 @@
+tags:
+  - Tasks
+operationId: delete-a-task
+summary: Delete a task
+security:
+  - userApiKey: []
+description: Remove a task. Allowed for the task's assignee or an account administrator
+responses:
+  '200':
+    description: Success
+  '401':
+    description: Unauthorized
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/bad_request_error'

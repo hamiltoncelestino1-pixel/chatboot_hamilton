@@ -187,6 +187,35 @@ class ActionCableListener < BaseListener
     broadcast(account, [account_token(account)], PIPELINE_ITEM_UPDATED, pipeline_item.push_event_data)
   end
 
+  def task_created(event)
+    task = event.data[:task]
+    account = task.account
+
+    broadcast(account, [account_token(account)], TASK_CREATED, task.push_event_data)
+  end
+
+  def task_updated(event)
+    task = event.data[:task]
+    account = task.account
+
+    broadcast(account, [account_token(account)], TASK_UPDATED, task.push_event_data)
+  end
+
+  def task_completed(event)
+    task = event.data[:task]
+    account = task.account
+
+    broadcast(account, [account_token(account)], TASK_COMPLETED, task.push_event_data)
+  end
+
+  def task_deleted(event)
+    task_data = event.data[:task_data]
+    account = Account.find_by(id: task_data[:account_id])
+    return if account.blank?
+
+    broadcast(account, [account_token(account)], TASK_DELETED, { task: { id: task_data[:id] } })
+  end
+
   private
 
   def account_token(account)

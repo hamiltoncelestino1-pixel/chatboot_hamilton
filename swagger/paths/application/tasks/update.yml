@@ -1,0 +1,26 @@
+tags:
+  - Tasks
+operationId: update-a-task
+summary: Update a task
+security:
+  - userApiKey: []
+description: Update a task's title, due date, or assignee
+requestBody:
+  required: true
+  content:
+    application/json:
+      schema:
+        $ref: '#/components/schemas/task_update_payload'
+responses:
+  '200':
+    description: Success
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/task'
+  '401':
+    description: Unauthorized
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/bad_request_error'

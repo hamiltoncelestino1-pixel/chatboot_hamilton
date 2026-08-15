@@ -76,6 +76,8 @@ pipeline_stage:
   $ref: ./resource/pipeline_stage.yml
 pipeline_item:
   $ref: ./resource/pipeline_item.yml
+task:
+  $ref: ./resource/task.yml
 label:
   $ref: ./resource/label.yml
 integrations_app:
@@ -151,6 +153,12 @@ pipeline_item_create_update_payload:
   $ref: ./request/pipeline_item/create_update_payload.yml
 pipeline_item_reorder_payload:
   $ref: ./request/pipeline_item/reorder_payload.yml
+
+## Task
+task_create_payload:
+  $ref: ./request/task/create_payload.yml
+task_update_payload:
+  $ref: ./request/task/update_payload.yml
 
 ## Conversation
 conversation_create_payload:

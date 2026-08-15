@@ -147,6 +147,9 @@ en:
       duplicate_contact_in_pipeline: "This contact already has a card in this pipeline."
     pipeline_stage:
       cannot_delete_special_stage: This stage is required and cannot be deleted
+    task:
+      conversation_contact_mismatch: "Conversation does not belong to the task's contact."
+      pipeline_item_contact_mismatch: "Pipeline card does not belong to the task's contact."
     macros:
       execute:
         pipeline_item_ids_required: pipeline_item_ids is required to execute a pipeline macro
@@ -244,6 +247,8 @@ en:
       sla_missed_first_response: 'SLA target first response missed for conversation (#%{display_id})'
       sla_missed_next_response: 'SLA target next response missed for conversation (#%{display_id})'
       sla_missed_resolution: 'SLA target resolution missed for conversation (#%{display_id})'
+      task_due: 'Task "%{task_title}" is due'
+    task_due_body: 'Due %{due_date}'
     attachment: 'Attachment'
     no_content: 'No content'
   conversations:
