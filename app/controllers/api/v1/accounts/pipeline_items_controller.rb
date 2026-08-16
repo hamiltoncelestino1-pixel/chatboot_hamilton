@@ -12,8 +12,7 @@ class Api::V1::Accounts::PipelineItemsController < Api::V1::Accounts::BaseContro
 
     items = policy_scope(
       Current.account.pipeline_items
-             .joins(:pipeline_stage)
-             .where(pipeline_stages: { pipeline_id: policy_scope(Current.account.pipelines).select(:id) })
+             .where(pipeline_id: policy_scope(Current.account.pipelines).select(:id))
              .includes(:contact, :conversation, :assignee, :team, pipeline_stage: :pipeline)
     )
     items = items.where(contact_id: params[:contact_id]) if params[:contact_id].present?
@@ -94,8 +93,7 @@ class Api::V1::Accounts::PipelineItemsController < Api::V1::Accounts::BaseContro
     allowed_pipeline_ids = policy_scope(Current.account.pipelines).select(:id)
     @item = policy_scope(
       Current.account.pipeline_items
-             .joins(:pipeline_stage)
-             .where(pipeline_stages: { pipeline_id: allowed_pipeline_ids })
+             .where(pipeline_id: allowed_pipeline_ids)
              .includes(:contact, :assignee, :team, pipeline_stage: :pipeline)
     ).find(params[:id])
   end
