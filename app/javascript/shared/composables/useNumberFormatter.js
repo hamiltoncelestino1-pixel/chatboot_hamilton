@@ -60,8 +60,22 @@ export function useNumberFormatter() {
     return new Intl.NumberFormat(resolvedLocale.value).format(num);
   };
 
+  /**
+   * Formats a value as currency.
+   * Defaults preserve this product's current fixed pt-BR/BRL formatting -
+   * pass locale/currency explicitly to override for a specific case.
+   * @param {number} value - The value to format
+   * @param {{ locale?: string, currency?: string }} [options]
+   * @returns {string} Formatted currency string (e.g., "R$ 1.234,56")
+   */
+  const formatCurrency = (value, { locale = 'pt-BR', currency = 'BRL' } = {}) =>
+    new Intl.NumberFormat(locale, { style: 'currency', currency }).format(
+      value
+    );
+
   return {
     formatCompactNumber,
     formatFullNumber,
+    formatCurrency,
   };
 }
