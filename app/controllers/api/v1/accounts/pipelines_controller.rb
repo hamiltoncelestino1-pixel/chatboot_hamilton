@@ -3,7 +3,7 @@ class Api::V1::Accounts::PipelinesController < Api::V1::Accounts::BaseController
   before_action :check_authorization
 
   def index
-    @pipelines = policy_scope(Current.account.pipelines).includes(:pipeline_stages)
+    @pipelines = policy_scope(Current.account.pipelines).includes(pipeline_stages: :pipeline_items)
   end
 
   def show; end
@@ -25,7 +25,7 @@ class Api::V1::Accounts::PipelinesController < Api::V1::Accounts::BaseController
   private
 
   def fetch_pipeline
-    @pipeline = policy_scope(Current.account.pipelines).find(params[:id])
+    @pipeline = policy_scope(Current.account.pipelines).includes(pipeline_stages: :pipeline_items).find(params[:id])
   end
 
   def pipeline_params
