@@ -3,7 +3,7 @@ class Api::V1::Accounts::TasksController < Api::V1::Accounts::BaseController
   before_action :check_authorization
 
   def index
-    items = policy_scope(Current.account.tasks.includes(:contact, :conversation, :pipeline_item, :assignee))
+    items = policy_scope(Current.account.tasks.includes(:assignee))
     items = items.where(contact_id: params[:contact_id]) if params[:contact_id].present?
     items = items.where(conversation_id: params[:conversation_id]) if params[:conversation_id].present?
     items = items.where(pipeline_item_id: params[:pipeline_item_id]) if params[:pipeline_item_id].present?
