@@ -25,13 +25,9 @@ const storeItems = computed(() =>
 );
 const localItems = ref([...storeItems.value]);
 
-watch(
-  storeItems,
-  val => {
-    localItems.value = [...val];
-  },
-  { deep: true }
-);
+watch(storeItems, val => {
+  localItems.value = [...val];
+});
 
 const onAdd = ({ item, newIndex }) => {
   const itemId = Number(item.dataset.id);
