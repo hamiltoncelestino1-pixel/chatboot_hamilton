@@ -33,13 +33,19 @@ class Notification::PushNotificationService
   def push_message
     {
       title: notification.push_message_title,
-      tag: "#{notification.notification_type}_#{conversation.display_id}_#{notification.id}",
+      tag: "#{notification.notification_type}_#{notification.primary_actor_id}_#{notification.id}",
       url: push_url
     }
   end
 
+  # primary_actor isn't always a Conversation (e.g. task_due -> Task, which has no
+  # display_id) - route by primary_actor_type instead of assuming Conversation.
   def push_url
-    app_account_conversation_url(account_id: conversation.account_id, id: conversation.display_id)
+    if notification.primary_actor_type == 'Task'
+      app_account_contact_url(account_id: notification.account_id, id: notification.primary_actor.contact_id)
+    else
+      app_account_conversation_url(account_id: conversation.account_id, id: conversation.display_id)
+    end
   end
 
   def can_send_browser_push?(subscription)
