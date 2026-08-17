@@ -44,7 +44,10 @@ const getMessageClasses = {
 
 const primaryActor = computed(() => props.inboxItem?.primaryActor);
 const meta = computed(() => primaryActor.value?.meta);
-const assigneeMeta = computed(() => meta.value?.sender);
+// meta is only present on Conversation-shaped primary actors (Task#push_event_data has no
+// meta key) - default to {} so the template below can safely read .name/.thumbnail instead
+// of crashing the whole list render for task_due notifications.
+const assigneeMeta = computed(() => meta.value?.sender || {});
 const isUnread = computed(() => !props.inboxItem?.readAt);
 const inbox = computed(() => props.stateInbox);
 

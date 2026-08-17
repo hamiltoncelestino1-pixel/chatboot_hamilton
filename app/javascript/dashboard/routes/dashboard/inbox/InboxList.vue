@@ -170,11 +170,12 @@ const openConversation = async notificationItem => {
     id,
     primaryActorId,
     primaryActorType,
-    primaryActor: { inboxId, id: conversationId },
+    primaryActor,
     notificationType,
   } = notificationItem;
+  const isTask = primaryActorType === 'Task';
 
-  if (route.params.id === String(conversationId)) return;
+  if (!isTask && route.params.id === String(primaryActor.id)) return;
 
   useTrack(INBOX_EVENTS.OPEN_CONVERSATION_VIA_INBOX, {
     notificationType,
@@ -191,9 +192,24 @@ const openConversation = async notificationItem => {
     // to update the unread count in the store realtime
     store.dispatch('notifications/unReadCount');
 
+    // Tasks don't always have a linked conversation - fall back to the contact profile,
+    // same rule NotificationsView.vue (the classic notifications list) uses for its
+    // action link.
+    if (isTask) {
+      const destination = primaryActor.conversationId
+        ? `/app/accounts/${route.params.accountId}/conversations/${primaryActor.conversationId}`
+        : `/app/accounts/${route.params.accountId}/contacts/${primaryActor.contactId}`;
+      router.push(destination);
+      return;
+    }
+
     router.push({
       name: 'inbox_view_conversation',
-      params: { inboxId, type: 'conversation', id: conversationId },
+      params: {
+        inboxId: primaryActor.inboxId,
+        type: 'conversation',
+        id: primaryActor.id,
+      },
     });
   } catch {
     // error
