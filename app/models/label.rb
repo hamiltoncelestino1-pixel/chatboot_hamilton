@@ -27,7 +27,6 @@ class Label < ApplicationRecord
   enum label_type: { general_label: 0, pipeline_label: 1 }
 
   scope :general, -> { where(label_type: :general_label) }
-  scope :for_pipelines, -> { where(label_type: :pipeline_label) }
 
   validates :title,
             presence: { message: I18n.t('errors.validations.presence') },

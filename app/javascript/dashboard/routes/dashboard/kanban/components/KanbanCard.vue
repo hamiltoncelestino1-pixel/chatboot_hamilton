@@ -8,6 +8,7 @@ import {
   shortTimestamp,
   dateFormat,
 } from 'shared/helpers/timeHelper';
+import { useNumberFormatter } from 'shared/composables/useNumberFormatter';
 import KanbanRunMacroMenu from './KanbanRunMacroMenu.vue';
 
 const props = defineProps({
@@ -20,13 +21,11 @@ const { t } = useI18n();
 const store = useStore();
 const route = useRoute();
 const accountId = computed(() => route.params.accountId);
+const { formatCurrency } = useNumberFormatter();
 
 const formattedValue = computed(() => {
   if (!props.item.value || Number(props.item.value) === 0) return null;
-  return new Intl.NumberFormat('pt-BR', {
-    style: 'currency',
-    currency: 'BRL',
-  }).format(props.item.value);
+  return formatCurrency(props.item.value);
 });
 
 const pipelineItemAttributes = computed(() =>

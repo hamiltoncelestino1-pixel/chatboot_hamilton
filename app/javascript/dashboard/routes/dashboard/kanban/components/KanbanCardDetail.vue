@@ -160,20 +160,12 @@ watch(
   { immediate: true }
 );
 
-watch(
-  activePipeline,
-  pipeline => {
-    if (pipeline) {
-      store.dispatch('pipelineMembers/get', { pipelineId: pipeline.id });
-    }
-  },
-  { immediate: true }
-);
-
+// pipelineMembers/get and attributes/get are already dispatched by the parent
+// KanbanIndex.vue (this component is always mounted as its child) - only fetch what isn't
+// duplicated there.
 onMounted(() => {
   store.dispatch('teams/get');
   store.dispatch('labels/get');
-  store.dispatch('attributes/get');
 });
 
 const handleCustomAttributeChange = async (key, value) => {

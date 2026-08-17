@@ -71,8 +71,7 @@ class Api::V1::Accounts::MacrosController < Api::V1::Accounts::BaseController
   def authorized_pipeline_item_ids
     allowed_pipeline_ids = policy_scope(Current.account.pipelines).select(:id)
     Current.account.pipeline_items
-           .joins(:pipeline_stage)
-           .where(pipeline_stages: { pipeline_id: allowed_pipeline_ids })
+           .where(pipeline_id: allowed_pipeline_ids)
            .where(id: params[:pipeline_item_ids])
            .pluck(:id)
   end

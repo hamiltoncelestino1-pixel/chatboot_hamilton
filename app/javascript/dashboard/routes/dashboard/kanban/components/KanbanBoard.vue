@@ -18,13 +18,9 @@ const storeStages = computed(() =>
 
 const localStages = ref([...storeStages.value]);
 
-watch(
-  storeStages,
-  val => {
-    localStages.value = [...val];
-  },
-  { deep: true }
-);
+watch(storeStages, val => {
+  localStages.value = [...val];
+});
 
 const onStagesDragEnd = async ({ newIndex, oldIndex }) => {
   if (newIndex === oldIndex) return;
