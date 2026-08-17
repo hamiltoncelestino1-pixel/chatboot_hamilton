@@ -8,6 +8,6 @@ class TaskDrop < BaseDrop
   end
 
   def contact_name
-    @obj.try(:contact).name.try(:capitalize) || 'Customer'
+    @obj.try(:contact).try(:name).try(:capitalize) || 'Customer'
   end
 end
