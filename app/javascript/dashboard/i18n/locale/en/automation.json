@@ -109,6 +109,8 @@
         "TITLE_PLACEHOLDER": "Title (optional)",
         "VALUE_PLACEHOLDER": "Deal value (optional)",
         "NOTES_PLACEHOLDER": "Notes (optional)",
+        "TASK_TITLE_PLACEHOLDER": "Task title",
+        "TASK_DUE_IN_DAYS_PLACEHOLDER": "Due in how many days",
         "ASSIGNEE_MODE": {
           "CONVERSATION_ASSIGNEE": "Same agent as the conversation",
           "NONE": "No assignee"
@@ -185,7 +187,8 @@
       "ADD_PIPELINE_ITEM_LABEL": "Add Label to Pipeline Card",
       "REMOVE_PIPELINE_ITEM_LABEL": "Remove Label from Pipeline Card",
       "UPDATE_PIPELINE_ITEM": "Update Pipeline Card",
-      "EXPORT_PIPELINE_ITEM": "Export Pipeline Card to Another Pipeline"
+      "EXPORT_PIPELINE_ITEM": "Export Pipeline Card to Another Pipeline",
+      "CREATE_PIPELINE_ITEM_TASK": "Create a Task"
     },
     "MESSAGE_TYPES": {
       "INCOMING": "Incoming Message",

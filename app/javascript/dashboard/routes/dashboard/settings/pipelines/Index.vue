@@ -106,6 +106,12 @@ const tableHeaders = computed(() => [
       >
         <template #actions>
           <Button
+            :label="t('PIPELINE_MGMT.LOST_REASONS_LINK')"
+            variant="ghost"
+            size="sm"
+            @click="router.push({ name: 'pipeline_lost_reasons_list' })"
+          />
+          <Button
             :label="t('PIPELINE_MGMT.HEADER_BTN_TXT')"
             size="sm"
             @click="openAddPopup"

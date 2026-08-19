@@ -557,6 +557,25 @@ const handleDelete = async () => {
             </select>
           </div>
 
+          <div
+            v-if="item.pipeline_lost_reason"
+            class="flex items-start gap-2 p-3 bg-red-50 dark:bg-red-900/20 rounded-lg"
+          >
+            <span
+              class="i-lucide-alert-triangle flex-shrink-0 mt-0.5 size-4 text-red-500 dark:text-red-400"
+            />
+            <div class="min-w-0">
+              <p
+                class="text-xs font-medium text-red-700 dark:text-red-300 mb-0.5"
+              >
+                {{ t('KANBAN.ITEM.LOST_REASON_LABEL') }}
+              </p>
+              <p class="text-sm text-red-700 dark:text-red-300 truncate">
+                {{ item.pipeline_lost_reason.title }}
+              </p>
+            </div>
+          </div>
+
           <div>
             <label
               class="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1"

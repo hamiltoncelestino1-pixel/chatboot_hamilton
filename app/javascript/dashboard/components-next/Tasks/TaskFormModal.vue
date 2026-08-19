@@ -25,6 +25,7 @@ const isEditMode = computed(() => !!props.task);
 const form = reactive({ title: props.task?.title || '' });
 const dueDate = ref(props.task ? new Date(props.task.due_date * 1000) : null);
 const assignee = ref(props.task?.assignee || null);
+const recurrenceInterval = ref(props.task?.recurrence_interval || '');
 const isSubmitting = ref(false);
 
 onMounted(() => {
@@ -56,6 +57,7 @@ const handleSubmit = async () => {
         title: form.title,
         due_date: dueDate.value.toISOString(),
         assignee_id: assignee.value?.id || null,
+        recurrence_interval: recurrenceInterval.value || null,
       });
       useAlert(t('TASKS.API.UPDATE_SUCCESS'));
     } else {
@@ -66,6 +68,7 @@ const handleSubmit = async () => {
         conversation_id: props.conversationId || null,
         pipeline_item_id: props.pipelineItemId || null,
         assignee_id: assignee.value?.id || null,
+        recurrence_interval: recurrenceInterval.value || null,
       });
       useAlert(t('TASKS.API.CREATE_SUCCESS'));
     }
@@ -158,6 +161,31 @@ const handleSubmit = async () => {
               "
               @select="onAssignAgent"
             />
+          </div>
+
+          <div>
+            <label
+              class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1"
+            >
+              {{ t('TASKS.RECURRENCE_LABEL') }}
+            </label>
+            <select
+              v-model="recurrenceInterval"
+              class="w-full px-3 py-2 text-sm border border-slate-200 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-woot-500"
+            >
+              <option value="">
+                {{ t('TASKS.RECURRENCE_OPTIONS.NONE') }}
+              </option>
+              <option value="daily">
+                {{ t('TASKS.RECURRENCE_OPTIONS.DAILY') }}
+              </option>
+              <option value="weekly">
+                {{ t('TASKS.RECURRENCE_OPTIONS.WEEKLY') }}
+              </option>
+              <option value="monthly">
+                {{ t('TASKS.RECURRENCE_OPTIONS.MONTHLY') }}
+              </option>
+            </select>
           </div>
         </div>
 

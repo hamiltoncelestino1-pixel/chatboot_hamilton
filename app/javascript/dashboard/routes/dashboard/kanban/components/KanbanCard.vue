@@ -162,6 +162,18 @@ const visibleAttributes = computed(() =>
         {{ formattedValue }}
       </span>
       <span
+        v-if="item.overdue_tasks_count > 0"
+        v-tooltip.top="
+          t('KANBAN.ITEM.OVERDUE_TASKS_TOOLTIP', {
+            count: item.overdue_tasks_count,
+          })
+        "
+        class="flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] font-medium bg-red-100 dark:bg-red-800 text-red-600 dark:text-red-300"
+      >
+        <span class="i-lucide-alert-triangle size-2.5" />
+        {{ item.overdue_tasks_count }}
+      </span>
+      <span
         v-if="item.conversation_id"
         class="text-xs text-woot-500 dark:text-woot-400 ml-auto"
       >

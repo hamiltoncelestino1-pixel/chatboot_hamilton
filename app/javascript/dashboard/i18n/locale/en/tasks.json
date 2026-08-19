@@ -12,6 +12,13 @@
     "PAST_DUE_WARNING": "This due date is more than 3 days in the past — no reminder will be sent",
     "ASSIGNEE_LABEL": "Assignee",
     "ASSIGNEE_PLACEHOLDER": "Assign an agent",
+    "RECURRENCE_LABEL": "Repeat",
+    "RECURRENCE_OPTIONS": {
+      "NONE": "Does not repeat",
+      "DAILY": "Daily",
+      "WEEKLY": "Weekly",
+      "MONTHLY": "Monthly"
+    },
     "CANCEL": "Cancel",
     "API": {
       "CREATE_SUCCESS": "Task created",

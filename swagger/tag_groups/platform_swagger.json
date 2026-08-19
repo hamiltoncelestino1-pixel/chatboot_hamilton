@@ -2630,6 +2630,13 @@
             "type": "number",
             "description": "The ID of the stage this item belongs to"
           },
+          "pipeline_lost_reason_id": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "description": "The ID of the lost reason, required once the item is in a `lost` stage"
+          },
           "conversation_id": {
             "type": [
               "number",
@@ -2683,6 +2690,9 @@
           "team": {
             "$ref": "#/components/schemas/team"
           },
+          "pipeline_lost_reason": {
+            "$ref": "#/components/schemas/pipeline_lost_reason"
+          },
           "created_at": {
             "type": "string",
             "format": "date-time",
@@ -2692,6 +2702,64 @@
             "type": "string",
             "format": "date-time",
             "description": "The date and time when the item was last updated"
+          }
+        }
+      },
+      "pipeline_funnel_report": {
+        "type": "object",
+        "description": "Snapshot-based funnel metrics for cards currently open (not won/lost) in the pipeline. stage_distribution and avg_time_in_stage_seconds reflect only cards presently sitting in each stage, not the full historical flow through the funnel.",
+        "properties": {
+          "open_value": {
+            "type": "number",
+            "description": "Sum of the value of all open (not won/lost) cards in the pipeline"
+          },
+          "stage_distribution": {
+            "type": "object",
+            "description": "Count of open cards currently in each stage, keyed by stage name",
+            "additionalProperties": {
+              "type": "integer"
+            }
+          },
+          "avg_time_in_stage": {
+            "type": "object",
+            "description": "Average time in seconds that open cards currently in each stage have spent there since the last stage change, keyed by stage name",
+            "additionalProperties": {
+              "type": "number"
+            }
+          }
+        }
+      },
+      "pipeline_lost_reason": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number",
+            "description": "The ID of the pipeline lost reason"
+          },
+          "title": {
+            "type": "string",
+            "description": "The title of the lost reason"
+          },
+          "account_id": {
+            "type": "number",
+            "description": "The ID of the account this lost reason belongs to"
+          },
+          "created_at": {
+            "type": "number",
+            "description": "The date and time when the lost reason was created"
+          },
+          "updated_at": {
+            "type": "number",
+            "description": "The date and time when the lost reason was last updated"
+          }
+        }
+      },
+      "pipeline_lost_reason_create_update_payload": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "description": "The title of the lost reason"
           }
         }
       },
@@ -2734,6 +2802,26 @@
               "null"
             ],
             "description": "The ID of the linked pipeline card, if any"
+          },
+          "recurrence_interval": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "daily",
+              "weekly",
+              "monthly",
+              null
+            ],
+            "description": "How often the next occurrence is created once this task is completed"
+          },
+          "recurrence_parent_id": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "description": "The ID of the task this occurrence was generated from, if any"
           },
           "assignee": {
             "$ref": "#/components/schemas/agent"
@@ -4027,6 +4115,10 @@
           "position": {
             "type": "number",
             "description": "Display order position within the stage"
+          },
+          "pipeline_lost_reason_id": {
+            "type": "number",
+            "description": "The ID of the lost reason - required when moving the item to a `lost` stage"
           }
         }
       },
@@ -4077,6 +4169,15 @@
           "assignee_id": {
             "type": "number",
             "description": "The ID of the responsible agent. Defaults to the current user if omitted"
+          },
+          "recurrence_interval": {
+            "type": "string",
+            "enum": [
+              "daily",
+              "weekly",
+              "monthly"
+            ],
+            "description": "If set, completing this task automatically creates the next occurrence with this same interval, due the corresponding period after this task's due_date"
           }
         }
       },
@@ -4095,6 +4196,15 @@
           "assignee_id": {
             "type": "number",
             "description": "The ID of the responsible agent"
+          },
+          "recurrence_interval": {
+            "type": "string",
+            "enum": [
+              "daily",
+              "weekly",
+              "monthly"
+            ],
+            "description": "If set, completing this task automatically creates the next occurrence with this same interval, due the corresponding period after this task's due_date"
           }
         }
       },
@@ -6884,6 +6994,15 @@
         },
         "required": true,
         "description": "The ID of the pipeline item"
+      },
+      "pipeline_lost_reason_id": {
+        "in": "path",
+        "name": "pipeline_lost_reason_id",
+        "schema": {
+          "type": "integer"
+        },
+        "required": true,
+        "description": "The ID of the pipeline lost reason"
       },
       "task_id": {
         "in": "path",

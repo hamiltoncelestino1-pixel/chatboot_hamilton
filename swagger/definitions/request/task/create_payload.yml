@@ -19,3 +19,9 @@ properties:
   assignee_id:
     type: number
     description: The ID of the responsible agent. Defaults to the current user if omitted
+  recurrence_interval:
+    type: string
+    enum: [daily, weekly, monthly]
+    description: >-
+      If set, completing this task automatically creates the next occurrence with this same
+      interval, due the corresponding period after this task's due_date

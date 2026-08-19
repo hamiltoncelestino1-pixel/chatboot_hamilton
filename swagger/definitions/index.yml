@@ -76,6 +76,12 @@ pipeline_stage:
   $ref: ./resource/pipeline_stage.yml
 pipeline_item:
   $ref: ./resource/pipeline_item.yml
+pipeline_funnel_report:
+  $ref: ./resource/pipeline_funnel_report.yml
+pipeline_lost_reason:
+  $ref: ./resource/pipeline_lost_reason.yml
+pipeline_lost_reason_create_update_payload:
+  $ref: ./request/pipeline_lost_reason/create_update_payload.yml
 task:
   $ref: ./resource/task.yml
 label:

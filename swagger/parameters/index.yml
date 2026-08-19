@@ -16,6 +16,9 @@ pipeline_stage_id:
 pipeline_item_id:
   $ref: ./pipeline_item_id.yml
 
+pipeline_lost_reason_id:
+  $ref: ./pipeline_lost_reason_id.yml
+
 task_id:
   $ref: ./task_id.yml
 

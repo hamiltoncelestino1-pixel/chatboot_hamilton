@@ -38,6 +38,10 @@ export const NOTIFICATION_TYPES = [
     label: 'PROFILE_SETTINGS.FORM.NOTIFICATIONS.TYPES.TASK_DUE',
     value: 'task_due',
   },
+  {
+    label: 'PROFILE_SETTINGS.FORM.NOTIFICATIONS.TYPES.PIPELINE_ITEM_STALE',
+    value: 'pipeline_item_stale',
+  },
 ];
 
 export const EVENT_TYPES = {

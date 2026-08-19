@@ -1,0 +1,21 @@
+type: object
+description: >-
+  Snapshot-based funnel metrics for cards currently open (not won/lost) in the pipeline.
+  stage_distribution and avg_time_in_stage_seconds reflect only cards presently sitting in
+  each stage, not the full historical flow through the funnel.
+properties:
+  open_value:
+    type: number
+    description: Sum of the value of all open (not won/lost) cards in the pipeline
+  stage_distribution:
+    type: object
+    description: Count of open cards currently in each stage, keyed by stage name
+    additionalProperties:
+      type: integer
+  avg_time_in_stage:
+    type: object
+    description: >-
+      Average time in seconds that open cards currently in each stage have spent there
+      since the last stage change, keyed by stage name
+    additionalProperties:
+      type: number

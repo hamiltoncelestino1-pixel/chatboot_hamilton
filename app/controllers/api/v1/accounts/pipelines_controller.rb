@@ -29,6 +29,7 @@ class Api::V1::Accounts::PipelinesController < Api::V1::Accounts::BaseController
   end
 
   def pipeline_params
-    params.require(:pipeline).permit(:name, :description, :position, :enable_auto_assignment, :max_assignment_limit, :sync_assignments)
+    params.require(:pipeline).permit(:name, :description, :position, :enable_auto_assignment, :max_assignment_limit, :sync_assignments,
+                                     :stale_alert_days)
   end
 end

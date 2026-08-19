@@ -12,6 +12,7 @@ import AddItemModal from '../components/AddItemModal.vue';
 import KanbanFilterBar from '../components/KanbanFilterBar.vue';
 import KanbanSortMenu from '../components/KanbanSortMenu.vue';
 import ExportItemModal from '../components/ExportItemModal.vue';
+import LostReasonModal from '../components/LostReasonModal.vue';
 
 const { t } = useI18n();
 const store = useStore();
@@ -137,5 +138,7 @@ const closeExportModal = () => {
       :item="itemToExport"
       @close="closeExportModal"
     />
+
+    <LostReasonModal />
   </div>
 </template>

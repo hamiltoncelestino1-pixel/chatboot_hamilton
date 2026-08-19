@@ -13,7 +13,7 @@ class Api::V1::Accounts::PipelineItemsController < Api::V1::Accounts::BaseContro
     items = policy_scope(
       Current.account.pipeline_items
              .where(pipeline_id: policy_scope(Current.account.pipelines).select(:id))
-             .includes(:contact, :conversation, :assignee, :team, pipeline_stage: :pipeline)
+             .includes(:contact, :conversation, :assignee, :team, :pipeline_lost_reason, pipeline_stage: :pipeline)
     )
     items = items.where(contact_id: params[:contact_id]) if params[:contact_id].present?
     items = items.where(conversation_id: params[:conversation_id]) if params[:conversation_id].present?
@@ -37,6 +37,7 @@ class Api::V1::Accounts::PipelineItemsController < Api::V1::Accounts::BaseContro
     @item.association(:assignee).reset if update_params.key?(:assignee_id)
     @item.association(:team).reset if update_params.key?(:team_id)
     @item.association(:pipeline_stage).reset if update_params.key?(:pipeline_stage_id)
+    @item.association(:pipeline_lost_reason).reset if update_params.key?(:pipeline_lost_reason_id)
   end
 
   def destroy
@@ -86,6 +87,10 @@ class Api::V1::Accounts::PipelineItemsController < Api::V1::Accounts::BaseContro
     @pipeline = policy_scope(Current.account.pipelines).find(params[:pipeline_id])
     @items = pipeline_items_scope
     @items = @items.where(pipeline_stage_id: params[:stage_id]) if params[:stage_id].present?
+    @overdue_tasks_counts = Task.pending
+                                .where(pipeline_item_id: @items.map(&:id))
+                                .where('due_date < ?', Time.current)
+                                .group(:pipeline_item_id).count
     render :index
   end
 
@@ -94,14 +99,14 @@ class Api::V1::Accounts::PipelineItemsController < Api::V1::Accounts::BaseContro
     @item = policy_scope(
       Current.account.pipeline_items
              .where(pipeline_id: allowed_pipeline_ids)
-             .includes(:contact, :assignee, :team, pipeline_stage: :pipeline)
+             .includes(:contact, :assignee, :team, :pipeline_lost_reason, pipeline_stage: :pipeline)
     ).find(params[:id])
   end
 
   def pipeline_items_scope
     policy_scope(
       @pipeline.pipeline_items
-               .includes(:contact, :conversation, :assignee, :team, pipeline_stage: :pipeline)
+               .includes(:contact, :conversation, :assignee, :team, :pipeline_lost_reason, pipeline_stage: :pipeline)
     ).order('pipeline_stage_id, position')
   end
 
@@ -116,7 +121,7 @@ class Api::V1::Accounts::PipelineItemsController < Api::V1::Accounts::BaseContro
   def update_params
     params.require(:pipeline_item).permit(
       :pipeline_stage_id, :conversation_id,
-      :title, :value, :notes, :position, :assignee_id, :team_id,
+      :title, :value, :notes, :position, :assignee_id, :team_id, :pipeline_lost_reason_id,
       custom_attributes: {}
     )
   end

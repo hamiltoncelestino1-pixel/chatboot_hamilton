@@ -43,6 +43,19 @@ module PipelineItemActions
     pipeline_item.update!(update_attrs)
   end
 
+  def create_task_for_pipeline_item(pipeline_item, attrs)
+    assignee_id = attrs[:assignee_id].presence || pipeline_item.assignee_id
+    log_missing_task_assignee(pipeline_item) if assignee_id.blank?
+
+    pipeline_item.account.tasks.create!(
+      title: attrs[:title],
+      due_date: attrs[:due_in_days].to_i.days.from_now,
+      assignee_id: assignee_id,
+      contact_id: pipeline_item.contact_id,
+      pipeline_item_id: pipeline_item.id
+    )
+  end
+
   def export_to_pipeline(pipeline_item, target_pipeline, target_stage_id)
     Pipelines::ExportItemService.new(
       pipeline_item: pipeline_item,
@@ -98,6 +111,13 @@ module PipelineItemActions
     Rails.logger.info(
       "[PipelineItemActions] assign_pipeline_team: team_id=#{team_id} does not belong to " \
       "account_id=#{pipeline_item.account_id}, skipping"
+    )
+  end
+
+  def log_missing_task_assignee(pipeline_item)
+    Rails.logger.info(
+      '[PipelineItemActions] create_task_for_pipeline_item: no assignee_id given and ' \
+      "pipeline_item##{pipeline_item.id} has none either - task creation will fail validation"
     )
   end
 end

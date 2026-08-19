@@ -65,6 +65,16 @@ class AgentNotifications::ConversationNotificationsMailer < ApplicationMailer
     send_mail_with_liquid(to: @agent.email, subject: subject) and return
   end
 
+  def pipeline_item_stale(pipeline_item, agent, _secondary_actor)
+    return unless smtp_config_set_or_development?
+
+    @agent = agent
+    @pipeline_item = pipeline_item
+    subject = "#{@agent.available_name}, card \"#{@pipeline_item.title}\" has been stalled"
+    @action_url = app_account_contact_url(account_id: @pipeline_item.account_id, id: @pipeline_item.contact_id)
+    send_mail_with_liquid(to: @agent.email, subject: subject) and return
+  end
+
   private
 
   def liquid_droppables
@@ -73,7 +83,8 @@ class AgentNotifications::ConversationNotificationsMailer < ApplicationMailer
                   conversation: @conversation,
                   inbox: @conversation&.inbox,
                   message: @message,
-                  task: @task
+                  task: @task,
+                  pipeline_item: @pipeline_item
                 })
   end
 end

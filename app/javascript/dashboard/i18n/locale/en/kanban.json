@@ -104,10 +104,12 @@
       "LABELS_ADD": "Add",
       "PIPELINE_LABEL": "Pipeline",
       "STAGE_LABEL": "Stage",
+      "LOST_REASON_LABEL": "Lost reason",
       "CUSTOM_ATTRIBUTES_TITLE": "Custom attributes",
       "TASKS": {
         "TITLE": "Tasks"
       },
+      "OVERDUE_TASKS_TOOLTIP": "{count} overdue tasks",
       "ASSIGN_TO_ME": "Assign to me",
       "CANCEL": "Cancel",
       "SAVE": "Save",
@@ -133,6 +135,12 @@
         "DELETE_SUCCESS": "Card deleted successfully.",
         "ERROR": "Something went wrong. Please try again."
       }
+    },
+    "LOST_REASON": {
+      "MODAL_TITLE": "Why was this opportunity lost?",
+      "MODAL_DESCRIPTION": "Pick a reason before moving this card to a lost stage.",
+      "SELECT_PLACEHOLDER": "Select a reason",
+      "CONFIRM": "Confirm"
     },
     "RUN_MACRO": {
       "BUTTON": "Run macro",

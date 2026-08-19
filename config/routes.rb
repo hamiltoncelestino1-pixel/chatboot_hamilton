@@ -279,6 +279,7 @@ Rails.application.routes.draw do
                 patch :update
               end
             end
+            resource :funnel_report, only: [:show], controller: 'pipelines/funnel_reports'
           end
 
           resources :pipeline_items, only: [:index, :create, :show, :update, :destroy] do
@@ -286,6 +287,8 @@ Rails.application.routes.draw do
             member { post :export }
             resource :labels, only: [:index, :create], module: :pipeline_items
           end
+
+          resources :pipeline_lost_reasons, only: [:index, :create, :update, :destroy]
 
           resources :tasks, only: [:index, :create, :show, :update, :destroy] do
             member { patch :complete }

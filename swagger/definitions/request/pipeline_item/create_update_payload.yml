@@ -21,3 +21,6 @@ properties:
   position:
     type: number
     description: Display order position within the stage
+  pipeline_lost_reason_id:
+    type: number
+    description: The ID of the lost reason - required when moving the item to a `lost` stage

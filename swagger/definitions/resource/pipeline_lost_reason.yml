@@ -1,0 +1,17 @@
+type: object
+properties:
+  id:
+    type: number
+    description: The ID of the pipeline lost reason
+  title:
+    type: string
+    description: The title of the lost reason
+  account_id:
+    type: number
+    description: The ID of the account this lost reason belongs to
+  created_at:
+    type: number
+    description: The date and time when the lost reason was created
+  updated_at:
+    type: number
+    description: The date and time when the lost reason was last updated

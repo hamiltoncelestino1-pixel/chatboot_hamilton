@@ -607,6 +607,21 @@
     $ref: ./application/pipelines/items/labels/index.yml
   post:
     $ref: ./application/pipelines/items/labels/create.yml
+/api/v1/accounts/{account_id}/pipeline_lost_reasons:
+  parameters:
+    - $ref: '#/components/parameters/account_id'
+  get:
+    $ref: ./application/pipelines/lost_reasons/index.yml
+  post:
+    $ref: ./application/pipelines/lost_reasons/create.yml
+/api/v1/accounts/{account_id}/pipeline_lost_reasons/{pipeline_lost_reason_id}:
+  parameters:
+    - $ref: '#/components/parameters/account_id'
+    - $ref: '#/components/parameters/pipeline_lost_reason_id'
+  patch:
+    $ref: ./application/pipelines/lost_reasons/update.yml
+  delete:
+    $ref: ./application/pipelines/lost_reasons/delete.yml
 /api/v1/accounts/{account_id}/pipelines/{pipeline_id}/pipeline_members:
   parameters:
     - $ref: '#/components/parameters/account_id'
@@ -627,6 +642,12 @@
     - $ref: '#/components/parameters/pipeline_id'
   delete:
     $ref: ./application/pipelines/members/delete.yml
+/api/v1/accounts/{account_id}/pipelines/{pipeline_id}/funnel_report:
+  parameters:
+    - $ref: '#/components/parameters/account_id'
+    - $ref: '#/components/parameters/pipeline_id'
+  get:
+    $ref: ./application/pipelines/funnel_report.yml
 
 # Tasks
 

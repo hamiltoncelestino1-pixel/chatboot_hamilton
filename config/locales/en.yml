@@ -248,7 +248,9 @@ en:
       sla_missed_next_response: 'SLA target next response missed for conversation (#%{display_id})'
       sla_missed_resolution: 'SLA target resolution missed for conversation (#%{display_id})'
       task_due: 'Task "%{task_title}" is due'
+      pipeline_item_stale: 'Card "%{item_title}" has been stalled'
     task_due_body: 'Due %{due_date}'
+    pipeline_item_stale_body: 'No stage change for %{days} days'
     attachment: 'Attachment'
     no_content: 'No content'
   conversations:

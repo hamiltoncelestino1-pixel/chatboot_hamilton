@@ -3,6 +3,7 @@
     "HEADER": "Pipelines",
     "DESCRIPTION": "Manage your CRM pipelines, stages, labels and assigned agents.",
     "HEADER_BTN_TXT": "Add pipeline",
+    "LOST_REASONS_LINK": "Lost reasons",
     "SEARCH_PLACEHOLDER": "Search pipelines",
     "LOADING": "Loading pipelines...",
     "BACK": "Back",
@@ -83,6 +84,57 @@
       },
       "API": {
         "SUCCESS": "Agents updated successfully.",
+        "ERROR": "Something went wrong. Please try again."
+      }
+    }
+  },
+  "PIPELINE_LOST_REASON_MGMT": {
+    "HEADER": "Lost reasons",
+    "DESCRIPTION": "Manage the list of reasons agents can pick when moving a card to a lost stage.",
+    "HEADER_BTN_TXT": "Add reason",
+    "SEARCH_PLACEHOLDER": "Search reasons",
+    "LOADING": "Loading lost reasons...",
+    "BACK": "Back to pipelines",
+    "FORM": {
+      "EDIT": "Edit",
+      "DELETE": "Delete",
+      "CANCEL": "Cancel",
+      "SUBMIT": "Save",
+      "TITLE": {
+        "LABEL": "Title",
+        "PLACEHOLDER": "e.g. Price too high"
+      }
+    },
+    "LIST": {
+      "404": "No lost reasons found.",
+      "TABLE_HEADER": {
+        "TITLE": "Title",
+        "ACTION": "Actions"
+      }
+    },
+    "ADD": {
+      "TITLE": "Add lost reason",
+      "API": {
+        "SUCCESS": "Lost reason created successfully.",
+        "ERROR": "Something went wrong. Please try again."
+      }
+    },
+    "EDIT": {
+      "TITLE": "Edit lost reason",
+      "API": {
+        "SUCCESS": "Lost reason updated successfully.",
+        "ERROR": "Something went wrong. Please try again."
+      }
+    },
+    "DELETE": {
+      "CONFIRM": {
+        "TITLE": "Delete lost reason",
+        "MESSAGE": "Are you sure you want to delete",
+        "YES": "Yes, delete",
+        "NO": "No, keep it"
+      },
+      "API": {
+        "SUCCESS": "Lost reason deleted successfully.",
         "ERROR": "Something went wrong. Please try again."
       }
     }
