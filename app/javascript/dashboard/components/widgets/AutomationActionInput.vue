@@ -2,6 +2,7 @@
 import AutomationActionTeamMessageInput from './AutomationActionTeamMessageInput.vue';
 import AutomationActionFileInput from './AutomationFileInput.vue';
 import AutomationActionCreatePipelineItemInput from './AutomationActionCreatePipelineItemInput.vue';
+import AutomationActionCreatePipelineItemTaskInput from './AutomationActionCreatePipelineItemTaskInput.vue';
 import AutomationActionPipelineStageInput from './AutomationActionPipelineStageInput.vue';
 import AutomationActionPipelineAssigneeInput from './AutomationActionPipelineAssigneeInput.vue';
 import AutomationActionPipelineLabelInput from './AutomationActionPipelineLabelInput.vue';
@@ -17,6 +18,7 @@ export default {
     AutomationActionTeamMessageInput,
     AutomationActionFileInput,
     AutomationActionCreatePipelineItemInput,
+    AutomationActionCreatePipelineItemTaskInput,
     AutomationActionPipelineStageInput,
     AutomationActionPipelineAssigneeInput,
     AutomationActionPipelineLabelInput,
@@ -107,6 +109,7 @@ export default {
         'team_message',
         'textarea',
         'pipeline_create_item',
+        'pipeline_create_task',
         'pipeline_stage_select',
         'pipeline_assignee_select',
         'pipeline_label_select',
@@ -208,6 +211,10 @@ export default {
         v-if="inputType === 'pipeline_create_item'"
         v-model="action_params"
         :dropdown-max-height="dropdownMaxHeight"
+      />
+      <AutomationActionCreatePipelineItemTaskInput
+        v-if="inputType === 'pipeline_create_task'"
+        v-model="action_params"
       />
       <AutomationActionPipelineStageInput
         v-if="inputType === 'pipeline_stage_select'"

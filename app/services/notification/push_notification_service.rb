@@ -38,10 +38,11 @@ class Notification::PushNotificationService
     }
   end
 
-  # primary_actor isn't always a Conversation (e.g. task_due -> Task, which has no
-  # display_id) - route by primary_actor_type instead of assuming Conversation.
+  # primary_actor isn't always a Conversation (e.g. task_due -> Task, pipeline_item_stale ->
+  # PipelineItem, neither of which has a display_id) - route by primary_actor_type instead of
+  # assuming Conversation.
   def push_url
-    if notification.primary_actor_type == 'Task'
+    if %w[Task PipelineItem].include?(notification.primary_actor_type)
       app_account_contact_url(account_id: notification.account_id, id: notification.primary_actor.contact_id)
     else
       app_account_conversation_url(account_id: conversation.account_id, id: conversation.display_id)

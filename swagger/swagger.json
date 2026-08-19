@@ -8419,6 +8419,209 @@
         }
       }
     },
+    "/api/v1/accounts/{account_id}/pipeline_lost_reasons": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/account_id"
+        }
+      ],
+      "get": {
+        "tags": [
+          "Pipelines"
+        ],
+        "operationId": "list-pipeline-lost-reasons",
+        "summary": "List pipeline lost reasons",
+        "description": "List all configured lost reasons in the account, ordered by title",
+        "security": [
+          {
+            "userApiKey": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/pipeline_lost_reason"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/bad_request_error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Pipelines"
+        ],
+        "operationId": "create-a-pipeline-lost-reason",
+        "summary": "Create a pipeline lost reason",
+        "description": "Create a new lost reason in the account (admin only)",
+        "security": [
+          {
+            "userApiKey": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/pipeline_lost_reason_create_update_payload"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/pipeline_lost_reason"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/bad_request_error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Invalid attributes",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/bad_request_error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/accounts/{account_id}/pipeline_lost_reasons/{pipeline_lost_reason_id}": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/account_id"
+        },
+        {
+          "$ref": "#/components/parameters/pipeline_lost_reason_id"
+        }
+      ],
+      "patch": {
+        "tags": [
+          "Pipelines"
+        ],
+        "operationId": "update-a-pipeline-lost-reason",
+        "summary": "Update a pipeline lost reason",
+        "description": "Update an existing lost reason in the account (admin only)",
+        "security": [
+          {
+            "userApiKey": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/pipeline_lost_reason_create_update_payload"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/pipeline_lost_reason"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/bad_request_error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Pipeline lost reason not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/bad_request_error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Pipelines"
+        ],
+        "operationId": "delete-a-pipeline-lost-reason",
+        "summary": "Delete a pipeline lost reason",
+        "description": "Delete a lost reason from the account (admin only). Pipeline items that used this reason keep existing, with their pipeline_lost_reason_id cleared.",
+        "security": [
+          {
+            "userApiKey": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/bad_request_error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Pipeline lost reason not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/bad_request_error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/accounts/{account_id}/pipelines/{pipeline_id}/pipeline_members": {
       "parameters": [
         {
@@ -8720,6 +8923,61 @@
           },
           "403": {
             "description": "Access denied",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/bad_request_error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Pipeline not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/bad_request_error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/accounts/{account_id}/pipelines/{pipeline_id}/funnel_report": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/account_id"
+        },
+        {
+          "$ref": "#/components/parameters/pipeline_id"
+        }
+      ],
+      "get": {
+        "tags": [
+          "Pipelines"
+        ],
+        "operationId": "get-funnel-report-of-a-pipeline",
+        "summary": "Get the funnel report of a pipeline",
+        "security": [
+          {
+            "userApiKey": []
+          }
+        ],
+        "description": "Returns the open value, stage distribution and average time in stage for a pipeline. This is a snapshot approximation (current cards only), not a full historical funnel - see the response schema description for details.",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/pipeline_funnel_report"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
             "content": {
               "application/json": {
                 "schema": {
@@ -12192,6 +12450,13 @@
             "type": "number",
             "description": "The ID of the stage this item belongs to"
           },
+          "pipeline_lost_reason_id": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "description": "The ID of the lost reason, required once the item is in a `lost` stage"
+          },
           "conversation_id": {
             "type": [
               "number",
@@ -12245,6 +12510,9 @@
           "team": {
             "$ref": "#/components/schemas/team"
           },
+          "pipeline_lost_reason": {
+            "$ref": "#/components/schemas/pipeline_lost_reason"
+          },
           "created_at": {
             "type": "string",
             "format": "date-time",
@@ -12254,6 +12522,64 @@
             "type": "string",
             "format": "date-time",
             "description": "The date and time when the item was last updated"
+          }
+        }
+      },
+      "pipeline_funnel_report": {
+        "type": "object",
+        "description": "Snapshot-based funnel metrics for cards currently open (not won/lost) in the pipeline. stage_distribution and avg_time_in_stage_seconds reflect only cards presently sitting in each stage, not the full historical flow through the funnel.",
+        "properties": {
+          "open_value": {
+            "type": "number",
+            "description": "Sum of the value of all open (not won/lost) cards in the pipeline"
+          },
+          "stage_distribution": {
+            "type": "object",
+            "description": "Count of open cards currently in each stage, keyed by stage name",
+            "additionalProperties": {
+              "type": "integer"
+            }
+          },
+          "avg_time_in_stage": {
+            "type": "object",
+            "description": "Average time in seconds that open cards currently in each stage have spent there since the last stage change, keyed by stage name",
+            "additionalProperties": {
+              "type": "number"
+            }
+          }
+        }
+      },
+      "pipeline_lost_reason": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number",
+            "description": "The ID of the pipeline lost reason"
+          },
+          "title": {
+            "type": "string",
+            "description": "The title of the lost reason"
+          },
+          "account_id": {
+            "type": "number",
+            "description": "The ID of the account this lost reason belongs to"
+          },
+          "created_at": {
+            "type": "number",
+            "description": "The date and time when the lost reason was created"
+          },
+          "updated_at": {
+            "type": "number",
+            "description": "The date and time when the lost reason was last updated"
+          }
+        }
+      },
+      "pipeline_lost_reason_create_update_payload": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "description": "The title of the lost reason"
           }
         }
       },
@@ -12296,6 +12622,26 @@
               "null"
             ],
             "description": "The ID of the linked pipeline card, if any"
+          },
+          "recurrence_interval": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "daily",
+              "weekly",
+              "monthly",
+              null
+            ],
+            "description": "How often the next occurrence is created once this task is completed"
+          },
+          "recurrence_parent_id": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "description": "The ID of the task this occurrence was generated from, if any"
           },
           "assignee": {
             "$ref": "#/components/schemas/agent"
@@ -13589,6 +13935,10 @@
           "position": {
             "type": "number",
             "description": "Display order position within the stage"
+          },
+          "pipeline_lost_reason_id": {
+            "type": "number",
+            "description": "The ID of the lost reason - required when moving the item to a `lost` stage"
           }
         }
       },
@@ -13639,6 +13989,15 @@
           "assignee_id": {
             "type": "number",
             "description": "The ID of the responsible agent. Defaults to the current user if omitted"
+          },
+          "recurrence_interval": {
+            "type": "string",
+            "enum": [
+              "daily",
+              "weekly",
+              "monthly"
+            ],
+            "description": "If set, completing this task automatically creates the next occurrence with this same interval, due the corresponding period after this task's due_date"
           }
         }
       },
@@ -13657,6 +14016,15 @@
           "assignee_id": {
             "type": "number",
             "description": "The ID of the responsible agent"
+          },
+          "recurrence_interval": {
+            "type": "string",
+            "enum": [
+              "daily",
+              "weekly",
+              "monthly"
+            ],
+            "description": "If set, completing this task automatically creates the next occurrence with this same interval, due the corresponding period after this task's due_date"
           }
         }
       },
@@ -16446,6 +16814,15 @@
         },
         "required": true,
         "description": "The ID of the pipeline item"
+      },
+      "pipeline_lost_reason_id": {
+        "in": "path",
+        "name": "pipeline_lost_reason_id",
+        "schema": {
+          "type": "integer"
+        },
+        "required": true,
+        "description": "The ID of the pipeline lost reason"
       },
       "task_id": {
         "in": "path",

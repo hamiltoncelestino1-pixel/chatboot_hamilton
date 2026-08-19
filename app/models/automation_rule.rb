@@ -45,7 +45,7 @@ class AutomationRule < ApplicationRecord
        open_conversation pending_conversation snooze_conversation change_priority send_email_transcript
        add_private_note create_pipeline_item move_pipeline_item_stage assign_pipeline_item_agent
        assign_pipeline_item_team add_pipeline_item_label remove_pipeline_item_label update_pipeline_item
-       export_pipeline_item].freeze
+       export_pipeline_item create_pipeline_item_task].freeze
   end
 
   def file_base_data

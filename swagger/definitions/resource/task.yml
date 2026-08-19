@@ -27,6 +27,17 @@ properties:
       - number
       - 'null'
     description: The ID of the linked pipeline card, if any
+  recurrence_interval:
+    type:
+      - string
+      - 'null'
+    enum: [daily, weekly, monthly, null]
+    description: How often the next occurrence is created once this task is completed
+  recurrence_parent_id:
+    type:
+      - number
+      - 'null'
+    description: The ID of the task this occurrence was generated from, if any
   assignee:
     $ref: '#/components/schemas/agent'
   created_at:

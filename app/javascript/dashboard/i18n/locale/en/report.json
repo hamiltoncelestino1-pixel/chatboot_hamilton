@@ -347,6 +347,25 @@
       "PLACEHOLDER": "Select date range"
     }
   },
+  "FUNNEL_REPORTS": {
+    "HEADER": "Funnel",
+    "DESCRIPTION": "See open value, stage distribution and average time in stage for a pipeline.",
+    "PIPELINE_PLACEHOLDER": "Select a pipeline",
+    "NO_PIPELINE_SELECTED": "Select a pipeline to see its funnel report.",
+    "SNAPSHOT_NOTE": "Stage distribution and average time in stage reflect only the cards currently in each stage - not a full historical record of every card that ever passed through the funnel.",
+    "OPEN_VALUE": {
+      "LABEL": "Open value",
+      "INFO_TEXT": "Sum of the value of all open (not won or lost) cards in this pipeline"
+    },
+    "STAGE_DISTRIBUTION": {
+      "TITLE": "Cards by stage",
+      "DATASET_LABEL": "Cards"
+    },
+    "AVG_TIME": {
+      "TITLE": "Average time in stage (days)",
+      "DATASET_LABEL": "Days"
+    }
+  },
   "TEAM_REPORTS": {
     "HEADER": "Team Overview",
     "DESCRIPTION": "Get a snapshot of your team's performance with essential metrics, including conversations, response times, resolution times, and resolved cases. Click a team name for more details.",

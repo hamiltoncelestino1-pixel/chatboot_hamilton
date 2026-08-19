@@ -1,0 +1,6 @@
+in: path
+name: pipeline_lost_reason_id
+schema:
+  type: integer
+required: true
+description: The ID of the pipeline lost reason

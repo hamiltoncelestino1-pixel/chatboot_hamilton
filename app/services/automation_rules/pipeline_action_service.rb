@@ -74,6 +74,11 @@ class AutomationRules::PipelineActionService
     send_pipeline_webhook_event(@pipeline_item, params, "automation_event.#{@rule.event_name}")
   end
 
+  def create_pipeline_item_task(params)
+    params = params[0]
+    create_task_for_pipeline_item(@pipeline_item, params)
+  end
+
   def log_invalid_target_stage(target_stage_id)
     Rails.logger.info(
       "[AutomationRules::PipelineActionService] target_stage_id=#{target_stage_id} does not belong to " \

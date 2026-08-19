@@ -1,0 +1,24 @@
+tags:
+  - Pipelines
+operationId: delete-a-pipeline-lost-reason
+summary: Delete a pipeline lost reason
+description: >-
+  Delete a lost reason from the account (admin only). Pipeline items that used this reason
+  keep existing, with their pipeline_lost_reason_id cleared.
+security:
+  - userApiKey: []
+responses:
+  '200':
+    description: Success
+  '401':
+    description: Unauthorized
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/bad_request_error'
+  '404':
+    description: Pipeline lost reason not found
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/bad_request_error'

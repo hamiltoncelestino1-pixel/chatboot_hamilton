@@ -2,21 +2,24 @@
 #
 # Table name: pipeline_items
 #
-#  id                :bigint           not null, primary key
-#  custom_attributes :jsonb            not null
-#  notes             :text
-#  position          :integer          default(0), not null
-#  title             :string(255)
-#  value             :decimal(15, 2)   default(0.0)
-#  created_at        :datetime         not null
-#  updated_at        :datetime         not null
-#  account_id        :bigint           not null
-#  assignee_id       :bigint
-#  contact_id        :bigint           not null
-#  conversation_id   :bigint
-#  pipeline_id       :bigint           not null
-#  pipeline_stage_id :bigint           not null
-#  team_id           :bigint
+#  id                      :bigint           not null, primary key
+#  custom_attributes       :jsonb            not null
+#  notes                   :text
+#  position                :integer          default(0), not null
+#  stage_changed_at        :datetime
+#  stale_alert_sent_at     :datetime
+#  title                   :string(255)
+#  value                   :decimal(15, 2)   default(0.0)
+#  created_at              :datetime         not null
+#  updated_at              :datetime         not null
+#  account_id              :bigint           not null
+#  assignee_id             :bigint
+#  contact_id              :bigint           not null
+#  conversation_id         :bigint
+#  pipeline_id             :bigint           not null
+#  pipeline_lost_reason_id :bigint
+#  pipeline_stage_id       :bigint           not null
+#  team_id                 :bigint
 #
 # Indexes
 #
@@ -27,6 +30,7 @@
 #  index_pipeline_items_on_conversation_id                 (conversation_id)
 #  index_pipeline_items_on_pipeline_id                     (pipeline_id)
 #  index_pipeline_items_on_pipeline_id_and_contact_id      (pipeline_id,contact_id) UNIQUE
+#  index_pipeline_items_on_pipeline_lost_reason_id         (pipeline_lost_reason_id)
 #  index_pipeline_items_on_pipeline_stage_id               (pipeline_stage_id)
 #  index_pipeline_items_on_pipeline_stage_id_and_position  (pipeline_stage_id,position)
 #  index_pipeline_items_on_team_id                         (team_id)
@@ -35,6 +39,7 @@
 #
 #  fk_rails_...  (assignee_id => users.id)
 #  fk_rails_...  (pipeline_id => pipelines.id)
+#  fk_rails_...  (pipeline_lost_reason_id => pipeline_lost_reasons.id)
 #  fk_rails_...  (team_id => teams.id)
 #
 class PipelineItem < ApplicationRecord
@@ -51,6 +56,7 @@ class PipelineItem < ApplicationRecord
   # path for #pipeline, though - see the `delegate` below, which overrides this association's
   # own reader on purpose.
   belongs_to :pipeline, optional: true
+  belongs_to :pipeline_lost_reason, optional: true
 
   has_many :tasks, dependent: :nullify
 
@@ -60,11 +66,15 @@ class PipelineItem < ApplicationRecord
     scope: :pipeline_id,
     message: ->(_object, _data) { I18n.t('errors.pipeline_item.duplicate_contact_in_pipeline') }
   }
+  # Not cleared automatically when a card leaves the lost stage (e.g. reopened) - it's kept as
+  # informational history of the last recorded reason, not a hard constraint.
+  validates :pipeline_lost_reason_id, presence: true, if: -> { pipeline_stage&.lost? }
   validate :assignee_must_be_pipeline_member
   validate :labels_must_be_pipeline_type
   validate :conversation_must_belong_to_contact, if: -> { conversation_id.present? }
 
   before_validation :set_pipeline_id_from_stage
+  before_save :touch_stage_changed_at, if: :pipeline_stage_id_changed?
 
   after_create_commit :dispatch_created_event
   after_update_commit :dispatch_stage_changed_event, if: :saved_change_to_pipeline_stage_id?
@@ -75,6 +85,12 @@ class PipelineItem < ApplicationRecord
   # set_pipeline_id_from_stage below, purely for the FK/index use cases). Keeping both is
   # intentional, not an oversight - see the comment on the belongs_to.
   delegate :pipeline, to: :pipeline_stage
+
+  # Exposed in email templates through liquid (see ApplicationRecord#droppables) - needed for
+  # the pipeline_item_stale mailer (app/mailers/agent_notifications/conversation_notifications_mailer.rb).
+  def droppables
+    super + ['PipelineItem']
+  end
 
   def push_event_data
     {
@@ -172,6 +188,12 @@ class PipelineItem < ApplicationRecord
     return if pipeline_stage_id.blank?
 
     self.pipeline_id = pipeline_stage.pipeline_id if pipeline_stage_id_changed? || pipeline_id.blank?
+  end
+
+  def touch_stage_changed_at
+    self.stage_changed_at = Time.zone.now
+    # Card moved again - it may go stale in its new stage and deserves a fresh alert then.
+    self.stale_alert_sent_at = nil
   end
 
   def labels_must_be_pipeline_type

@@ -104,10 +104,12 @@
       "LABELS_ADD": "Adicionar",
       "PIPELINE_LABEL": "Pipeline",
       "STAGE_LABEL": "Etapa",
+      "LOST_REASON_LABEL": "Motivo da perda",
       "CUSTOM_ATTRIBUTES_TITLE": "Campos personalizados",
       "TASKS": {
         "TITLE": "Tarefas"
       },
+      "OVERDUE_TASKS_TOOLTIP": "{count} tarefas vencidas",
       "ASSIGN_TO_ME": "Atribuir a mim",
       "CANCEL": "Cancelar",
       "SAVE": "Salvar",
@@ -133,6 +135,12 @@
         "DELETE_SUCCESS": "Card excluído com sucesso.",
         "ERROR": "Algo deu errado. Tente novamente."
       }
+    },
+    "LOST_REASON": {
+      "MODAL_TITLE": "Por que essa oportunidade foi perdida?",
+      "MODAL_DESCRIPTION": "Escolha um motivo antes de mover esse card para um estágio de perda.",
+      "SELECT_PLACEHOLDER": "Selecione um motivo",
+      "CONFIRM": "Confirmar"
     },
     "RUN_MACRO": {
       "BUTTON": "Rodar macro",

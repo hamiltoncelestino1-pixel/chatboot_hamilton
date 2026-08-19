@@ -2,6 +2,7 @@ import { frontendURL } from '../../../../helper/URLHelper';
 import SettingsWrapper from '../SettingsWrapper.vue';
 import Index from './Index.vue';
 import PipelineDetail from './PipelineDetail.vue';
+import LostReasons from './LostReasons.vue';
 
 export default {
   routes: [
@@ -20,6 +21,12 @@ export default {
           name: 'pipelines_list',
           meta: { permissions: ['administrator'] },
           component: Index,
+        },
+        {
+          path: 'lost-reasons',
+          name: 'pipeline_lost_reasons_list',
+          meta: { permissions: ['administrator'] },
+          component: LostReasons,
         },
         {
           path: ':pipelineId',

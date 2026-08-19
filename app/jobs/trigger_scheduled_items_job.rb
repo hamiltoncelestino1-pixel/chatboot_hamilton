@@ -22,6 +22,9 @@ class TriggerScheduledItemsJob < ApplicationJob
 
     # Job to notify users about due tasks
     Tasks::TriggerDueTasksJob.perform_later
+
+    # Job to notify assignees about stale pipeline items
+    PipelineItems::TriggerStaleItemsJob.perform_later
   end
 end
 

@@ -44,7 +44,8 @@ class Notification < ApplicationRecord
     sla_missed_first_response: 6,
     sla_missed_next_response: 7,
     sla_missed_resolution: 8,
-    task_due: 9
+    task_due: 9,
+    pipeline_item_stale: 10
   }.freeze
 
   enum notification_type: NOTIFICATION_TYPES
@@ -54,7 +55,7 @@ class Notification < ApplicationRecord
   after_destroy_commit :dispatch_destroy_event
   after_update_commit :dispatch_update_event
 
-  PRIMARY_ACTORS = %w[Conversation Task].freeze
+  PRIMARY_ACTORS = %w[Conversation Task PipelineItem].freeze
 
   def push_event_data
     # Secondary actor could be nil for cases like system assigning conversation
@@ -86,35 +87,12 @@ class Notification < ApplicationRecord
     }
   end
 
-  # rubocop:disable Metrics/MethodLength
   def push_message_title
-    notification_title_map = {
-      'conversation_creation' => 'notifications.notification_title.conversation_creation',
-      'conversation_assignment' => 'notifications.notification_title.conversation_assignment',
-      'assigned_conversation_new_message' => 'notifications.notification_title.assigned_conversation_new_message',
-      'participating_conversation_new_message' => 'notifications.notification_title.assigned_conversation_new_message',
-      'conversation_mention' => 'notifications.notification_title.conversation_mention',
-      'sla_missed_first_response' => 'notifications.notification_title.sla_missed_first_response',
-      'sla_missed_next_response' => 'notifications.notification_title.sla_missed_next_response',
-      'sla_missed_resolution' => 'notifications.notification_title.sla_missed_resolution',
-      'task_due' => 'notifications.notification_title.task_due'
-    }
-
     i18n_key = notification_title_map[notification_type]
     return '' unless i18n_key
 
-    if notification_type == 'conversation_creation'
-      I18n.t(i18n_key, display_id: conversation.display_id, inbox_name: primary_actor.inbox.name)
-    elsif %w[conversation_assignment assigned_conversation_new_message participating_conversation_new_message
-             conversation_mention].include?(notification_type)
-      I18n.t(i18n_key, display_id: conversation.display_id)
-    elsif notification_type == 'task_due'
-      I18n.t(i18n_key, task_title: primary_actor.title)
-    else
-      I18n.t(i18n_key, display_id: primary_actor.display_id)
-    end
+    I18n.t(i18n_key, **title_i18n_args)
   end
-  # rubocop:enable Metrics/MethodLength
 
   def push_message_body
     case notification_type
@@ -126,6 +104,8 @@ class Notification < ApplicationRecord
       message_body((conversation.messages.incoming.last || conversation.messages.outgoing.last))
     when 'task_due'
       I18n.t('notifications.task_due_body', due_date: I18n.l(primary_actor.due_date, format: '%d/%m/%Y %H:%M'))
+    when 'pipeline_item_stale'
+      I18n.t('notifications.pipeline_item_stale_body', days: days_stale)
     else
       ''
     end
@@ -145,6 +125,43 @@ class Notification < ApplicationRecord
 
   def sender_name(actor)
     actor.try(:sender)&.name || ''
+  end
+
+  def notification_title_map
+    {
+      'conversation_creation' => 'notifications.notification_title.conversation_creation',
+      'conversation_assignment' => 'notifications.notification_title.conversation_assignment',
+      'assigned_conversation_new_message' => 'notifications.notification_title.assigned_conversation_new_message',
+      'participating_conversation_new_message' => 'notifications.notification_title.assigned_conversation_new_message',
+      'conversation_mention' => 'notifications.notification_title.conversation_mention',
+      'sla_missed_first_response' => 'notifications.notification_title.sla_missed_first_response',
+      'sla_missed_next_response' => 'notifications.notification_title.sla_missed_next_response',
+      'sla_missed_resolution' => 'notifications.notification_title.sla_missed_resolution',
+      'task_due' => 'notifications.notification_title.task_due',
+      'pipeline_item_stale' => 'notifications.notification_title.pipeline_item_stale'
+    }
+  end
+
+  def title_i18n_args
+    case notification_type
+    when 'conversation_creation'
+      { display_id: conversation.display_id, inbox_name: primary_actor.inbox.name }
+    when 'conversation_assignment', 'assigned_conversation_new_message', 'participating_conversation_new_message',
+         'conversation_mention'
+      { display_id: conversation.display_id }
+    when 'task_due'
+      { task_title: primary_actor.title }
+    when 'pipeline_item_stale'
+      { item_title: primary_actor.title }
+    else
+      { display_id: primary_actor.display_id }
+    end
+  end
+
+  def days_stale
+    return 0 if primary_actor.stage_changed_at.blank?
+
+    ((Time.current - primary_actor.stage_changed_at) / 1.day).to_i
   end
 
   def message_content(actor)

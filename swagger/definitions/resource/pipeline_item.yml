@@ -22,6 +22,11 @@ properties:
   pipeline_stage_id:
     type: number
     description: The ID of the stage this item belongs to
+  pipeline_lost_reason_id:
+    type:
+      - number
+      - 'null'
+    description: The ID of the lost reason, required once the item is in a `lost` stage
   conversation_id:
     type:
       - number
@@ -58,6 +63,8 @@ properties:
     $ref: '#/components/schemas/agent'
   team:
     $ref: '#/components/schemas/team'
+  pipeline_lost_reason:
+    $ref: '#/components/schemas/pipeline_lost_reason'
   created_at:
     type: string
     format: date-time

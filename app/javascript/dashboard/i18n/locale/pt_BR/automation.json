@@ -109,6 +109,8 @@
         "TITLE_PLACEHOLDER": "Título (opcional)",
         "VALUE_PLACEHOLDER": "Valor do negócio (opcional)",
         "NOTES_PLACEHOLDER": "Notas (opcional)",
+        "TASK_TITLE_PLACEHOLDER": "Título da tarefa",
+        "TASK_DUE_IN_DAYS_PLACEHOLDER": "Vencimento em quantos dias",
         "ASSIGNEE_MODE": {
           "CONVERSATION_ASSIGNEE": "Mesmo agente da conversa",
           "NONE": "Sem responsável"
@@ -184,7 +186,8 @@
       "ADD_PIPELINE_ITEM_LABEL": "Adicionar Etiqueta ao Card do Pipeline",
       "REMOVE_PIPELINE_ITEM_LABEL": "Remover Etiqueta do Card do Pipeline",
       "UPDATE_PIPELINE_ITEM": "Atualizar Card do Pipeline",
-      "EXPORT_PIPELINE_ITEM": "Exportar Card para Outro Pipeline"
+      "EXPORT_PIPELINE_ITEM": "Exportar Card para Outro Pipeline",
+      "CREATE_PIPELINE_ITEM_TASK": "Criar uma Tarefa"
     },
     "MESSAGE_TYPES": {
       "INCOMING": "Mensagem Recebida",

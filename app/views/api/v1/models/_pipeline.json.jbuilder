@@ -7,5 +7,6 @@ json.stages_count resource.pipeline_stages.size
 json.enable_auto_assignment resource.enable_auto_assignment
 json.max_assignment_limit resource.max_assignment_limit
 json.sync_assignments resource.sync_assignments
+json.stale_alert_days resource.stale_alert_days
 json.created_at resource.created_at
 json.updated_at resource.updated_at

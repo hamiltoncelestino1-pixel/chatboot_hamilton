@@ -2,6 +2,7 @@ import PipelinesAPI from 'dashboard/api/pipelines';
 import PipelineItemsAPI from 'dashboard/api/pipelineItems';
 import PipelineItemLabelsAPI from 'dashboard/api/pipelineItemLabels';
 import { useAlert } from 'dashboard/composables';
+import { useLostReasonPrompt } from 'dashboard/composables/useLostReasonPrompt';
 import { throwErrorMessage } from '../../utils/api';
 
 export const actions = {
@@ -138,23 +139,49 @@ export const actions = {
     }
   },
 
+  // Both drag-and-drop (KanbanBoard.handleCardMove) and manual edit
+  // (KanbanCardDetail.handleSave) dispatch this directly, so the lost-reason prompt lives
+  // here rather than in either caller. The commit below already moves the card optimistically
+  // (vuedraggable has already moved it visually too) - if the destination is a `lost` stage
+  // and no reason was pre-supplied, pause for a reason before persisting. Cancelling reuses
+  // the exact same rollback commit as an API error, which the callers' `watch(storeItems...)`
+  // already resyncs from.
   moveItem: async (
-    { commit },
-    { itemId, fromStageId, toStageId, position }
+    { commit, state },
+    { itemId, fromStageId, toStageId, position, pipelineLostReasonId = null }
   ) => {
     commit('MOVE_ITEM', { itemId, fromStageId, toStageId, position });
-    try {
-      const { data } = await PipelineItemsAPI.update(itemId, {
-        pipeline_item: { pipeline_stage_id: toStageId, position },
-      });
-      commit('EDIT_ITEM', data);
-    } catch {
+
+    const rollback = () => {
       commit('MOVE_ITEM', {
         itemId,
         fromStageId: toStageId,
         toStageId: fromStageId,
         position: 0,
       });
+    };
+
+    let reasonId = pipelineLostReasonId;
+    if (state.stages[toStageId]?.stage_type === 'lost' && !reasonId) {
+      const { promptForLostReason } = useLostReasonPrompt();
+      reasonId = await promptForLostReason();
+      if (!reasonId) {
+        rollback();
+        return;
+      }
+    }
+
+    try {
+      const { data } = await PipelineItemsAPI.update(itemId, {
+        pipeline_item: {
+          pipeline_stage_id: toStageId,
+          position,
+          ...(reasonId ? { pipeline_lost_reason_id: reasonId } : {}),
+        },
+      });
+      commit('EDIT_ITEM', data);
+    } catch {
+      rollback();
       useAlert('Failed to move card. Please try again.');
     }
   },

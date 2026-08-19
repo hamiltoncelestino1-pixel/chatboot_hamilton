@@ -44,10 +44,11 @@ class Api::V1::Accounts::TasksController < Api::V1::Accounts::BaseController
   end
 
   def create_params
-    params.require(:task).permit(:title, :due_date, :contact_id, :conversation_id, :pipeline_item_id, :assignee_id)
+    params.require(:task).permit(:title, :due_date, :contact_id, :conversation_id, :pipeline_item_id, :assignee_id,
+                                 :recurrence_interval)
   end
 
   def update_params
-    params.require(:task).permit(:title, :due_date, :assignee_id)
+    params.require(:task).permit(:title, :due_date, :assignee_id, :recurrence_interval)
   end
 end

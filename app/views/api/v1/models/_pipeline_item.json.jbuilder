@@ -4,6 +4,7 @@ json.value resource.value
 json.notes resource.notes
 json.position resource.position
 json.pipeline_stage_id resource.pipeline_stage_id
+json.pipeline_lost_reason_id resource.pipeline_lost_reason_id
 json.pipeline_id resource.pipeline_stage.pipeline_id
 json.pipeline_name resource.pipeline_stage.pipeline.name
 json.pipeline_stage_name resource.pipeline_stage.name
@@ -27,5 +28,11 @@ if resource.team
 else
   json.team nil
 end
+if resource.pipeline_lost_reason
+  json.pipeline_lost_reason resource.pipeline_lost_reason, partial: 'api/v1/models/pipeline_lost_reason', as: :resource
+else
+  json.pipeline_lost_reason nil
+end
 json.label_list resource.label_list
 json.custom_attributes resource.custom_attributes
+json.overdue_tasks_count local_assigns[:overdue_tasks_counts]&.fetch(resource.id, 0) || 0

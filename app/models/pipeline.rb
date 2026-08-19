@@ -8,6 +8,7 @@
 #  max_assignment_limit   :integer          default(0), not null
 #  name                   :string(255)      not null
 #  position               :integer          default(0), not null
+#  stale_alert_days       :integer
 #  sync_assignments       :boolean          default(FALSE), not null
 #  created_at             :datetime         not null
 #  updated_at             :datetime         not null
@@ -30,6 +31,7 @@ class Pipeline < ApplicationRecord
             presence: { message: I18n.t('errors.validations.presence') },
             uniqueness: { scope: :account_id }
   validates :max_assignment_limit, numericality: { greater_than_or_equal_to: 0 }
+  validates :stale_alert_days, numericality: { greater_than_or_equal_to: 0 }, allow_nil: true
 
   default_scope { order(:position) }
 

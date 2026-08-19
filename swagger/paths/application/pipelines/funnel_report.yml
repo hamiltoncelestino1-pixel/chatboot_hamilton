@@ -1,0 +1,29 @@
+tags:
+  - Pipelines
+operationId: get-funnel-report-of-a-pipeline
+summary: Get the funnel report of a pipeline
+security:
+  - userApiKey: []
+description: >-
+  Returns the open value, stage distribution and average time in stage for a pipeline.
+  This is a snapshot approximation (current cards only), not a full historical funnel -
+  see the response schema description for details.
+responses:
+  '200':
+    description: Success
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/pipeline_funnel_report'
+  '401':
+    description: Unauthorized
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/bad_request_error'
+  '404':
+    description: Pipeline not found
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/bad_request_error'

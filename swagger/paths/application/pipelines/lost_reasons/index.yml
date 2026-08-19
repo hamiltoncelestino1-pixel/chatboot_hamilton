@@ -1,0 +1,22 @@
+tags:
+  - Pipelines
+operationId: list-pipeline-lost-reasons
+summary: List pipeline lost reasons
+description: List all configured lost reasons in the account, ordered by title
+security:
+  - userApiKey: []
+responses:
+  '200':
+    description: Success
+    content:
+      application/json:
+        schema:
+          type: array
+          items:
+            $ref: '#/components/schemas/pipeline_lost_reason'
+  '401':
+    description: Unauthorized
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/bad_request_error'

@@ -922,6 +922,10 @@ export const AUTOMATIONS = {
         key: 'send_webhook_event',
         name: 'SEND_WEBHOOK_EVENT',
       },
+      {
+        key: 'create_pipeline_item_task',
+        name: 'CREATE_PIPELINE_ITEM_TASK',
+      },
     ],
   },
   pipeline_item_stage_changed: {
@@ -995,6 +999,10 @@ export const AUTOMATIONS = {
       {
         key: 'send_webhook_event',
         name: 'SEND_WEBHOOK_EVENT',
+      },
+      {
+        key: 'create_pipeline_item_task',
+        name: 'CREATE_PIPELINE_ITEM_TASK',
       },
     ],
   },
@@ -1166,5 +1174,10 @@ export const AUTOMATION_ACTION_TYPES = [
     key: 'update_pipeline_item',
     label: 'UPDATE_PIPELINE_ITEM',
     inputType: 'pipeline_update_fields',
+  },
+  {
+    key: 'create_pipeline_item_task',
+    label: 'CREATE_PIPELINE_ITEM_TASK',
+    inputType: 'pipeline_create_task',
   },
 ];

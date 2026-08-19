@@ -2,18 +2,20 @@
 #
 # Table name: tasks
 #
-#  id               :bigint           not null, primary key
-#  completed_at     :datetime
-#  due_date         :datetime         not null
-#  reminder_sent_at :datetime
-#  title            :string           not null
-#  created_at       :datetime         not null
-#  updated_at       :datetime         not null
-#  account_id       :bigint           not null
-#  assignee_id      :bigint           not null
-#  contact_id       :bigint           not null
-#  conversation_id  :bigint
-#  pipeline_item_id :bigint
+#  id                   :bigint           not null, primary key
+#  completed_at         :datetime
+#  due_date             :datetime         not null
+#  recurrence_interval  :string
+#  reminder_sent_at     :datetime
+#  title                :string           not null
+#  created_at           :datetime         not null
+#  updated_at           :datetime         not null
+#  account_id           :bigint           not null
+#  assignee_id          :bigint           not null
+#  contact_id           :bigint           not null
+#  conversation_id      :bigint
+#  pipeline_item_id     :bigint
+#  recurrence_parent_id :bigint
 #
 # Indexes
 #
@@ -23,6 +25,7 @@
 #  index_tasks_on_conversation_id            (conversation_id)
 #  index_tasks_on_due_date_pending_reminder  (due_date) WHERE ((completed_at IS NULL) AND (reminder_sent_at IS NULL))
 #  index_tasks_on_pipeline_item_id           (pipeline_item_id)
+#  index_tasks_on_recurrence_parent_id       (recurrence_parent_id)
 #
 # Foreign Keys
 #
@@ -31,6 +34,7 @@
 #  fk_rails_...  (contact_id => contacts.id)
 #  fk_rails_...  (conversation_id => conversations.id)
 #  fk_rails_...  (pipeline_item_id => pipeline_items.id)
+#  fk_rails_...  (recurrence_parent_id => tasks.id)
 #
 class Task < ApplicationRecord
   belongs_to :account
@@ -38,11 +42,15 @@ class Task < ApplicationRecord
   belongs_to :conversation, optional: true
   belongs_to :pipeline_item, optional: true
   belongs_to :assignee, class_name: 'User'
+  belongs_to :recurrence_parent, class_name: 'Task', optional: true
 
   has_many :notifications, as: :primary_actor, dependent: :destroy_async
 
+  RECURRENCE_INTERVALS = %w[daily weekly monthly].freeze
+
   validates :title, presence: true
   validates :due_date, presence: true
+  validates :recurrence_interval, inclusion: { in: RECURRENCE_INTERVALS }, allow_nil: true
   validate :conversation_must_belong_to_contact, if: -> { conversation_id.present? }
   validate :pipeline_item_must_belong_to_contact, if: -> { pipeline_item_id.present? }
 
@@ -53,6 +61,7 @@ class Task < ApplicationRecord
   after_create_commit :dispatch_created_event
   after_update_commit :dispatch_completed_event, if: :saved_change_to_completed_at?
   after_update_commit :dispatch_updated_event, if: :broadcast_relevant_change?
+  after_update_commit :create_next_occurrence, if: -> { saved_change_to_completed_at? && recurrence_interval.present? }
   after_destroy_commit :dispatch_deleted_event
 
   def completed?
@@ -96,6 +105,32 @@ class Task < ApplicationRecord
 
   def reset_reminder_if_rescheduled
     self.reminder_sent_at = nil if due_date_changed? && reminder_sent_at.present?
+  end
+
+  # saved_change_to_completed_at? fires on any change to the column, including it going back
+  # to nil when the task is reopened - only spawn the next occurrence when it was actually
+  # marked complete, not when reopening it.
+  def create_next_occurrence
+    return if completed_at.blank?
+
+    account.tasks.create!(
+      title: title,
+      due_date: next_due_date,
+      assignee_id: assignee_id,
+      contact_id: contact_id,
+      conversation_id: conversation_id,
+      pipeline_item_id: pipeline_item_id,
+      recurrence_interval: recurrence_interval,
+      recurrence_parent_id: id
+    )
+  end
+
+  def next_due_date
+    case recurrence_interval
+    when 'daily' then due_date + 1.day
+    when 'weekly' then due_date + 1.week
+    when 'monthly' then due_date + 1.month
+    end
   end
 
   # Mirrors PipelineItem#conversation_must_belong_to_contact (app/models/pipeline_item.rb):

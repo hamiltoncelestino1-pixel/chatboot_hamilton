@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_08_14_120000) do
+ActiveRecord::Schema[7.1].define(version: 2026_08_19_221100) do
   # These extensions should be enabled to support this database
   enable_extension "pg_stat_statements"
   enable_extension "pg_trgm"
@@ -1089,6 +1089,9 @@ ActiveRecord::Schema[7.1].define(version: 2026_08_14_120000) do
     t.bigint "team_id"
     t.jsonb "custom_attributes", default: {}, null: false
     t.bigint "pipeline_id", null: false
+    t.datetime "stage_changed_at"
+    t.datetime "stale_alert_sent_at"
+    t.bigint "pipeline_lost_reason_id"
     t.index ["account_id", "contact_id"], name: "index_pipeline_items_on_account_id_and_contact_id"
     t.index ["account_id"], name: "index_pipeline_items_on_account_id"
     t.index ["assignee_id"], name: "index_pipeline_items_on_assignee_id"
@@ -1096,9 +1099,19 @@ ActiveRecord::Schema[7.1].define(version: 2026_08_14_120000) do
     t.index ["conversation_id"], name: "index_pipeline_items_on_conversation_id"
     t.index ["pipeline_id", "contact_id"], name: "index_pipeline_items_on_pipeline_id_and_contact_id", unique: true
     t.index ["pipeline_id"], name: "index_pipeline_items_on_pipeline_id"
+    t.index ["pipeline_lost_reason_id"], name: "index_pipeline_items_on_pipeline_lost_reason_id"
     t.index ["pipeline_stage_id", "position"], name: "index_pipeline_items_on_pipeline_stage_id_and_position"
     t.index ["pipeline_stage_id"], name: "index_pipeline_items_on_pipeline_stage_id"
     t.index ["team_id"], name: "index_pipeline_items_on_team_id"
+  end
+
+  create_table "pipeline_lost_reasons", force: :cascade do |t|
+    t.string "title", null: false
+    t.bigint "account_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["account_id", "title"], name: "index_pipeline_lost_reasons_on_account_id_and_title", unique: true
+    t.index ["account_id"], name: "index_pipeline_lost_reasons_on_account_id"
   end
 
   create_table "pipeline_members", force: :cascade do |t|
@@ -1135,6 +1148,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_08_14_120000) do
     t.boolean "enable_auto_assignment", default: false, null: false
     t.integer "max_assignment_limit", default: 0, null: false
     t.boolean "sync_assignments", default: false, null: false
+    t.integer "stale_alert_days"
     t.index ["account_id", "name"], name: "index_pipelines_on_account_id_and_name", unique: true
     t.index ["account_id", "position"], name: "index_pipelines_on_account_id_and_position"
     t.index ["account_id"], name: "index_pipelines_on_account_id"
@@ -1308,12 +1322,15 @@ ActiveRecord::Schema[7.1].define(version: 2026_08_14_120000) do
     t.bigint "assignee_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "recurrence_interval"
+    t.bigint "recurrence_parent_id"
     t.index ["account_id"], name: "index_tasks_on_account_id"
     t.index ["assignee_id"], name: "index_tasks_on_assignee_id"
     t.index ["contact_id"], name: "index_tasks_on_contact_id"
     t.index ["conversation_id"], name: "index_tasks_on_conversation_id"
     t.index ["due_date"], name: "index_tasks_on_due_date_pending_reminder", where: "((completed_at IS NULL) AND (reminder_sent_at IS NULL))"
     t.index ["pipeline_item_id"], name: "index_tasks_on_pipeline_item_id"
+    t.index ["recurrence_parent_id"], name: "index_tasks_on_recurrence_parent_id"
   end
 
   create_table "team_members", force: :cascade do |t|
@@ -1409,15 +1426,18 @@ ActiveRecord::Schema[7.1].define(version: 2026_08_14_120000) do
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "inboxes", "portals"
+  add_foreign_key "pipeline_items", "pipeline_lost_reasons"
   add_foreign_key "pipeline_items", "pipelines"
   add_foreign_key "pipeline_items", "teams"
   add_foreign_key "pipeline_items", "users", column: "assignee_id"
+  add_foreign_key "pipeline_lost_reasons", "accounts"
   add_foreign_key "pipeline_members", "pipelines"
   add_foreign_key "pipeline_members", "users"
   add_foreign_key "tasks", "accounts"
   add_foreign_key "tasks", "contacts"
   add_foreign_key "tasks", "conversations"
   add_foreign_key "tasks", "pipeline_items"
+  add_foreign_key "tasks", "tasks", column: "recurrence_parent_id"
   add_foreign_key "tasks", "users", column: "assignee_id"
   create_trigger("accounts_after_insert_row_tr", :generated => true, :compatibility => 1).
       on("accounts").

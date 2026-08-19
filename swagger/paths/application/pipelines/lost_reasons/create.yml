@@ -1,0 +1,32 @@
+tags:
+  - Pipelines
+operationId: create-a-pipeline-lost-reason
+summary: Create a pipeline lost reason
+description: Create a new lost reason in the account (admin only)
+security:
+  - userApiKey: []
+requestBody:
+  required: true
+  content:
+    application/json:
+      schema:
+        $ref: '#/components/schemas/pipeline_lost_reason_create_update_payload'
+responses:
+  '200':
+    description: Success
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/pipeline_lost_reason'
+  '401':
+    description: Unauthorized
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/bad_request_error'
+  '422':
+    description: Invalid attributes
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/bad_request_error'
