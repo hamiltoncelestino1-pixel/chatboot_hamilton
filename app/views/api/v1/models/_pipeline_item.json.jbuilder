@@ -33,6 +33,6 @@ if resource.pipeline_lost_reason
 else
   json.pipeline_lost_reason nil
 end
-json.label_list resource.label_list
+json.label_list resource.preloaded_label_list
 json.custom_attributes resource.custom_attributes
 json.overdue_tasks_count local_assigns[:overdue_tasks_counts]&.fetch(resource.id, 0) || 0

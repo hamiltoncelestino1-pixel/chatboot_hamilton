@@ -5,6 +5,6 @@ json.position resource.position
 json.stage_type resource.stage_type
 json.pipeline_id resource.pipeline_id
 json.account_id resource.account_id
-json.items_count resource.pipeline_items.size
+json.items_count local_assigns[:items_counts]&.fetch(resource.id, 0) || 0
 json.created_at resource.created_at
 json.updated_at resource.updated_at

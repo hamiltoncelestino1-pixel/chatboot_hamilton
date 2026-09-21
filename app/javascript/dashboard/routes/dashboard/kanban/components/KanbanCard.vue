@@ -1,7 +1,6 @@
 <script setup>
-import { computed } from 'vue';
+import { computed, inject } from 'vue';
 import { useRoute } from 'vue-router';
-import { useStore } from 'dashboard/composables/store';
 import { useI18n } from 'vue-i18n';
 import {
   dynamicTime,
@@ -18,7 +17,6 @@ const props = defineProps({
 const emit = defineEmits(['click', 'export']);
 const { t } = useI18n();
 
-const store = useStore();
 const route = useRoute();
 const accountId = computed(() => route.params.accountId);
 const { formatCurrency } = useNumberFormatter();
@@ -28,8 +26,13 @@ const formattedValue = computed(() => {
   return formatCurrency(props.item.value);
 });
 
-const pipelineItemAttributes = computed(() =>
-  store.getters['attributes/getAttributesByModel']('pipeline_item_attribute')
+// Same for every card on the board - computed once in KanbanBoard.vue and provided down
+// instead of recomputed per card instance (task 09). The default (a factory, so it's only built
+// when nothing was provided) exists just for a card rendered outside the board.
+const visibleCardAttributeDefinitions = inject(
+  'kanbanCardAttributeDefinitions',
+  () => computed(() => []),
+  true
 );
 
 const createdAtShort = computed(() =>
@@ -53,8 +56,7 @@ const datesTooltip = computed(() => {
 });
 
 const visibleAttributes = computed(() =>
-  pipelineItemAttributes.value
-    .filter(attr => attr.display_on_card)
+  visibleCardAttributeDefinitions.value
     .map(attr => ({
       key: attr.attribute_key,
       label: attr.attribute_display_name,

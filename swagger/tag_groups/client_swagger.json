@@ -2529,6 +2529,37 @@
           }
         }
       },
+      "pipeline_item_board_meta": {
+        "type": "object",
+        "properties": {
+          "count": {
+            "type": "integer",
+            "description": "Total number of items matching the active filters, across all pages"
+          },
+          "current_page": {
+            "type": [
+              "string",
+              "integer"
+            ],
+            "description": "Current page number"
+          }
+        }
+      },
+      "pipeline_item_board_list_response": {
+        "type": "object",
+        "properties": {
+          "meta": {
+            "$ref": "#/components/schemas/pipeline_item_board_meta"
+          },
+          "payload": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/pipeline_item"
+            },
+            "description": "List of pipeline items for the requested stage"
+          }
+        }
+      },
       "pipeline_funnel_report": {
         "type": "object",
         "description": "Snapshot-based funnel metrics for cards currently open (not won/lost) in the pipeline. stage_distribution and avg_time_in_stage_seconds reflect only cards presently sitting in each stage, not the full historical flow through the funnel.",
@@ -3959,6 +3990,10 @@
             "items": {
               "type": "number"
             }
+          },
+          "start_position": {
+            "type": "number",
+            "description": "Position offset for the first id in ordered_ids - the index of the page being reordered (0 for the first page). Required when reordering any page other than the first, so positions don't collide with items on pages not currently loaded. Defaults to 0.\n"
           }
         },
         "required": [

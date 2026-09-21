@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onMounted, ref } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 import { useStore, useMapGetter } from 'dashboard/composables/store';
@@ -20,13 +20,21 @@ const showAddItemModal = ref(false);
 const itemsGetter = useMapGetter('kanban/getItemsForContact');
 const items = computed(() => itemsGetter.value(props.contactId));
 
-onMounted(async () => {
-  try {
-    await store.dispatch('kanban/fetchItemsForContact', props.contactId);
-  } finally {
-    isFetching.value = false;
-  }
-});
+// A watch, not onMounted, for the same reason as ConversationOpportunities.vue (task 25): the
+// index the getter reads is populated only by this fetch, and the component can stay mounted
+// while contactId changes.
+watch(
+  () => props.contactId,
+  async contactId => {
+    isFetching.value = true;
+    try {
+      await store.dispatch('kanban/fetchItemsForContact', contactId);
+    } finally {
+      isFetching.value = false;
+    }
+  },
+  { immediate: true }
+);
 
 const goToOpportunity = item => {
   router.push({

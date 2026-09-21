@@ -4,3 +4,8 @@
 *.sh                          text eol=lf
 docker/entrypoints/**         text eol=lf
 bin/*                         text eol=lf
+
+# Rubocop (Layout/EndOfLine) rejeita CRLF em .rb - já aconteceu duas vezes num ambiente
+# Windows/Docker (task 22, claude/pipeline_performance_tasks/) sem nenhuma config de editor
+# ter causado isso; força LF na origem em vez de confiar em cada editor.
+*.rb                          text eol=lf

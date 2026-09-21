@@ -239,9 +239,20 @@ describe ActionCableListener do
     let!(:pipeline_item) { create(:pipeline_item, pipeline_stage: stage, account: account) }
     let!(:event) { Events::Base.new(event_name, Time.zone.now, pipeline_item: pipeline_item) }
 
-    it 'broadcasts to the whole account' do
+    it 'broadcasts to pipeline members and account admins, not the whole account' do
+      create(:pipeline_member, pipeline: pipeline, user: agent)
+
       expect(ActionCableBroadcastJob).to receive(:perform_later).with(
-        ["account_#{account.id}"],
+        a_collection_containing_exactly(agent.pubsub_token, admin.pubsub_token),
+        'pipeline_item.created',
+        pipeline_item.push_event_data.merge(account_id: account.id)
+      )
+      listener.pipeline_item_created(event)
+    end
+
+    it 'does not include an agent who is not a member of the pipeline' do
+      expect(ActionCableBroadcastJob).to receive(:perform_later).with(
+        a_collection_containing_exactly(admin.pubsub_token),
         'pipeline_item.created',
         pipeline_item.push_event_data.merge(account_id: account.id)
       )
@@ -256,11 +267,13 @@ describe ActionCableListener do
     let!(:pipeline_item) { create(:pipeline_item, pipeline_stage: stage, account: account) }
     let!(:event) { Events::Base.new(event_name, Time.zone.now, pipeline_item: pipeline_item) }
 
-    it 'broadcasts to the whole account' do
+    it 'broadcasts to pipeline members and account admins, not the whole account' do
+      create(:pipeline_member, pipeline: pipeline, user: agent)
+
       expect(ActionCableBroadcastJob).to receive(:perform_later).with(
-        ["account_#{account.id}"],
+        a_collection_containing_exactly(agent.pubsub_token, admin.pubsub_token),
         'pipeline_item.updated',
-        pipeline_item.push_event_data.merge(account_id: account.id)
+        pipeline_item.push_event_data.merge(account_id: account.id, previous_pipeline_stage_id: nil)
       )
       listener.pipeline_item_updated(event)
     end

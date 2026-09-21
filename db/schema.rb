@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_08_19_221100) do
+ActiveRecord::Schema[7.1].define(version: 2026_09_18_120000) do
   # These extensions should be enabled to support this database
   enable_extension "pg_stat_statements"
   enable_extension "pg_trgm"
@@ -1102,6 +1102,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_08_19_221100) do
     t.index ["pipeline_lost_reason_id"], name: "index_pipeline_items_on_pipeline_lost_reason_id"
     t.index ["pipeline_stage_id", "position"], name: "index_pipeline_items_on_pipeline_stage_id_and_position"
     t.index ["pipeline_stage_id"], name: "index_pipeline_items_on_pipeline_stage_id"
+    t.index ["stage_changed_at"], name: "index_pipeline_items_on_stage_changed_at_pending_stale_alert", where: "((stale_alert_sent_at IS NULL) AND (assignee_id IS NOT NULL))"
     t.index ["team_id"], name: "index_pipeline_items_on_team_id"
   end
 

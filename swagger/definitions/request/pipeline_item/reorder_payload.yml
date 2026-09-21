@@ -8,6 +8,12 @@ properties:
     description: Array of item IDs in the desired display order
     items:
       type: number
+  start_position:
+    type: number
+    description: >
+      Position offset for the first id in ordered_ids - the index of the page being reordered
+      (0 for the first page). Required when reordering any page other than the first, so
+      positions don't collide with items on pages not currently loaded. Defaults to 0.
 required:
   - stage_id
   - ordered_ids

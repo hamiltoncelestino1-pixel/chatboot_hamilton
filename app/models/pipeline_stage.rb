@@ -37,6 +37,13 @@ class PipelineStage < ApplicationRecord
     { id: id, name: name, color: color, position: position, pipeline_id: pipeline_id, stage_type: stage_type }
   end
 
+  # Shared by PipelineItem#assign_position (new cards), Pipelines::ExportItemService (a card
+  # arriving from another pipeline) and PipelineItemActions#move_stage (a card moved by
+  # automation/macro) - one place instead of three copies of the same query (task 24).
+  def next_position
+    (pipeline_items.maximum(:position) || -1) + 1
+  end
+
   private
 
   def prevent_special_stage_deletion

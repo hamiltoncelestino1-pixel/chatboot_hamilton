@@ -5,8 +5,13 @@ import { useStore, useMapGetter } from 'dashboard/composables/store';
 import { useAlert } from 'dashboard/composables';
 import DropdownMenu from 'dashboard/components-next/dropdown-menu/DropdownMenu.vue';
 
+// Two mutually exclusive scopes (task 07): an explicit list of ids (single card, from
+// KanbanCard.vue) or a stageId (+ itemCount just to label it - the actual set is resolved
+// server-side from the board's active filters, not from this list) to run on the whole column.
 const props = defineProps({
-  pipelineItemIds: { type: Array, required: true },
+  pipelineItemIds: { type: Array, default: null },
+  stageId: { type: Number, default: null },
+  itemCount: { type: Number, default: 0 },
   showLabel: { type: Boolean, default: false },
   buttonClass: { type: String, default: '' },
   openUpward: { type: Boolean, default: false },
@@ -15,17 +20,31 @@ const props = defineProps({
 const { t } = useI18n();
 const store = useStore();
 const macros = useMapGetter('macros/getMacros');
+const activeFilterParams = useMapGetter('kanban/getActiveFilterParams');
 
 const showMenu = ref(false);
 const executingMacroId = ref(null);
+
+const isColumnScope = computed(() => props.stageId != null);
+const scopeCount = computed(() =>
+  isColumnScope.value ? props.itemCount : props.pipelineItemIds?.length || 0
+);
 
 const pipelineMacros = computed(() =>
   macros.value.filter(macro => macro.macro_type === 'pipeline_item')
 );
 
+// The count is shown right on the option so the agent sees the real scope before clicking -
+// same number as the column badge, never "however many happen to be loaded" (task 07's whole
+// point: that number used to be silently wrong under pagination).
 const macroMenuItems = computed(() =>
   pipelineMacros.value.map(macro => ({
-    label: macro.name,
+    label: isColumnScope.value
+      ? t('KANBAN.RUN_MACRO.COLUMN_ITEM_LABEL', {
+          name: macro.name,
+          count: scopeCount.value,
+        })
+      : macro.name,
     action: 'run',
     value: macro.id,
     macro,
@@ -52,21 +71,23 @@ const closeMenu = () => {
 };
 
 const runMacro = async macro => {
-  if (!props.pipelineItemIds.length || executingMacroId.value) return;
+  if (!scopeCount.value || executingMacroId.value) return;
 
   executingMacroId.value = macro.id;
   try {
     await store.dispatch('macros/execute', {
       macroId: macro.id,
-      pipelineItemIds: props.pipelineItemIds,
+      pipelineItemIds: isColumnScope.value ? null : props.pipelineItemIds,
+      stageId: isColumnScope.value ? props.stageId : null,
+      filters: isColumnScope.value ? activeFilterParams.value : undefined,
     });
     // macros/execute only enqueues MacrosPipelineExecutionJob - the cards haven't been
     // mutated yet by the time this resolves. Deliberately not refetching here: a REST
-    // fetchItems() fired at this point races the job's own per-card real-time broadcasts
-    // (pipeline_item.updated) with a stale snapshot, and SET_ITEMS only adds an item to a
-    // stage's order without removing it from a stale one, so the loser of that race gets
-    // stuck showing the card in its old column. The board updates via the WebSocket
-    // broadcasts alone, same as manual drag-and-drop relies on for other sessions.
+    // refetch fired at this point races the job's own per-card real-time broadcasts
+    // (pipeline_item.updated, handled by applyRealtimePipelineItem) with a stale snapshot,
+    // and the loser of that race would overwrite the other with outdated data. The board
+    // updates via the WebSocket broadcasts alone, same as manual drag-and-drop relies on for
+    // other sessions.
     useAlert(t('KANBAN.RUN_MACRO.SUCCESS'));
   } catch (error) {
     useAlert(t('KANBAN.RUN_MACRO.ERROR'));

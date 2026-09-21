@@ -41,8 +41,10 @@ const selectedStage = ref(null);
 const isCreating = ref(false);
 const isSaving = ref(false);
 
-const itemsInStage = stage =>
-  store.getters['kanban/getItemsForStage'](stage.id)?.length || 0;
+// stage.items_count comes straight from the API (_pipeline_stage.json.jbuilder, task 01) - the
+// board's store only ever holds whatever page of cards was last fetched for that stage (task 05),
+// which can be 0 if the agent never opened this pipeline's board at all.
+const itemsInStage = stage => stage.items_count || 0;
 
 const startEdit = stage => {
   editingStageId.value = stage.id;

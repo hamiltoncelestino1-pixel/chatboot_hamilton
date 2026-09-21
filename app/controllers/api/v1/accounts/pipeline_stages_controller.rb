@@ -4,18 +4,23 @@ class Api::V1::Accounts::PipelineStagesController < Api::V1::Accounts::BaseContr
   before_action :check_authorization
 
   def index
-    @stages = @pipeline.pipeline_stages.includes(:pipeline_items)
+    @stages = @pipeline.pipeline_stages
+    @items_counts = PipelineItem.where(pipeline_stage_id: @stages.map(&:id)).group(:pipeline_stage_id).count
   end
 
-  def show; end
+  def show
+    @items_counts = { @stage.id => @stage.pipeline_items.count }
+  end
 
   def create
     @stage = @pipeline.pipeline_stages.new(stage_params.merge(account: Current.account, stage_type: :normal))
     @stage.save!
+    @items_counts = {}
   end
 
   def update
     @stage.update!(stage_params)
+    @items_counts = { @stage.id => @stage.pipeline_items.count }
   end
 
   def destroy

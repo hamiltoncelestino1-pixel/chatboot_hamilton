@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, watch } from 'vue';
+import { ref, computed, watch, provide } from 'vue';
 import draggable from 'vuedraggable';
 import { useStore, useMapGetter } from 'dashboard/composables/store';
 import KanbanColumn from './KanbanColumn.vue';
@@ -9,6 +9,19 @@ const emit = defineEmits(['card-click', 'add-item', 'export']);
 const store = useStore();
 const activePipeline = useMapGetter('kanban/getActivePipeline');
 const getStagesForPipeline = useMapGetter('kanban/getStagesForPipeline');
+
+// Same for every card on the board, so it's computed once here instead of once per card
+// (KanbanCard.vue used to call this per instance - task 09). Pre-filtered to display_on_card
+// since that filter doesn't depend on the card either, only the value read from it does.
+const cardAttributeDefinitions = useMapGetter(
+  'attributes/getAttributesByModel'
+);
+const visibleCardAttributeDefinitions = computed(() =>
+  cardAttributeDefinitions
+    .value('pipeline_item_attribute')
+    .filter(attr => attr.display_on_card)
+);
+provide('kanbanCardAttributeDefinitions', visibleCardAttributeDefinitions);
 
 const storeStages = computed(() =>
   activePipeline.value

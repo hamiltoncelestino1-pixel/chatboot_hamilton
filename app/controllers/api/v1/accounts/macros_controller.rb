@@ -51,19 +51,60 @@ class Api::V1::Accounts::MacrosController < Api::V1::Accounts::BaseController
   def execute
     case @macro.macro_type
     when 'pipeline_item'
-      return render_could_not_create_error(I18n.t('errors.macros.execute.pipeline_item_ids_required')) if params[:pipeline_item_ids].blank?
-
-      ::MacrosPipelineExecutionJob.perform_later(@macro, pipeline_item_ids: authorized_pipeline_item_ids, user: Current.user)
+      execute_pipeline_item_macro
     else
-      return render_could_not_create_error(I18n.t('errors.macros.execute.conversation_ids_required')) if params[:conversation_ids].blank?
-
-      ::MacrosExecutionJob.perform_later(@macro, conversation_ids: params[:conversation_ids], user: Current.user)
+      execute_conversation_macro
     end
-
-    head :ok
   end
 
   private
+
+  def execute_conversation_macro
+    return render_could_not_create_error(I18n.t('errors.macros.execute.conversation_ids_required')) if params[:conversation_ids].blank?
+
+    ::MacrosExecutionJob.perform_later(@macro, conversation_ids: params[:conversation_ids], user: Current.user)
+    head :ok
+  end
+
+  # Two ways to target pipeline items: an explicit list (single card, from KanbanCard), or a
+  # stage_id + the board's active filters, to run on every card currently matching that column -
+  # not just the page the frontend happened to have loaded (task 07: pagination silently broke
+  # the old "pass every loaded id" approach, running on 25 cards when the agent meant 900). The
+  # job resolves the stage_id case against the live data at execution time, same filters applied
+  # server-side via PipelineItemFinder.
+  def execute_pipeline_item_macro
+    if params[:stage_id].present?
+      execute_pipeline_item_macro_for_stage
+    elsif params[:pipeline_item_ids].present?
+      ::MacrosPipelineExecutionJob.perform_later(@macro, pipeline_item_ids: authorized_pipeline_item_ids, user: Current.user)
+      head :ok
+    else
+      render_could_not_create_error(I18n.t('errors.macros.execute.pipeline_item_ids_required'))
+    end
+  end
+
+  def execute_pipeline_item_macro_for_stage
+    stage = authorized_pipeline_stage
+    return render_could_not_create_error(I18n.t('errors.macros.execute.stage_not_found')) if stage.blank?
+
+    ::MacrosPipelineExecutionJob.perform_later(
+      @macro, stage_id: stage.id, filters: pipeline_item_filter_params, user: Current.user
+    )
+    head :ok
+  end
+
+  def authorized_pipeline_stage
+    allowed_pipeline_ids = policy_scope(Current.account.pipelines).select(:id)
+    Current.account.pipeline_stages.joins(:pipeline).where(pipeline_id: allowed_pipeline_ids).find_by(id: params[:stage_id])
+  end
+
+  def pipeline_item_filter_params
+    params.permit(
+      :only_mine, :assignee_id, :created_at_from, :created_at_to,
+      :updated_at_from, :updated_at_to, :value_min, :value_max,
+      label_titles: []
+    ).to_h
+  end
 
   # PipelineItemPolicy::Scope is unconditional (scope.all) - the actual per-pipeline
   # restriction lives in PipelinePolicy::Scope (assigned_pipelines), so authorization must

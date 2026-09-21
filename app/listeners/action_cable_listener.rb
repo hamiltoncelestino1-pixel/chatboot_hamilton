@@ -176,15 +176,22 @@ class ActionCableListener < BaseListener
   def pipeline_item_created(event)
     pipeline_item = event.data[:pipeline_item]
     account = pipeline_item.account
+    tokens = user_tokens(account, pipeline_item.pipeline.members)
 
-    broadcast(account, [account_token(account)], PIPELINE_ITEM_CREATED, pipeline_item.push_event_data)
+    broadcast(account, tokens, PIPELINE_ITEM_CREATED, pipeline_item.push_event_data)
   end
 
   def pipeline_item_updated(event)
     pipeline_item = event.data[:pipeline_item]
     account = pipeline_item.account
+    tokens = user_tokens(account, pipeline_item.pipeline.members)
 
-    broadcast(account, [account_token(account)], PIPELINE_ITEM_UPDATED, pipeline_item.push_event_data)
+    # The board keeps per-stage counts for cards it hasn't loaded; when a card leaves a stage it
+    # needs to know which one, and push_event_data only carries the current stage.
+    previous_stage_id = event.data[:changed_attributes]&.dig('pipeline_stage_id')&.first
+    payload = pipeline_item.push_event_data.merge(previous_pipeline_stage_id: previous_stage_id)
+
+    broadcast(account, tokens, PIPELINE_ITEM_UPDATED, payload)
   end
 
   def task_created(event)

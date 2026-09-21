@@ -6,7 +6,8 @@ export const DEFAULT_KANBAN_FILTERS = Object.freeze({
   labelTitles: null,
 });
 
+// Matches the API default (task 03) - manual drag order, not recency.
 export const DEFAULT_KANBAN_SORT = Object.freeze({
-  field: 'created_at',
-  order: 'desc',
+  field: 'position',
+  order: 'asc',
 });
