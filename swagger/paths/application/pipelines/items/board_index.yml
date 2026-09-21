@@ -1,0 +1,95 @@
+tags:
+  - Pipelines
+operationId: list-pipeline-board-items
+summary: List pipeline items for a board column (paginated)
+security:
+  - userApiKey: []
+description: >
+  Returns one paginated, filtered and sorted page of items for a single pipeline stage - the
+  contract the Kanban board uses to load a column. stage_id is required for this contract;
+  without it, GET on this same path returns every item in the pipeline as a plain array instead
+  (unpaginated, no filters/sort applied).
+parameters:
+  - name: stage_id
+    in: query
+    required: true
+    schema:
+      type: integer
+    description: >
+      The ID of the pipeline stage (column) to list items for. Required - omitting it falls back
+      to the unpaginated full-pipeline response instead of this envelope.
+  - $ref: '#/components/parameters/page'
+  - name: sort_by
+    in: query
+    schema:
+      type: string
+      enum: ['position', 'created_at', 'updated_at', 'value', 'assignee']
+      default: 'position'
+    description: Field to sort by.
+  - name: order
+    in: query
+    schema:
+      type: string
+      enum: ['asc', 'desc']
+      default: 'asc'
+    description: Sort direction.
+  - name: only_mine
+    in: query
+    schema:
+      type: boolean
+    description: When true, only items assigned to the current user. Takes precedence over assignee_id.
+  - name: assignee_id
+    in: query
+    schema:
+      type: string
+    description: Filter by assignee. Pass an agent ID, or the literal `unassigned` for items with no assignee.
+  - name: created_at_from
+    in: query
+    schema:
+      type: integer
+    description: Unix epoch (seconds). Only items created on or after this date.
+  - name: created_at_to
+    in: query
+    schema:
+      type: integer
+    description: Unix epoch (seconds). Only items created on or before the end of this calendar day.
+  - name: updated_at_from
+    in: query
+    schema:
+      type: integer
+    description: Unix epoch (seconds). Only items last updated on or after this date.
+  - name: updated_at_to
+    in: query
+    schema:
+      type: integer
+    description: Unix epoch (seconds). Only items last updated on or before the end of this calendar day.
+  - name: value_min
+    in: query
+    schema:
+      type: number
+    description: Minimum deal value (inclusive).
+  - name: value_max
+    in: query
+    schema:
+      type: number
+    description: Maximum deal value (inclusive).
+  - name: label_titles
+    in: query
+    schema:
+      type: array
+      items:
+        type: string
+    description: Filter by label titles - matches items with ANY of the given labels (OR, not AND).
+responses:
+  '200':
+    description: Success
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/pipeline_item_board_list_response'
+  '401':
+    description: Unauthorized
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/bad_request_error'

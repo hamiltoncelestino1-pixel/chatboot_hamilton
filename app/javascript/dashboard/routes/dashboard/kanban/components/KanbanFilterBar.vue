@@ -48,19 +48,24 @@ const persist = () => {
 const applyFilter = patch => {
   store.commit('kanban/SET_KANBAN_FILTERS', patch);
   persist();
+  store.dispatch('kanban/resetBoard');
 };
 
+// Debouncing this (not just the commit) means the refetch it triggers is debounced too - typing
+// in the value range fields fires one request after the pause, not one per keystroke.
 const debouncedApplyFilter = useDebounceFn(applyFilter, 500);
 
 const toggleShowOnlyMine = value => {
   store.commit('kanban/SET_SHOW_ONLY_MINE', value);
   persist();
+  store.dispatch('kanban/resetBoard');
 };
 
 const clearFilters = () => {
   store.commit('kanban/RESET_KANBAN_FILTERS');
   store.commit('kanban/SET_SHOW_ONLY_MINE', false);
   persist();
+  store.dispatch('kanban/resetBoard');
 };
 
 const onAssigneeChange = e => {

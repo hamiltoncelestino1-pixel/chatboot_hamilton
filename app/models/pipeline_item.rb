@@ -23,17 +23,18 @@
 #
 # Indexes
 #
-#  index_pipeline_items_on_account_id                      (account_id)
-#  index_pipeline_items_on_account_id_and_contact_id       (account_id,contact_id)
-#  index_pipeline_items_on_assignee_id                     (assignee_id)
-#  index_pipeline_items_on_contact_id                      (contact_id)
-#  index_pipeline_items_on_conversation_id                 (conversation_id)
-#  index_pipeline_items_on_pipeline_id                     (pipeline_id)
-#  index_pipeline_items_on_pipeline_id_and_contact_id      (pipeline_id,contact_id) UNIQUE
-#  index_pipeline_items_on_pipeline_lost_reason_id         (pipeline_lost_reason_id)
-#  index_pipeline_items_on_pipeline_stage_id               (pipeline_stage_id)
-#  index_pipeline_items_on_pipeline_stage_id_and_position  (pipeline_stage_id,position)
-#  index_pipeline_items_on_team_id                         (team_id)
+#  index_pipeline_items_on_account_id                            (account_id)
+#  index_pipeline_items_on_account_id_and_contact_id             (account_id,contact_id)
+#  index_pipeline_items_on_assignee_id                           (assignee_id)
+#  index_pipeline_items_on_contact_id                            (contact_id)
+#  index_pipeline_items_on_conversation_id                       (conversation_id)
+#  index_pipeline_items_on_pipeline_id                           (pipeline_id)
+#  index_pipeline_items_on_pipeline_id_and_contact_id            (pipeline_id,contact_id) UNIQUE
+#  index_pipeline_items_on_pipeline_lost_reason_id               (pipeline_lost_reason_id)
+#  index_pipeline_items_on_pipeline_stage_id                     (pipeline_stage_id)
+#  index_pipeline_items_on_pipeline_stage_id_and_position        (pipeline_stage_id,position)
+#  index_pipeline_items_on_stage_changed_at_pending_stale_alert  (stage_changed_at) WHERE ((stale_alert_sent_at IS NULL) AND (assignee_id IS NOT NULL))
+#  index_pipeline_items_on_team_id                               (team_id)
 #
 # Foreign Keys
 #
@@ -75,6 +76,12 @@ class PipelineItem < ApplicationRecord
 
   before_validation :set_pipeline_id_from_stage
   before_save :touch_stage_changed_at, if: :pipeline_stage_id_changed?
+  # unless: :position_changed? so a caller that explicitly assigns a position (none does today,
+  # per the task 24 audit) isn't silently overridden. Note this checks against the column
+  # default (0), not "was a key passed" - a caller that explicitly passes `position: 0` would
+  # still be overridden, since that's indistinguishable from never touching it. No current
+  # caller does that.
+  before_create :assign_position, unless: :position_changed?
 
   after_create_commit :dispatch_created_event
   after_update_commit :dispatch_stage_changed_event, if: :saved_change_to_pipeline_stage_id?
@@ -141,6 +148,14 @@ class PipelineItem < ApplicationRecord
     }
   end
 
+  # acts_as_taggable_on's #label_list always re-queries tags (it builds `base_tags.where(...)`
+  # from scratch, ignoring any preloaded association), so it N+1s under any eager load. This
+  # reads the same rows off the preloaded `taggings: :tag` association instead - used by the
+  # API jbuilder, which eager loads that association for exactly this reason.
+  def preloaded_label_list
+    taggings.select { |tagging| tagging.context == 'labels' && tagging.tagger_id.nil? }.filter_map(&:tag).map(&:name)
+  end
+
   # Deliberately not Contact#push_event_data: that uses `thumbnail`, but the Kanban UI
   # (mirroring the pipeline_item API jbuilder) expects `avatar_url`.
   def contact_push_event_data
@@ -188,6 +203,14 @@ class PipelineItem < ApplicationRecord
     return if pipeline_stage_id.blank?
 
     self.pipeline_id = pipeline_stage.pipeline_id if pipeline_stage_id_changed? || pipeline_id.blank?
+  end
+
+  # Every card used to nurse in at position 0 (the column default, task 24) - a card born on
+  # a page the client hadn't loaded looked identical, position-wise, to one just dragged to the
+  # very top, so reordering the loaded prefix pushed every untouched, unloaded card above it on
+  # the next fetch. New cards now go to the end of their stage instead.
+  def assign_position
+    self.position = pipeline_stage.next_position
   end
 
   def touch_stage_changed_at

@@ -10,7 +10,7 @@ class Pipelines::ExportItemService
     target_stage = fetch_target_stage
     pipeline_item.update!(
       pipeline_stage_id: target_stage.id,
-      position: next_position(target_stage),
+      position: target_stage.next_position,
       assignee_id: exportable_assignee_id(target_pipeline)
     )
     pipeline_item.association(:pipeline_stage).reset
@@ -28,10 +28,6 @@ class Pipelines::ExportItemService
     target_pipeline.pipeline_stages.find(target_stage_id)
   rescue ActiveRecord::RecordNotFound
     raise InvalidTargetStageError, I18n.t('errors.pipeline_item.invalid_target_stage')
-  end
-
-  def next_position(target_stage)
-    (target_stage.pipeline_items.maximum(:position) || -1) + 1
   end
 
   def exportable_assignee_id(pipeline)

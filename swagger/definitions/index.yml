@@ -76,6 +76,10 @@ pipeline_stage:
   $ref: ./resource/pipeline_stage.yml
 pipeline_item:
   $ref: ./resource/pipeline_item.yml
+pipeline_item_board_meta:
+  $ref: ./resource/pipeline_item_board_meta.yml
+pipeline_item_board_list_response:
+  $ref: ./resource/pipeline_item_board_list_response.yml
 pipeline_funnel_report:
   $ref: ./resource/pipeline_funnel_report.yml
 pipeline_lost_reason:

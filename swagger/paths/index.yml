@@ -578,7 +578,7 @@
     - $ref: '#/components/parameters/account_id'
     - $ref: '#/components/parameters/pipeline_id'
   get:
-    $ref: ./application/pipelines/items/index.yml
+    $ref: ./application/pipelines/items/board_index.yml
 /api/v1/accounts/{account_id}/pipeline_items:
   parameters:
     - $ref: '#/components/parameters/account_id'

@@ -16,9 +16,9 @@ class PipelinesAPI extends ApiClient {
     });
   }
 
-  getItems(pipelineId, stageId = null) {
-    const params = stageId ? `?stage_id=${stageId}` : '';
-    return axios.get(`${this.url}/${pipelineId}/pipeline_items${params}`);
+  // Paginated/filtered/sorted board column (task 03) - params always includes stage_id.
+  getBoardItems(pipelineId, params) {
+    return axios.get(`${this.url}/${pipelineId}/pipeline_items`, { params });
   }
 
   createStage(pipelineId, data) {

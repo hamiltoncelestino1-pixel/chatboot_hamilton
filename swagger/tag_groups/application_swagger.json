@@ -6549,24 +6549,139 @@
         "tags": [
           "Pipelines"
         ],
-        "operationId": "list-pipeline-items",
-        "summary": "List pipeline items",
+        "operationId": "list-pipeline-board-items",
+        "summary": "List pipeline items for a board column (paginated)",
         "security": [
           {
             "userApiKey": []
           }
         ],
-        "description": "List all items for a given pipeline. Pass ?stage_id=X to filter by stage.",
+        "description": "Returns one paginated, filtered and sorted page of items for a single pipeline stage - the contract the Kanban board uses to load a column. stage_id is required for this contract; without it, GET on this same path returns every item in the pipeline as a plain array instead (unpaginated, no filters/sort applied).\n",
+        "parameters": [
+          {
+            "name": "stage_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "The ID of the pipeline stage (column) to list items for. Required - omitting it falls back to the unpaginated full-pipeline response instead of this envelope.\n"
+          },
+          {
+            "$ref": "#/components/parameters/page"
+          },
+          {
+            "name": "sort_by",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "position",
+                "created_at",
+                "updated_at",
+                "value",
+                "assignee"
+              ],
+              "default": "position"
+            },
+            "description": "Field to sort by."
+          },
+          {
+            "name": "order",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "asc",
+                "desc"
+              ],
+              "default": "asc"
+            },
+            "description": "Sort direction."
+          },
+          {
+            "name": "only_mine",
+            "in": "query",
+            "schema": {
+              "type": "boolean"
+            },
+            "description": "When true, only items assigned to the current user. Takes precedence over assignee_id."
+          },
+          {
+            "name": "assignee_id",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filter by assignee. Pass an agent ID, or the literal `unassigned` for items with no assignee."
+          },
+          {
+            "name": "created_at_from",
+            "in": "query",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Unix epoch (seconds). Only items created on or after this date."
+          },
+          {
+            "name": "created_at_to",
+            "in": "query",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Unix epoch (seconds). Only items created on or before the end of this calendar day."
+          },
+          {
+            "name": "updated_at_from",
+            "in": "query",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Unix epoch (seconds). Only items last updated on or after this date."
+          },
+          {
+            "name": "updated_at_to",
+            "in": "query",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Unix epoch (seconds). Only items last updated on or before the end of this calendar day."
+          },
+          {
+            "name": "value_min",
+            "in": "query",
+            "schema": {
+              "type": "number"
+            },
+            "description": "Minimum deal value (inclusive)."
+          },
+          {
+            "name": "value_max",
+            "in": "query",
+            "schema": {
+              "type": "number"
+            },
+            "description": "Maximum deal value (inclusive)."
+          },
+          {
+            "name": "label_titles",
+            "in": "query",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "description": "Filter by label titles - matches items with ANY of the given labels (OR, not AND)."
+          }
+        ],
         "responses": {
           "200": {
             "description": "Success",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/pipeline_item"
-                  }
+                  "$ref": "#/components/schemas/pipeline_item_board_list_response"
                 }
               }
             }
@@ -11032,6 +11147,37 @@
           }
         }
       },
+      "pipeline_item_board_meta": {
+        "type": "object",
+        "properties": {
+          "count": {
+            "type": "integer",
+            "description": "Total number of items matching the active filters, across all pages"
+          },
+          "current_page": {
+            "type": [
+              "string",
+              "integer"
+            ],
+            "description": "Current page number"
+          }
+        }
+      },
+      "pipeline_item_board_list_response": {
+        "type": "object",
+        "properties": {
+          "meta": {
+            "$ref": "#/components/schemas/pipeline_item_board_meta"
+          },
+          "payload": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/pipeline_item"
+            },
+            "description": "List of pipeline items for the requested stage"
+          }
+        }
+      },
       "pipeline_funnel_report": {
         "type": "object",
         "description": "Snapshot-based funnel metrics for cards currently open (not won/lost) in the pipeline. stage_distribution and avg_time_in_stage_seconds reflect only cards presently sitting in each stage, not the full historical flow through the funnel.",
@@ -12462,6 +12608,10 @@
             "items": {
               "type": "number"
             }
+          },
+          "start_position": {
+            "type": "number",
+            "description": "Position offset for the first id in ordered_ids - the index of the page being reordered (0 for the first page). Required when reordering any page other than the first, so positions don't collide with items on pages not currently loaded. Defaults to 0.\n"
           }
         },
         "required": [

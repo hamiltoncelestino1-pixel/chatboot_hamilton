@@ -41,6 +41,7 @@
       "FIELD_LABEL": "Ordenar por",
       "ORDER_LABEL": "Direção",
       "OPTIONS": {
+        "MANUAL": "Ordem manual",
         "ASSIGNEE": "Responsável",
         "CREATED_AT": "Criado em",
         "UPDATED_AT": "Atualizado em",
@@ -53,7 +54,7 @@
     },
     "FILTER": {
       "TOOLTIP": "Filtrar cards",
-      "DISABLE_DRAG_HINT": "Limpe a ordenação para reordenar os cards",
+      "DISABLE_DRAG_HINT": "Volte para Ordem manual para arrastar e reordenar os cards",
       "SHOW_ONLY_MINE": "Exibir apenas minhas",
       "ASSIGNEE_LABEL": "Responsável",
       "ALL": "Todos",
@@ -146,7 +147,19 @@
       "BUTTON": "Rodar macro",
       "EMPTY_STATE": "Nenhuma macro de pipeline disponível.",
       "SUCCESS": "Macro executada com sucesso.",
-      "ERROR": "Falha ao rodar a macro. Tente novamente."
+      "ERROR": "Falha ao rodar a macro. Tente novamente.",
+      "COLUMN_ITEM_LABEL": "{name} ({count} cards)"
+    },
+    "COLUMN": {
+      "END_OF_LIST": "Não há mais cards",
+      "ERROR": "Não foi possível carregar esses cards",
+      "RETRY": "Tentar de novo"
+    },
+    "BOARD": {
+      "COLUMNS_LOAD_FAILED": "Uma coluna não carregou. Tente de novo na própria coluna. | {count} colunas não carregaram. Tente de novo em cada uma.",
+      "MOVE_ITEM_FAILED": "Não foi possível mover o card. Tente novamente.",
+      "REORDER_STAGES_FAILED": "Não foi possível reordenar as etapas. Tente novamente.",
+      "REORDER_ITEMS_FAILED": "Não foi possível reordenar os cards. Tente novamente."
     }
   }
 }

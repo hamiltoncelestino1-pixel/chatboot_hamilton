@@ -26,15 +26,28 @@ const hasPipelines = computed(() => pipelines.value.length > 0);
 
 const { kanbanBoardSettings } = useUISettings();
 
+// Applies the pipeline's saved filters/sort AND (re)fetches every column with them in the same
+// step - committing the saved sort without refetching would leave the board showing whatever
+// page 1 loaded under the *previous* sort (filtering/sorting is server-side, task 03/08 - a
+// column only knows the page(s) it already fetched, it can't reach the rest of the stage on its
+// own). This watcher is the single place activePipelineId changes route through (initial mount
+// here, or a pipeline switch via PipelineSelector.vue), so it's also the only place that needs
+// to call resetBoard.
+// Watches the id, not the pipeline object (task 23): getActivePipeline reads $state.pipelines[id],
+// and that object gets a fresh identity from EDIT_PIPELINE (saving the pipeline's settings) or
+// SET_PIPELINES (any fetchPipelines after the first) without activePipelineId itself changing -
+// watching the object fired this whole reset (losing whatever page an agent had scrolled to) on
+// every unrelated pipeline settings save.
 watch(
-  activePipeline,
-  pipeline => {
-    if (!pipeline) return;
-    const saved = kanbanBoardSettings(pipeline.id);
+  () => activePipeline.value?.id,
+  async pipelineId => {
+    if (!pipelineId) return;
+    const saved = kanbanBoardSettings(pipelineId);
     store.commit('kanban/SET_KANBAN_FILTERS', saved.filters);
     store.commit('kanban/SET_KANBAN_SORT', saved.sort);
     store.commit('kanban/SET_SHOW_ONLY_MINE', saved.showOnlyMine);
-    store.dispatch('pipelineMembers/get', { pipelineId: pipeline.id });
+    store.dispatch('pipelineMembers/get', { pipelineId });
+    await store.dispatch('kanban/resetBoard');
   },
   { immediate: true }
 );
@@ -57,8 +70,9 @@ onMounted(async () => {
       activePipeline.value?.id ||
       pipelines.value[0]?.id;
     if (targetPipelineId) {
+      // The activePipeline watcher above (immediate: true) picks this up and does the actual
+      // settings-restore + resetBoard - committing here is what makes it fire.
       store.commit('kanban/SET_ACTIVE_PIPELINE', targetPipelineId);
-      await store.dispatch('kanban/fetchItems', targetPipelineId);
     }
     if (route.query.itemId) {
       selectedCardId.value = Number(route.query.itemId);

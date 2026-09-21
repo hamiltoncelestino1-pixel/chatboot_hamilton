@@ -10,10 +10,13 @@ const activePipeline = useMapGetter('kanban/getActivePipeline');
 
 const isOpen = ref(false);
 
-const selectPipeline = async pipeline => {
+// KanbanIndex.vue's activePipeline watcher does the settings-restore + resetBoard for us - it
+// fires off this commit, same as on initial mount. Dispatching resetBoard here too would race
+// it: this fetch would go out under the *previous* sort/filters, and the watcher's restored
+// settings would only apply client-side to whatever that fetch happened to load.
+const selectPipeline = pipeline => {
   isOpen.value = false;
   store.commit('kanban/SET_ACTIVE_PIPELINE', pipeline.id);
-  await store.dispatch('kanban/fetchItems', pipeline.id);
 };
 </script>
 

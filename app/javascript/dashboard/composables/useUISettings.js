@@ -141,7 +141,10 @@ const DEFAULT_KANBAN_BOARD_SETTINGS = {
     valueRange: null,
     labelTitles: null,
   },
-  sort: { field: 'created_at', order: 'desc' },
+  // Matches DEFAULT_KANBAN_SORT (store/modules/kanban/constants.js) - a pipeline nobody has
+  // saved a preference for yet should default to manual drag order, not the pre-task-03 default
+  // (task 16).
+  sort: { field: 'position', order: 'asc' },
   showOnlyMine: false,
 };
 

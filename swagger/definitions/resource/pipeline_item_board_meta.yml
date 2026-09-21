@@ -1,0 +1,10 @@
+type: object
+properties:
+  count:
+    type: integer
+    description: Total number of items matching the active filters, across all pages
+  current_page:
+    type:
+      - string
+      - integer
+    description: Current page number

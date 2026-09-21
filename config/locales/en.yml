@@ -154,6 +154,7 @@ en:
       execute:
         pipeline_item_ids_required: pipeline_item_ids is required to execute a pipeline macro
         conversation_ids_required: conversation_ids is required to execute a conversation macro
+        stage_not_found: stage_id does not exist or you do not have access to its pipeline
     mfa:
       already_enabled: MFA is already enabled
       not_enabled: MFA is not enabled

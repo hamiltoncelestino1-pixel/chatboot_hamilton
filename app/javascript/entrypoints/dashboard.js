@@ -1,5 +1,4 @@
 import { createApp } from 'vue';
-import { createI18n } from 'vue-i18n';
 
 import axios from 'axios';
 // Global Components
@@ -10,7 +9,7 @@ import WootWizard from 'components/ui/Wizard.vue';
 import FloatingVue from 'floating-vue';
 import WootUiKit from 'dashboard/components';
 import App from 'dashboard/App.vue';
-import i18nMessages from 'dashboard/i18n';
+import i18n from 'dashboard/i18n/instance';
 import createAxios from 'dashboard/helper/APIHelper';
 
 import commonHelpers, { isJSONValid } from 'dashboard/helper/commons';
@@ -32,12 +31,6 @@ import { vResizeObserver } from '@vueuse/components';
 import { directive as onClickaway } from 'vue3-click-away';
 
 import 'floating-vue/dist/style.css';
-
-const i18n = createI18n({
-  legacy: false, // https://github.com/intlify/vue-i18n/issues/1902
-  locale: 'en',
-  messages: i18nMessages,
-});
 
 sync(store, router);
 

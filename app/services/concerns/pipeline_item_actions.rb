@@ -10,7 +10,7 @@ module PipelineItemActions
     target_stage = PipelineStage.find_by(id: target_stage_id, pipeline_id: pipeline_item.pipeline_id)
     return nil if target_stage.blank?
 
-    pipeline_item.update!(pipeline_stage_id: target_stage.id, position: next_position_for_stage(target_stage))
+    pipeline_item.update!(pipeline_stage_id: target_stage.id, position: target_stage.next_position)
     target_stage
   end
 
@@ -92,10 +92,6 @@ module PipelineItemActions
   end
 
   private
-
-  def next_position_for_stage(stage)
-    (stage.pipeline_items.maximum(:position) || -1) + 1
-  end
 
   # Named distinctly from ActionService's own private team_belongs_to_account?(team_ids) -
   # both are private instance methods, so once a class includes this module alongside

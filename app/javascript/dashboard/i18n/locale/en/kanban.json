@@ -41,6 +41,7 @@
       "FIELD_LABEL": "Sort by",
       "ORDER_LABEL": "Order",
       "OPTIONS": {
+        "MANUAL": "Manual order",
         "ASSIGNEE": "Assignee",
         "CREATED_AT": "Created at",
         "UPDATED_AT": "Updated at",
@@ -53,7 +54,7 @@
     },
     "FILTER": {
       "TOOLTIP": "Filter cards",
-      "DISABLE_DRAG_HINT": "Clear sorting to reorder cards",
+      "DISABLE_DRAG_HINT": "Switch back to Manual order to drag and reorder cards",
       "SHOW_ONLY_MINE": "Show only mine",
       "ASSIGNEE_LABEL": "Assignee",
       "ALL": "All",
@@ -146,7 +147,19 @@
       "BUTTON": "Run macro",
       "EMPTY_STATE": "No pipeline macros available.",
       "SUCCESS": "Macro executed successfully.",
-      "ERROR": "Failed to run macro. Please try again."
+      "ERROR": "Failed to run macro. Please try again.",
+      "COLUMN_ITEM_LABEL": "{name} ({count} cards)"
+    },
+    "COLUMN": {
+      "END_OF_LIST": "No more cards",
+      "ERROR": "Couldn't load these cards",
+      "RETRY": "Try again"
+    },
+    "BOARD": {
+      "COLUMNS_LOAD_FAILED": "A column failed to load. Try again from that column. | {count} columns failed to load. Try again from each column.",
+      "MOVE_ITEM_FAILED": "Failed to move the card. Please try again.",
+      "REORDER_STAGES_FAILED": "Failed to reorder the stages. Please try again.",
+      "REORDER_ITEMS_FAILED": "Failed to reorder the cards. Please try again."
     }
   }
 }

@@ -19,11 +19,14 @@ const activeSort = useMapGetter('kanban/getActiveSort');
 const isSortActive = useMapGetter('kanban/isSortActive');
 
 const sortMenus = computed(() => [
+  { label: t('KANBAN.SORT.OPTIONS.MANUAL'), value: 'position' },
   { label: t('KANBAN.SORT.OPTIONS.ASSIGNEE'), value: 'assignee' },
   { label: t('KANBAN.SORT.OPTIONS.CREATED_AT'), value: 'created_at' },
   { label: t('KANBAN.SORT.OPTIONS.UPDATED_AT'), value: 'updated_at' },
   { label: t('KANBAN.SORT.OPTIONS.VALUE'), value: 'value' },
 ]);
+
+const isManualOrder = computed(() => activeSort.value.field === 'position');
 
 const orderingMenus = computed(() => [
   { label: t('KANBAN.SORT.ORDER.ASC'), value: 'asc' },
@@ -46,15 +49,20 @@ const persist = sort => {
 };
 
 const handleSortChange = field => {
-  const sort = { field, order: activeSort.value.order };
+  // Manual order only makes sense ascending (drag position) - avoid a "manual descending" state
+  // that has no UI to produce or make sense of (task 16).
+  const order = field === 'position' ? 'asc' : activeSort.value.order;
+  const sort = { field, order };
   store.commit('kanban/SET_KANBAN_SORT', sort);
   persist(sort);
+  store.dispatch('kanban/resetBoard');
 };
 
 const handleOrderChange = order => {
   const sort = { field: activeSort.value.field, order };
   store.commit('kanban/SET_KANBAN_SORT', sort);
   persist(sort);
+  store.dispatch('kanban/resetBoard');
 };
 </script>
 
@@ -88,7 +96,10 @@ const handleOrderChange = order => {
           @update:model-value="handleSortChange"
         />
       </div>
-      <div class="flex items-center justify-between gap-2">
+      <div
+        v-if="!isManualOrder"
+        class="flex items-center justify-between gap-2"
+      >
         <span class="text-sm truncate text-n-slate-12">{{
           t('KANBAN.SORT.ORDER_LABEL')
         }}</span>

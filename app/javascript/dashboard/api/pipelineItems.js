@@ -6,10 +6,11 @@ class PipelineItemsAPI extends ApiClient {
     super('pipeline_items', { accountScoped: true });
   }
 
-  reorder(stageId, orderedIds) {
+  reorder(stageId, orderedIds, startPosition = 0) {
     return axios.post(`${this.url}/reorder`, {
       stage_id: stageId,
       ordered_ids: orderedIds,
+      start_position: startPosition,
     });
   }
 

@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onMounted, ref } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 import { useStore, useMapGetter } from 'dashboard/composables/store';
@@ -20,16 +20,21 @@ const showAddItemModal = ref(false);
 const itemsGetter = useMapGetter('kanban/getItemsForConversation');
 const items = computed(() => itemsGetter.value(Number(props.conversationId)));
 
-onMounted(async () => {
-  try {
-    await store.dispatch(
-      'kanban/fetchItemsForConversation',
-      props.conversationId
-    );
-  } finally {
-    isFetching.value = false;
-  }
-});
+// A watch, not onMounted: ContactPanel isn't remounted when the agent switches conversation, only
+// its conversationId prop changes. The getter above reads an index that's populated solely by
+// this fetch (task 25), so it has to run for every conversation shown, not just the first.
+watch(
+  () => props.conversationId,
+  async conversationId => {
+    isFetching.value = true;
+    try {
+      await store.dispatch('kanban/fetchItemsForConversation', conversationId);
+    } finally {
+      isFetching.value = false;
+    }
+  },
+  { immediate: true }
+);
 
 const goToOpportunity = item => {
   router.push({
