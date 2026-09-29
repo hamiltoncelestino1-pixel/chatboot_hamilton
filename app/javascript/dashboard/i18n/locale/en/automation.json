@@ -103,6 +103,7 @@
       "PIPELINE": {
         "PIPELINE_PLACEHOLDER": "Select pipeline",
         "STAGE_PLACEHOLDER": "Select stage",
+        "LOST_REASON_PLACEHOLDER": "Select lost reason",
         "TARGET_PIPELINE_PLACEHOLDER": "Select target pipeline",
         "ASSIGNEE_MODE_PLACEHOLDER": "Select assignee",
         "TEAM_MODE_PLACEHOLDER": "Select team",

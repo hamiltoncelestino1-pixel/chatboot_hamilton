@@ -6,11 +6,13 @@
 # remove_label (conversation-level actions) - including this module in a class that inherits
 # from ActionService would otherwise silently shadow those with incompatible signatures.
 module PipelineItemActions
-  def move_stage(pipeline_item, target_stage_id)
+  def move_stage(pipeline_item, target_stage_id, lost_reason_id = nil)
     target_stage = PipelineStage.find_by(id: target_stage_id, pipeline_id: pipeline_item.pipeline_id)
     return nil if target_stage.blank?
 
-    pipeline_item.update!(pipeline_stage_id: target_stage.id, position: target_stage.next_position)
+    attrs = { pipeline_stage_id: target_stage.id, position: target_stage.next_position }
+    attrs[:pipeline_lost_reason_id] = lost_reason_id if lost_reason_id.present?
+    pipeline_item.update!(attrs)
     target_stage
   end
 

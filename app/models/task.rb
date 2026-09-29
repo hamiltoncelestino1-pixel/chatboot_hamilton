@@ -85,6 +85,8 @@ class Task < ApplicationRecord
       contact_id: contact_id,
       conversation_id: conversation_id,
       pipeline_item_id: pipeline_item_id,
+      recurrence_interval: recurrence_interval,
+      recurrence_parent_id: recurrence_parent_id,
       assignee: assignee.push_event_data
     }
   end

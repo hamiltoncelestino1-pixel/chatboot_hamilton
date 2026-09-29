@@ -1,11 +1,12 @@
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue';
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { usePipelineLostReasonsStore } from 'dashboard/stores/pipelineLostReasons';
 import { useLostReasonPrompt } from 'dashboard/composables/useLostReasonPrompt';
 
 const { t } = useI18n();
-const { isOpen, confirmLostReason, cancelLostReason } = useLostReasonPrompt();
+const { isOpen, confirmLostReason, cancelLostReason, cancelAllPendingPrompts } =
+  useLostReasonPrompt();
 
 const lostReasonsStore = usePipelineLostReasonsStore();
 const reasons = computed(() => lostReasonsStore.getRecords);
@@ -20,6 +21,15 @@ watch(isOpen, open => {
 
 onMounted(() => {
   lostReasonsStore.get();
+});
+
+// Safety net for navigating away mid-prompt: this component only exists while the user is
+// on the Kanban route, but the queue in useLostReasonPrompt is module-scoped and survives
+// unmount. Without this, a moveItem awaiting promptForLostReason() would hang forever, and
+// remounting here later would reopen the modal referring to a stale card. No-op if the
+// queue is already empty.
+onUnmounted(() => {
+  cancelAllPendingPrompts();
 });
 
 const handleConfirm = () => {

@@ -103,6 +103,7 @@
       "PIPELINE": {
         "PIPELINE_PLACEHOLDER": "Selecione a pipeline",
         "STAGE_PLACEHOLDER": "Selecione a etapa",
+        "LOST_REASON_PLACEHOLDER": "Selecione o motivo da perda",
         "TARGET_PIPELINE_PLACEHOLDER": "Selecione a pipeline de destino",
         "ASSIGNEE_MODE_PLACEHOLDER": "Selecione o responsável",
         "TEAM_MODE_PLACEHOLDER": "Selecione o time",
