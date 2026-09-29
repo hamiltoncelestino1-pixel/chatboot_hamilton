@@ -249,6 +249,12 @@ export const actions = {
   // `position` is expected to already be absolute within the destination stage (not a
   // page-local index) - translating a drop's visual index into that absolute position is the
   // caller's job (task 06), since it depends on exactly which pages are loaded there.
+  // Returns true only when the move was actually persisted; false when the user cancelled the
+  // lost-reason prompt or the API call failed. Both failure paths already rolled back and (for
+  // the API error) alerted, so a caller acting on `false` should stay silent and just not
+  // report success - KanbanCardDetail.handleSave depends on this to avoid claiming a save that
+  // did not happen. Drag-and-drop ignores the return value, which is fine: the board's own
+  // state is already correct either way.
   moveItem: async (
     { commit, state },
     { itemId, fromStageId, toStageId, position, pipelineLostReasonId = null }
@@ -276,7 +282,7 @@ export const actions = {
       reasonId = await promptForLostReason();
       if (!reasonId) {
         rollback();
-        return;
+        return false;
       }
     }
 
@@ -289,9 +295,11 @@ export const actions = {
         },
       });
       commit('EDIT_ITEM', data);
+      return true;
     } catch {
       rollback();
       useAlert(i18n.global.t('KANBAN.BOARD.MOVE_ITEM_FAILED'));
+      return false;
     }
   },
 

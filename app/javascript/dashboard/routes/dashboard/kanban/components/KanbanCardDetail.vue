@@ -208,12 +208,17 @@ const handleSave = async () => {
     };
 
     if (form.value.pipeline_stage_id !== props.item.pipeline_stage_id) {
-      await store.dispatch('kanban/moveItem', {
+      const moved = await store.dispatch('kanban/moveItem', {
         itemId: props.item.id,
         fromStageId: props.item.pipeline_stage_id,
         toStageId: form.value.pipeline_stage_id,
         position: 0,
       });
+      // Cancelled lost-reason prompt or a failed move: moveItem already rolled back and, when
+      // it was an API error, alerted. Abort the whole save instead of persisting the other
+      // fields - saving part of what the user asked for and reporting success is the very bug
+      // this guards against. The panel stays open with their edits intact, so nothing is lost.
+      if (!moved) return;
     }
 
     await store.dispatch('kanban/updateItem', payload);
