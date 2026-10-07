@@ -36,7 +36,9 @@ const updateValue = () => {
     assignee_mode: assigneeMode.value,
     team_mode: teamMode.value,
     title: title.value || null,
-    value: value.value || null,
+    // Same reasoning as due_in_days in AutomationActionCreatePipelineItemTaskInput: a card
+    // worth 0 is a real value, and `|| null` would silently discard it.
+    value: value.value === '' ? null : value.value,
     notes: notes.value || null,
   });
 };
@@ -132,7 +134,7 @@ onMounted(() => {
   assigneeMode.value = data.assignee_mode || 'none';
   teamMode.value = data.team_mode || 'none';
   title.value = data.title || '';
-  value.value = data.value || '';
+  value.value = data.value ?? '';
   notes.value = data.notes || '';
 
   if (!pipelineId.value) {

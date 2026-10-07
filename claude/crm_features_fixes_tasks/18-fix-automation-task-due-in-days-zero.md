@@ -37,3 +37,87 @@ automação — o campo deve mostrar `0`, não aparecer em branco.
 - Digitar/persistir `0` no campo "dias para vencer" funciona corretamente no round-trip
   (salvar e reabrir mostra `0`, não vazio).
 - `pnpm eslint:fix` limpo no arquivo tocado.
+
+## Resultado (2026-10-05)
+
+### No escopo da task
+
+`AutomationActionCreatePipelineItemTaskInput.vue`:
+
+```js
+due_in_days: dueInDays.value === '' ? null : dueInDays.value,  // updateValue
+dueInDays.value = data.due_in_days ?? '';                      // onMounted
+```
+
+O `Input.vue` já converte para número de verdade quando `type="number"` e o valor não é vazio
+(`Number(value)`, `components-next/input/Input.vue:65-67`), então `dueInDays.value` é sempre
+`''` ou um `Number` — a comparação com `''` cobre exatamente o caso de "campo vazio" sem
+confundir com `0`.
+
+### Dois achados adjacentes, incluídos com aprovação do usuário
+
+**(a) O `min="0"` desse input era inerte.** `Input.vue` só repassava `min` para o DOM quando o
+tipo era `date`/`datetime-local`/`time` (linha 134) — `number` estava na lista do `max` (linha
+136) mas **não** na do `min`. E como `min` é declarado como prop, não cai no `v-bind="$attrs"`
+tampouco. Resultado: era possível digitar `-5`, e `(-5).days.from_now` cria uma task já nascida
+vencida. Corrigido acrescentando `'number'` à lista do `min`.
+
+Isso importava porque **a premissa desta task é que o `min="0"` sinaliza que `0` é válido** — o
+atributo que justifica a task não estava chegando ao DOM.
+
+Raio de impacto medido antes de mexer num componente compartilhado por **56** consumidores: dos
+6 que usam `type="number"`, **só este** passa `min`. (O `FairDistribution.vue` também passa
+`min`, mas para o `DurationInput`, outro componente; os dois outros consumidores de `min` no
+`Input.vue` são `datetime-local`, já cobertos pela lista antiga.) A mudança altera o
+comportamento de **exatamente um** input no app.
+
+**(b) Mesmo bug de falsy no componente irmão.**
+`AutomationActionCreatePipelineItemInput.vue` fazia `value.value || null` e `data.value || ''` —
+um card com valor `0` salvava como `null` e reabria em branco. Corrigido com a mesma expressão
+(`=== ''` / `??`). Fora do escopo nominal da task, que cita só `due_in_days`.
+
+### Verificação incidental da task 17
+
+Ao rastrear o formato de `action_params` aqui, confirmei que `actionQueryGenerator` embrulha o
+objeto num array ao salvar (`[{title, due_in_days}]`), mas `manifestActions` **desembrulha** de
+volta para objeto plano ao abrir a edição (`useEditableAutomation.js:106-111`, `params[0] || {}`).
+Ou seja, a validação da task 17 (`action.action_params?.title?.trim()`) está correta tanto na
+criação quanto na edição — **sem falso positivo** ao editar uma regra que já tem título.
+
+### Verificação empírica
+
+Spec temporário (`tmp_task18_debug.spec.js`, apagado depois) montando o componente de verdade
+(`mount`, não `shallowMount`, para exercitar o `Input.vue` real):
+
+**Com os fixes:**
+
+```
+  typed 0          -> {"title":"Ligar","due_in_days":0}
+  cleared          -> {"title":null,"due_in_days":null}
+  reopened with 0  -> input value = 0
+  reopened with 5  -> input value = 5
+  min attribute    = "0"
+5 passed
+```
+
+**Com os fixes revertidos:**
+
+```
+  typed 0          -> {"title":"Ligar","due_in_days":null}   <- o 0 digitado virou null
+  cleared          -> {"title":null,"due_in_days":null}
+  reopened with 0  -> input value =                          <- campo em branco
+  reopened with 5  -> input value = 5
+  min attribute    = undefined                               <- min inerte
+3 failed | 2 passed
+```
+
+`cleared` e `reopened with 5` idênticos nas duas execuções: os caminhos normais (campo vazio
+continua virando `null`, valor comum continua aparecendo) não regrediram.
+
+**Nota de honestidade sobre a cobertura:** o componente irmão do item (b) **não** foi montado em
+spec — ele depende do store Vuex e do `usePipelineSelector`, e a mudança é a mesma expressão de
+duas linhas já provada empiricamente no componente desta task. A verificação dele fica no teste
+manual.
+
+**Lint:** `eslint` exit 0 e `prettier --check` limpo nos 3 arquivos. Nenhum CRLF introduzido
+nesta task.

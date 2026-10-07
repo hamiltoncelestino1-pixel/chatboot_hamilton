@@ -48,6 +48,7 @@ module PipelineItemActions
   def create_task_for_pipeline_item(pipeline_item, attrs)
     assignee_id = attrs[:assignee_id].presence || pipeline_item.assignee_id
     log_missing_task_assignee(pipeline_item) if assignee_id.blank?
+    log_missing_task_title(pipeline_item) if attrs[:title].blank?
 
     pipeline_item.account.tasks.create!(
       title: attrs[:title],
@@ -116,6 +117,16 @@ module PipelineItemActions
     Rails.logger.info(
       '[PipelineItemActions] create_task_for_pipeline_item: no assignee_id given and ' \
       "pipeline_item##{pipeline_item.id} has none either - task creation will fail validation"
+    )
+  end
+
+  # The form now blocks saving a rule with a blank title, but rules saved before that fix are
+  # still out there failing inside the callers' generic rescue. This is the only trace of why.
+  def log_missing_task_title(pipeline_item)
+    Rails.logger.info(
+      '[PipelineItemActions] create_task_for_pipeline_item: blank title for ' \
+      "pipeline_item##{pipeline_item.id} - task creation will fail validation " \
+      '(automation/macro saved before the title became required?)'
     )
   end
 end

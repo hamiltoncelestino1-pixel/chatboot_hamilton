@@ -1,0 +1,42 @@
+tags:
+  - Pipelines
+operationId: export-pipeline-item
+summary: Export a pipeline item to another pipeline
+security:
+  - userApiKey: []
+description: >
+  Move a card to a stage of a different pipeline. The response is the updated card, same shape
+  as the show endpoint. Exporting to the pipeline the card already belongs to is rejected.
+requestBody:
+  required: true
+  content:
+    application/json:
+      schema:
+        $ref: '#/components/schemas/pipeline_item_export_payload'
+responses:
+  '200':
+    description: Success
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/pipeline_item'
+  '401':
+    description: Unauthorized
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/bad_request_error'
+  '404':
+    description: Pipeline item or target pipeline not found
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/bad_request_error'
+  '422':
+    description: >
+      The target stage does not belong to the target pipeline, or the target pipeline is the
+      one the card is already in
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/bad_request_error'

@@ -5,10 +5,11 @@ class PipelineItems::TriggerStaleItemsJob < ApplicationJob
     Pipeline.where.not(stale_alert_days: [nil, 0]).find_each do |pipeline|
       stale_items(pipeline).find_each(batch_size: 100) do |item|
         # rubocop:disable Rails/SkipsModelValidations
-        # Claim before enqueueing: if the cron fires again before NotifyStaleItemJob runs, the
-        # WHERE stale_alert_sent_at: nil above no longer matches this item, so it won't be
-        # re-enqueued and double-notified (same fix as Tasks::TriggerDueTasksJob).
-        item.update_column(:stale_alert_sent_at, Time.zone.now)
+        # Conditional claim before enqueueing, same compare-and-swap as
+        # Tasks::TriggerDueTasksJob: `stale_alert_sent_at IS NULL` lives in the WHERE, so
+        # overlapping runs can't both claim the same card and double-notify it.
+        next unless PipelineItem.where(id: item.id, stale_alert_sent_at: nil)
+                                .update_all(stale_alert_sent_at: Time.zone.now) == 1
         # rubocop:enable Rails/SkipsModelValidations
 
         PipelineItems::NotifyStaleItemJob.perform_later(item)

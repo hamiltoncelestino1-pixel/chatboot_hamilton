@@ -163,6 +163,8 @@ pipeline_item_create_update_payload:
   $ref: ./request/pipeline_item/create_update_payload.yml
 pipeline_item_reorder_payload:
   $ref: ./request/pipeline_item/reorder_payload.yml
+pipeline_item_export_payload:
+  $ref: ./request/pipeline_item/export_payload.yml
 
 ## Task
 task_create_payload:

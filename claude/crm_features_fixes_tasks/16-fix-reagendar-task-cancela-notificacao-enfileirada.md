@@ -43,3 +43,78 @@ task vencida, enfileirar `NotifyDueTaskJob` manualmente sem executar ainda, reag
   notificação de vencimento antiga.
 - Fluxo normal (task vencida, sem reagendamento) continua notificando normalmente.
 - `bundle exec rubocop -a` limpo no arquivo tocado.
+
+## Resultado (2026-10-05)
+
+Dois guards acrescentados em `Tasks::NotifyDueTaskJob#perform`
+(`app/jobs/tasks/notify_due_task_job.rb:10-16`), e o comentário das linhas 5-8 reescrito — ele
+afirmava que "só `completed_at` ainda precisa ser checado", o que deixou de ser verdade.
+
+```ruby
+return if task.completed_at.present?
+return if task.due_date > Time.current
+return if task.reminder_sent_at.blank?
+```
+
+### Não precisou cancelar job nenhum do Sidekiq
+
+A primeira leitura desta task sugeria rastrear `job_id` para cancelar o job enfileirado — **não
+é necessário**. `perform_later` serializa a task por GlobalID e o worker **relê a linha do
+banco** na hora de executar, então o job já vê o `due_date`/`reminder_sent_at` atualizados; e
+`ApplicationJob` já tem `discard_on ActiveJob::DeserializationError`
+(`app/jobs/application_job.rb:3`) para o caso de a task ter sido apagada nesse meio-tempo. O fix
+é revalidação no momento da execução, não cancelamento.
+
+### Por que dois guards, e não só o que a task pede
+
+| Guard | Cenário que impede |
+|---|---|
+| `due_date > Time.current` | O da task: reagendada **pro futuro** entre o claim e a execução. |
+| `reminder_sent_at.blank?` | Reagendada pra **outra data no passado**: segue vencida (o guard acima deixa passar), mas `Task#reset_reminder_if_rescheduled` zerou o claim, e o cron roda **a cada 5 minutos** (`config/schedule.yml:14-16`) → reivindica de novo e notifica. Sem este guard o agente é notificado **duas vezes**. |
+
+Invariante conferido: `Tasks::NotifyDueTaskJob` tem um **único** enfileirador
+(`trigger_due_tasks_job.rb:15`, alcançado via `TriggerScheduledItemsJob`) e `reminder_sent_at`
+um **único** ponto que limpa (`task.rb:115`) — então `blank?` no momento da execução só pode
+significar "foi reagendada depois do claim".
+
+Sob esse invariante o segundo guard engloba o primeiro (reagendar pro futuro também limpa o
+claim). Os dois foram mantidos de propósito: expressam intenções distintas e o primeiro sobrevive
+a uma escrita que pule callbacks (`update_column(:due_date, ...)`, SQL direto, console).
+Aprovado pelo usuário antes de implementar.
+
+### Verificação empírica
+
+Script de `rails runner` percorrendo o **caminho real** de produção em cada cenário —
+`Tasks::NotifyDueTaskJob.new(task).serialize` (enfileiramento) → mutação no banco (o agente
+agindo enquanto o job espera na fila) → `ActiveJob::Base.execute(payload)` (worker
+deserializando com leitura fresca do banco + executando). Contagem por
+`Notification.where(primary_actor_type: 'Task', primary_actor_id: task.id)`.
+
+**Com o fix:**
+
+```
+  OK     A) vencida, sem reagendar                  notificacoes=1 (esperado 1)
+  OK     B) reagendada pro FUTURO                   notificacoes=0 (esperado 0)
+  OK     C) reagendada pra outro dia PASSADO        notificacoes=0 (esperado 0)
+  OK     D) concluida antes do job rodar            notificacoes=0 (esperado 0)
+```
+
+**Com os dois guards novos removidos** (prova de que os bugs são reais e de que são estes guards
+que os evitam):
+
+```
+  OK     A) vencida, sem reagendar                  notificacoes=1 (esperado 1)
+  FALHOU B) reagendada pro FUTURO                   notificacoes=1 (esperado 0)
+  FALHOU C) reagendada pra outro dia PASSADO        notificacoes=1 (esperado 0)
+  OK     D) concluida antes do job rodar            notificacoes=0 (esperado 0)
+```
+
+A e D idênticos nas duas execuções: o caminho feliz e a checagem pré-existente de `completed_at`
+não regrediram.
+
+**Enterprise:** nenhum override de `Tasks::NotifyDueTaskJob` em `enterprise/` (o
+`enterprise/lib/tasks` são rake tasks, não o model `Task`) — risco 5 da visão geral descartado
+para esta task.
+
+**Rubocop:** `1 file inspected, no offenses detected`, após normalizar o arquivo de CRLF para LF
+— **5ª ocorrência** do problema nesta base (o `Edit` reescreveu o arquivo inteiro em CRLF).

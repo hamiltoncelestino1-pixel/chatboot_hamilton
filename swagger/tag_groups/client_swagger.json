@@ -2366,6 +2366,32 @@
             "type": "number",
             "description": "Number of stages in this pipeline"
           },
+          "enable_auto_assignment": {
+            "type": "boolean",
+            "description": "Whether new items in this pipeline are auto-assigned to its members"
+          },
+          "max_assignment_limit": {
+            "type": "number",
+            "description": "Maximum open items per member considered by auto-assignment (0 means no limit)"
+          },
+          "sync_assignments": {
+            "type": "boolean",
+            "description": "Whether changing an item's assignee also assigns the linked conversation"
+          },
+          "stale_alert_days": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "description": "Days without a stage change before an item is flagged as stale. Null disables the alert"
+          },
+          "stages": {
+            "type": "array",
+            "description": "The pipeline's stages, ordered by position. Added by the index/show/create/update views (not by the shared partial), so every endpoint that returns a pipeline includes it.\n",
+            "items": {
+              "$ref": "#/components/schemas/pipeline_stage"
+            }
+          },
           "created_at": {
             "type": "string",
             "format": "date-time",
@@ -2376,7 +2402,8 @@
             "format": "date-time",
             "description": "The date and time when the pipeline was last updated"
           }
-        }
+        },
+        "additionalProperties": false
       },
       "pipeline_stage": {
         "type": "object",
@@ -2396,6 +2423,16 @@
           "position": {
             "type": "number",
             "description": "The display order position of the stage within the pipeline"
+          },
+          "stage_type": {
+            "type": "string",
+            "enum": [
+              "normal",
+              "start",
+              "won",
+              "lost"
+            ],
+            "description": "The role this stage plays in the pipeline. Only one stage per pipeline may be start, won or lost; normal has no such restriction. Items in won/lost stages are excluded from the funnel report and from the stale-card alert.\n"
           },
           "pipeline_id": {
             "type": "number",
@@ -2419,7 +2456,8 @@
             "format": "date-time",
             "description": "The date and time when the stage was last updated"
           }
-        }
+        },
+        "additionalProperties": false
       },
       "pipeline_item": {
         "type": "object",
@@ -2436,8 +2474,11 @@
             "description": "The title of the item (card)"
           },
           "value": {
-            "type": "number",
-            "description": "The monetary value associated with this deal"
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "The monetary value associated with this deal. Serialized as a string, not a number: the column is decimal(15,2) and Jbuilder renders BigDecimal as a string to avoid the float rounding a JSON number would introduce.\n"
           },
           "notes": {
             "type": [
@@ -2453,6 +2494,18 @@
           "pipeline_stage_id": {
             "type": "number",
             "description": "The ID of the stage this item belongs to"
+          },
+          "pipeline_stage_name": {
+            "type": "string",
+            "description": "The name of the stage this item belongs to"
+          },
+          "pipeline_id": {
+            "type": "number",
+            "description": "The ID of the pipeline this item belongs to, resolved through its stage"
+          },
+          "pipeline_name": {
+            "type": "string",
+            "description": "The name of the pipeline this item belongs to"
           },
           "pipeline_lost_reason_id": {
             "type": [
@@ -2494,40 +2547,61 @@
               }
             }
           },
-          "assignee_id": {
-            "type": [
-              "integer",
-              "null"
-            ],
-            "description": "The ID of the agent assigned to this item"
-          },
-          "team_id": {
-            "type": [
-              "integer",
-              "null"
-            ],
-            "description": "The ID of the team assigned to this item"
-          },
           "assignee": {
-            "$ref": "#/components/schemas/agent"
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/agent"
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "team": {
-            "$ref": "#/components/schemas/team"
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/team"
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "pipeline_lost_reason": {
-            "$ref": "#/components/schemas/pipeline_lost_reason"
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/pipeline_lost_reason"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "label_list": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "The labels applied to this item"
+          },
+          "custom_attributes": {
+            "type": "object",
+            "description": "Custom attribute values set on this item, keyed by attribute key"
+          },
+          "overdue_tasks_count": {
+            "type": "number",
+            "description": "Number of pending tasks on this item whose due date has passed. Drives the overdue badge on the card"
           },
           "created_at": {
-            "type": "string",
-            "format": "date-time",
-            "description": "The date and time when the item was created"
+            "type": "number",
+            "description": "When the item was created, as a Unix timestamp in seconds. Note this is an integer, not an ISO-8601 string - the serializer emits `created_at.to_i`"
           },
           "updated_at": {
-            "type": "string",
-            "format": "date-time",
-            "description": "The date and time when the item was last updated"
+            "type": "number",
+            "description": "When the item was last updated, as a Unix timestamp in seconds. Note this is an integer, not an ISO-8601 string - the serializer emits `updated_at.to_i`"
           }
-        }
+        },
+        "additionalProperties": false
       },
       "pipeline_item_board_meta": {
         "type": "object",
@@ -3899,6 +3973,25 @@
           "position": {
             "type": "number",
             "description": "Display order position"
+          },
+          "enable_auto_assignment": {
+            "type": "boolean",
+            "description": "Whether new items in this pipeline are auto-assigned to its members"
+          },
+          "max_assignment_limit": {
+            "type": "number",
+            "description": "Maximum open items per member considered by auto-assignment (0 means no limit)"
+          },
+          "sync_assignments": {
+            "type": "boolean",
+            "description": "Whether changing an item's assignee also assigns the linked conversation"
+          },
+          "stale_alert_days": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "description": "Days without a stage change before an item is flagged as stale. Null disables the alert"
           }
         },
         "required": [
@@ -4001,6 +4094,32 @@
           "ordered_ids"
         ]
       },
+      "pipeline_item_export_payload": {
+        "type": "object",
+        "properties": {
+          "pipeline_item": {
+            "type": "object",
+            "description": "The controller reads these through params.require(:pipeline_item), so the body is wrapped in this key - unlike the reorder payload, which is read unwrapped.\n",
+            "properties": {
+              "target_pipeline_id": {
+                "type": "number",
+                "description": "The ID of the pipeline the card is being moved to"
+              },
+              "target_stage_id": {
+                "type": "number",
+                "description": "The ID of the stage within the target pipeline to drop the card in. Must belong to target_pipeline_id, otherwise the request is rejected with 422.\n"
+              }
+            },
+            "required": [
+              "target_pipeline_id",
+              "target_stage_id"
+            ]
+          }
+        },
+        "required": [
+          "pipeline_item"
+        ]
+      },
       "task_create_payload": {
         "type": "object",
         "properties": {
@@ -4036,7 +4155,7 @@
               "weekly",
               "monthly"
             ],
-            "description": "If set, completing this task automatically creates the next occurrence with this same interval, due the corresponding period after this task's due_date"
+            "description": "If set, completing this task automatically creates the next occurrence with this same interval. The next due date stays on the schedule set by the first task in the chain - a monthly task due on the 31st keeps landing on the 31st, skipping shorter months - and occurrences already in the past are skipped, so completing a task late never produces a next occurrence that is itself already overdue. Editing a due date by hand re-bases the schedule on the new date"
           }
         }
       },

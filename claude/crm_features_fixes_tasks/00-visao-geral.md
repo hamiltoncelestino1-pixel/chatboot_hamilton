@@ -29,7 +29,26 @@ arquivo real (não só o relato do subagente) antes de escrever esta pasta.
 | 01, 02, 03 | ✅ Implementadas. Estavam **não commitadas** no working tree da branch `fix/crm-epic-audit-fixes` (revisadas e commitadas em 2026-09-29). |
 | 04 | ✅ Implementada — corrigida de passagem pelo commit `78f410567` (PR #41, épico `pipeline_performance_tasks`), não por esta pasta. |
 | 05, 06, 07 | ✅ Implementadas em 2026-09-29, com seção `## Resultado` em cada arquivo. |
-| 08 a 20 | ⬜ Pendentes. |
+| 08 a 13 | ✅ Implementadas em 2026-09-30, com seção `## Resultado` em cada arquivo. |
+| 14 a 20 | ✅ Implementadas em 2026-10-05, com seção `## Resultado` em cada arquivo. **A lista original (01-20) está concluída.** |
+| 21 | ✅ Implementada em 2026-10-06, com seção `## Resultado`. Expôs 7 divergências de Swagger **e um bug de produção** (`GET /pipelines/:id` devolvia 401 para todos, admins inclusive). |
+| 22 | ✅ Implementada em 2026-10-06. **Reescrita**: o diagnóstico original (asserções frágeis) estava errado — a suíte rodava contra o banco de **desenvolvimento**. Os specs não precisaram de alteração. |
+| 23 | ✅ Implementada em 2026-10-07. **63 chaves** de frontend + **11** de backend traduzidas (a medição original dizia 52 + 9 — ver correção no arquivo). |
+| 24 | ✅ Implementada em 2026-10-07. Causa raiz era **outra** (`rails_i18n.enabled_modules = [:pluralization]` no `application.rb`, vindo do upstream) e afetava **todos** os 39 locales não-ingleses, não só o pt_BR. **Pasta concluída.** |
+
+### Tasks acrescentadas durante a implementação
+
+| # | Task | Severidade | Origem |
+|---|------|------------|--------|
+| [21](21-ligar-skooma-nos-specs-de-request.md) | Ligar o Skooma de verdade nos specs de request | 🟠 Alta | Tasks 11 e 12 |
+| [22](22-fix-specs-notificacao-contagem-global.md) | Suíte de specs rodava contra o banco de **desenvolvimento** (`rails_helper` usava `\|\|=` e o container define `RAILS_ENV=development`) | 🟠 Alta | Tasks 10 e 13 |
+| [23](23-fix-i18n-pt-br-dominio-crm.md) | Lacunas de tradução `pt_BR` no domínio CRM (63 chaves no frontend + 11 no backend) | 🟠 Alta | Task 20 |
+| [24](24-fix-locale-pt-br-nao-carrega-rails-i18n.md) | Locale `pt_BR` não carrega as traduções padrão do Rails — `rails-i18n` traz `pt-BR` (hífen), app usa `pt_BR` (underscore) | 🟠 Alta | Task 23 |
+
+A **21 é a mais consequente das duas**: o `conform_to_definition` do Skooma não é invocado por
+nenhum spec do projeto, apesar do `CLAUDE.md` afirmar que a documentação Swagger "é checada em
+teste". É a causa raiz das divergências que as tasks 11 e 12 corrigiram — sem ela, o mesmo
+problema reaparece no próximo campo novo.
 
 Decisão de produto já tomada para a **task 09** (2026-09-29): *manter a grade, pulando as
 ocorrências vencidas* — soma o intervalo a partir do `due_date` original repetidamente até

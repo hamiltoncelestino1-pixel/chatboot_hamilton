@@ -23,8 +23,13 @@
     "ADD": {
       "TITLE": "Adicionar pipeline",
       "FORM": {
-        "NAME": { "LABEL": "Nome", "PLACEHOLDER": "ex: Vendas" },
-        "DESCRIPTION": { "LABEL": "Descrição" }
+        "NAME": {
+          "LABEL": "Nome",
+          "PLACEHOLDER": "ex: Vendas"
+        },
+        "DESCRIPTION": {
+          "LABEL": "Descrição"
+        }
       },
       "CANCEL": "Cancelar",
       "SUBMIT": "Criar",
@@ -80,6 +85,62 @@
       "API": {
         "SUCCESS": "Agentes atualizados com sucesso.",
         "ERROR": "Algo deu errado. Tente novamente."
+      },
+      "SYNC_ASSIGNMENTS": {
+        "TITLE": "Sincronizar atribuições",
+        "DESCRIPTION": "Mantém o responsável e o time sincronizados entre um card e a conversa vinculada, nos dois sentidos."
+      }
+    },
+    "LOST_REASONS_LINK": "Motivos de perda"
+  },
+  "PIPELINE_LOST_REASON_MGMT": {
+    "HEADER": "Motivos de perda",
+    "DESCRIPTION": "Gerencie a lista de motivos que os agentes podem escolher ao mover um card para um estágio de perdido.",
+    "HEADER_BTN_TXT": "Adicionar motivo",
+    "SEARCH_PLACEHOLDER": "Buscar motivos",
+    "LOADING": "Carregando motivos de perda...",
+    "BACK": "Voltar para pipelines",
+    "FORM": {
+      "EDIT": "Editar",
+      "DELETE": "Excluir",
+      "CANCEL": "Cancelar",
+      "SUBMIT": "Salvar",
+      "TITLE": {
+        "LABEL": "Título",
+        "PLACEHOLDER": "ex.: Preço muito alto"
+      }
+    },
+    "LIST": {
+      "404": "Nenhum motivo de perda encontrado.",
+      "TABLE_HEADER": {
+        "TITLE": "Título",
+        "ACTION": "Ações"
+      }
+    },
+    "ADD": {
+      "TITLE": "Adicionar motivo de perda",
+      "API": {
+        "SUCCESS": "Motivo de perda criado com sucesso.",
+        "ERROR": "Algo deu errado. Por favor, tente novamente."
+      }
+    },
+    "EDIT": {
+      "TITLE": "Editar motivo de perda",
+      "API": {
+        "SUCCESS": "Motivo de perda atualizado com sucesso.",
+        "ERROR": "Algo deu errado. Por favor, tente novamente."
+      }
+    },
+    "DELETE": {
+      "CONFIRM": {
+        "TITLE": "Excluir motivo de perda",
+        "MESSAGE": "Tem certeza de que deseja excluir",
+        "YES": "Sim, excluir",
+        "NO": "Não, manter"
+      },
+      "API": {
+        "SUCCESS": "Motivo de perda excluído com sucesso.",
+        "ERROR": "Algo deu errado. Por favor, tente novamente."
       }
     }
   }

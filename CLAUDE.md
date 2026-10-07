@@ -187,10 +187,16 @@ direto num arquivo Vuex).
 - FactoryBot: `after(:build)`/`after(:create)` pra associações obrigatórias lazy, `trait` pra
   variações (`spec/factories/pipeline_items.rb:9-21`)
 - `shoulda-matchers` para validações simples (`it { is_expected.to validate_presence_of(:x) }`)
-- Specs de `:request` são validadas contra `swagger/swagger.json` via Skooma
-  (`spec/rails_helper.rb:79-81`) — **então documentação Swagger de endpoint novo não é
-  opcional, é checada em teste** (ver `claude/06-integracoes.md` e a regra de memória sobre
-  `swagger:build`)
+- Specs de `:request` **podem** ser validados contra `swagger/swagger.json` via Skooma, mas a
+  validação é **opt-in por exemplo**: o `config.include Skooma::RSpec[...]`
+  (`spec/rails_helper.rb:79-81`) só disponibiliza o matcher. Sem escrever
+  `expect(response).to conform_schema(200)` no exemplo, nada é verificado — e dos 181 arquivos
+  `type: :request`, só ~10 o fazem hoje. **Ao criar ou mudar um endpoint, acrescente o matcher
+  no exemplo de sucesso**, senão a documentação diverge em silêncio (foi assim que as tasks 11,
+  12 e 21 de `claude/crm_features_fixes_tasks/` acumularam divergências). O matcher se chama
+  `conform_schema`/`conform_response_schema` — **não** `conform_to_definition`, que é de outra
+  gem. `spec/swagger/openapi_spec.rb` valida o documento em si com `be_valid_document`.
+  Ver `claude/06-integracoes.md` e a regra de memória sobre `swagger:build`
 - `AGENTS.md` é explícito: **não escreva specs a menos que peçam** — regra real deste
   projeto, não suavizar
 
@@ -225,11 +231,21 @@ direto num arquivo Vuex).
 - Regra geral (`AGENTS.md`): só editar `en.yml` (backend) e `en.json`-equivalente (frontend,
   na prática os arquivos em `i18n/locale/en/*.json`); outros idiomas são geridos pela
   comunidade/Crowdin (`crowdin.yml`)
-- **Exceção real e ativa, documentada no `AGENTS.md`**: o domínio Kanban/Pipeline
-  (`i18n/locale/*/kanban.json`, `automation.json`, `macros.json`) mantém `pt_BR` sincronizado
-  manualmente junto com `en` — isso contraria a regra geral de propósito. Se você tocar
-  nesses três arquivos, atualize `en/` **e** `pt_BR/` juntos; para qualquer outro domínio,
-  siga a regra geral (só `en`)
+- **Exceção real e ativa**: **todo domínio próprio deste fork mantém `en` + `pt_BR`
+  sincronizados à mão.** A regra geral existe porque a comunidade/Crowdin traduz o conteúdo do
+  upstream — e isso simplesmente não acontece com o que é só nosso: Kanban/Pipeline, Tasks,
+  relatório de funil e as notificações desse domínio não existem no Chatwoot original, então
+  nunca vão chegar traduzidos de lugar nenhum. Na prática, hoje isso cobre:
+  `kanban.json`, `automation.json`, `macros.json`, `tasks.json`, `pipelineMgmt.json`, as
+  chaves de pipeline/task em `settings.json`, e os blocos `notifications.*` / `errors.*` de
+  pipeline/task/macro em `config/locales/pt_BR.yml`. **A regra é o critério ("é feature nossa?"),
+  não essa lista** — a lista fica desatualizada, o critério não.
+  Essa formulação substitui a versão antiga, que enumerava só três arquivos; foi justamente por
+  enumerar que `tasks.json` (21 chaves, UI inteira em inglês) e `pipelineMgmt.json` (30 chaves)
+  nasceram sem tradução. Ver `claude/crm_features_fixes_tasks/23-*.md`.
+  Para qualquer domínio herdado do upstream, siga a regra geral (só `en`).
+  **Cuidado ao criar um arquivo de locale novo**: ele precisa ser importado **e** espalhado em
+  `i18n/locale/<locale>/index.js`, senão é ignorado em silêncio (foi o caso do `tasks.json`)
 - Convenção de chave: namespace `SCREAMING_SNAKE_CASE` por feature, sub-namespace `API` pra
   mensagens de sucesso/erro — ex. `KANBAN.ITEM.API.CREATE_SUCCESS`
   (`i18n/locale/en/kanban.json`)
@@ -334,6 +350,17 @@ bundle exec rspec spec/path/to/file_spec.rb          # backend, RSpec
 bundle exec rspec spec/path/to/file_spec.rb:LINE     # teste único
 ```
 
+**RSpec no Docker local**: o container define `RAILS_ENV=development`
+(`docker-compose.yaml:42`). O `spec/rails_helper.rb` **força** `ENV['RAILS_ENV'] = 'test'` por
+causa disso — antes usava `||=`, que não sobrescrevia, e a suíte inteira rodava contra o
+`chatwoot_dev` (falhando só onde algum spec contava linhas globalmente, e silenciosamente no
+resto). Se o banco de teste estiver atrás das migrations:
+
+```bash
+docker exec -e RAILS_ENV=test chatwoot-noble-rails-1 bundle exec rails db:migrate
+docker exec chatwoot-noble-rails-1 bundle exec rspec spec/caminho/do/arquivo_spec.rb
+```
+
 ---
 
 ## 7. Checklist para implementar uma feature nova
@@ -369,12 +396,13 @@ Baseado no fluxo real observado neste repo (ex.: como Kanban/Pipeline foi constr
 - Não escrever specs a menos que peçam explicitamente (regra do `AGENTS.md`) — quando pedido:
   RSpec (model + request) no backend com FactoryBot; Vitest colocado junto do arquivo no
   frontend
-- Se adicionar/mudar endpoint de API: manter Swagger em dia (specs de request quebram via
-  Skooma se o YAML não bater com a resposta real)
+- Se adicionar/mudar endpoint de API: manter Swagger em dia **e** pôr
+  `expect(response).to conform_schema(200)` no exemplo de sucesso — sem o matcher o Skooma não
+  verifica nada (ver seção 3)
 
 **i18n**
-- Só editar `en.yml`/`en.json` — **exceto** se for no domínio Kanban/Pipeline
-  (`kanban.json`, `automation.json`, `macros.json`), que também mantém `pt_BR`
+- Só editar `en.yml`/`en.json` — **exceto** se for feature própria do fork
+  (Kanban/Pipeline, Tasks, funil), que mantém `pt_BR` junto; ver seção 3
 
 **Enterprise**
 - Ao mexer em lógica core existente, checar se há override/extensão correspondente em

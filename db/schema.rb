@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_09_18_120000) do
+ActiveRecord::Schema[7.1].define(version: 2026_09_30_120000) do
   # These extensions should be enabled to support this database
   enable_extension "pg_stat_statements"
   enable_extension "pg_trgm"
@@ -1325,6 +1325,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_09_18_120000) do
     t.datetime "updated_at", null: false
     t.string "recurrence_interval"
     t.bigint "recurrence_parent_id"
+    t.datetime "recurrence_anchor_at"
     t.index ["account_id"], name: "index_tasks_on_account_id"
     t.index ["assignee_id"], name: "index_tasks_on_assignee_id"
     t.index ["contact_id"], name: "index_tasks_on_contact_id"

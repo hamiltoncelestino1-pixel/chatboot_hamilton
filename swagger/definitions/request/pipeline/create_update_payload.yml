@@ -9,5 +9,19 @@ properties:
   position:
     type: number
     description: Display order position
+  enable_auto_assignment:
+    type: boolean
+    description: Whether new items in this pipeline are auto-assigned to its members
+  max_assignment_limit:
+    type: number
+    description: Maximum open items per member considered by auto-assignment (0 means no limit)
+  sync_assignments:
+    type: boolean
+    description: Whether changing an item's assignee also assigns the linked conversation
+  stale_alert_days:
+    type:
+      - number
+      - 'null'
+    description: Days without a stage change before an item is flagged as stale. Null disables the alert
 required:
   - name

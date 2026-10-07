@@ -43,6 +43,7 @@ import whatsappTemplates from './whatsappTemplates.json';
 import yearInReview from './yearInReview.json';
 import kanban from './kanban.json';
 import pipelineMgmt from './pipelineMgmt.json';
+import tasks from './tasks.json';
 
 export default {
   ...advancedFilters,
@@ -90,4 +91,5 @@ export default {
   ...yearInReview,
   ...kanban,
   ...pipelineMgmt,
+  ...tasks,
 };

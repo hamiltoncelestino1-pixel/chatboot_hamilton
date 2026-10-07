@@ -85,6 +85,16 @@ pt_BR:
     messages:
       search:
         time_range_limit_exceeded: 'A pesquisa está limitada aos últimos %{days} dias'
+    pipeline_stage:
+      cannot_delete_special_stage: Este estágio é obrigatório e não pode ser excluído
+    task:
+      conversation_contact_mismatch: 'A conversa não pertence ao contato da tarefa.'
+      pipeline_item_contact_mismatch: 'O card do pipeline não pertence ao contato da tarefa.'
+    macros:
+      execute:
+        pipeline_item_ids_required: pipeline_item_ids é obrigatório para executar uma macro de pipeline
+        conversation_ids_required: conversation_ids é obrigatório para executar uma macro de conversa
+        stage_not_found: stage_id não existe ou você não tem acesso ao pipeline dele
     categories:
       locale:
         unique: deve ser único na categoria e no portal
@@ -125,6 +135,7 @@ pt_BR:
       key_conflict: A chave fornecida não é permitida pois pode entrar em conflito com os atributos padrão.
     pipeline_item:
       assignee_not_member: O responsável precisa ser um agente atribuído ao pipeline
+      conversation_contact_mismatch: A conversa não pertence ao contato vinculado
       invalid_target_stage: "A stage selecionada não pertence à pipeline de destino."
       export_same_pipeline: "Não é possível exportar um card para a pipeline à qual ele já pertence."
       duplicate_contact_in_pipeline: "Este contato já possui um card neste pipeline."
@@ -221,6 +232,10 @@ pt_BR:
       sla_missed_first_response: 'Meta de SLA de Primeira Resposta não alcançada para a conversa (#%{display_id})'
       sla_missed_next_response: 'Meta de SLA de Próxima Resposta não alcançada para a conversa (#%{display_id})'
       sla_missed_resolution: 'Meta de SLA de Resolução não alcançada para a conversa (#%{display_id})'
+      task_due: 'A tarefa "%{task_title}" está vencendo'
+      pipeline_item_stale: 'O card "%{item_title}" está parado'
+    task_due_body: 'Vence %{due_date}'
+    pipeline_item_stale_body: 'Sem mudança de estágio há %{days} dias'
     attachment: 'Anexo'
     no_content: 'Sem conteúdo'
   conversations:

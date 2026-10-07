@@ -1,6 +1,7 @@
 <script setup>
 import { ref, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { useAlert } from 'dashboard/composables';
 import { usePipelineSelector } from 'dashboard/composables/usePipelineSelector';
 import { useNumberFormatter } from 'shared/composables/useNumberFormatter';
 import PipelineReportsAPI from 'dashboard/api/pipelineReports';
@@ -26,6 +27,12 @@ const fetchReport = async () => {
   try {
     const { data } = await PipelineReportsAPI.getFunnelReport(pipelineId.value);
     report.value = data;
+  } catch {
+    // Dropping the previous report matters when the failure happened while switching
+    // pipelines: the select already shows the new pipeline, so keeping the old data would
+    // attribute one pipeline's numbers to another. Empty state plus the alert is honest.
+    report.value = null;
+    useAlert(t('REPORT.DATA_FETCHING_FAILED'));
   } finally {
     isFetching.value = false;
   }

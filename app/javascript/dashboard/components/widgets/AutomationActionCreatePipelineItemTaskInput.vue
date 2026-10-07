@@ -13,14 +13,18 @@ const dueInDays = ref('');
 const updateValue = () => {
   emit('update:modelValue', {
     title: title.value || null,
-    due_in_days: dueInDays.value || null,
+    // 0 means "due today" and is a value the field accepts, so emptiness has to be tested as
+    // emptiness - `|| null` would turn a typed 0 into null on the way out and `|| ''` would
+    // blank the field on the way back in. Input.vue already gives us a real Number here
+    // (it coerces non-empty values when type is number), so this is '' or a number.
+    due_in_days: dueInDays.value === '' ? null : dueInDays.value,
   });
 };
 
 onMounted(() => {
   const data = Array.isArray(props.modelValue) ? {} : props.modelValue || {};
   title.value = data.title || '';
-  dueInDays.value = data.due_in_days || '';
+  dueInDays.value = data.due_in_days ?? '';
 });
 </script>
 

@@ -1,0 +1,29 @@
+{
+  "TASKS": {
+    "EMPTY_STATE": "Nenhuma tarefa ainda",
+    "CREATE": "Adicionar tarefa",
+    "EDIT": "Editar tarefa",
+    "SAVE": "Salvar",
+    "OVERDUE": "Vencida",
+    "TITLE_LABEL": "Título",
+    "TITLE_PLACEHOLDER": "Título da tarefa",
+    "DUE_DATE_LABEL": "Data de vencimento",
+    "DUE_DATE_PLACEHOLDER": "Selecione a data de vencimento",
+    "PAST_DUE_WARNING": "Esta data de vencimento está mais de 3 dias no passado — nenhum lembrete será enviado",
+    "ASSIGNEE_LABEL": "Responsável",
+    "ASSIGNEE_PLACEHOLDER": "Atribuir a um agente",
+    "RECURRENCE_LABEL": "Repetir",
+    "RECURRENCE_OPTIONS": {
+      "NONE": "Não se repete",
+      "DAILY": "Diariamente",
+      "WEEKLY": "Semanalmente",
+      "MONTHLY": "Mensalmente"
+    },
+    "CANCEL": "Cancelar",
+    "API": {
+      "CREATE_SUCCESS": "Tarefa criada",
+      "UPDATE_SUCCESS": "Tarefa atualizada",
+      "ERROR": "Não foi possível salvar a tarefa"
+    }
+  }
+}

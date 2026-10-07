@@ -24,4 +24,8 @@ properties:
     enum: [daily, weekly, monthly]
     description: >-
       If set, completing this task automatically creates the next occurrence with this same
-      interval, due the corresponding period after this task's due_date
+      interval. The next due date stays on the schedule set by the first task in the chain -
+      a monthly task due on the 31st keeps landing on the 31st, skipping shorter months - and
+      occurrences already in the past are skipped, so completing a task late never produces a
+      next occurrence that is itself already overdue. Editing a due date by hand re-bases the
+      schedule on the new date

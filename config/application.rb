@@ -37,7 +37,18 @@ module Chatwoot
   class Application < Rails::Application
     # Initialize configuration defaults for originally generated Rails version.
     config.load_defaults 7.0
-    config.rails_i18n.enabled_modules = [:pluralization]
+    # :locale is what carries date/number/activerecord translations. Upstream enables only
+    # :pluralization (0920a01e6), which left every non-English locale without them - validation
+    # messages came back as "Translation missing..." in development and in English in production,
+    # and I18n.l with a named format or %B raised. See
+    # claude/crm_features_fixes_tasks/24-*.md for the measurement.
+    config.rails_i18n.enabled_modules = [:locale, :pluralization]
+
+    # I18n::Locale::Fallbacks derives a locale's parents by splitting on hyphens, so pt_BR gets
+    # no parent at all and never reaches rails-i18n's pt-BR. These three are the app's locales
+    # (config/initializers/languages.rb) spelled with an underscore where the gem uses a hyphen.
+    # production.rb and staging.rb set this too - keep the three in sync.
+    config.i18n.fallbacks = [:en, { pt_BR: :'pt-BR', zh_TW: :'zh-TW', zh_CN: :'zh-CN' }]
 
     config.eager_load_paths << Rails.root.join('lib')
     config.eager_load_paths << Rails.root.join('enterprise/lib')
