@@ -9,6 +9,10 @@ ser revisados quando houver espaço.
 Nenhum item aqui é causado pelo épico CRM (`claude/crm_features_fixes_tasks/`, commit
 `e45c5c2c3`). Levantado em 2026-10-07.
 
+**18 exemplos, 5 arquivos.** Treze deles têm causa identificada e nenhuma é bug de produção: são
+specs do upstream que não acompanharam mudanças deliberadas deste fork, ou specs sensíveis à
+velocidade da máquina.
+
 ## Como rodar a suíte nesta base
 
 O container define `RAILS_ENV=development`, e desde a task 22 do épico CRM o
@@ -22,125 +26,182 @@ docker exec chatwoot-noble-rails-1 bundle exec rspec <arquivo>
 
 > ⚠️ **Qualquer medição de spec anterior a 2026-10-06 nesta base é suspeita.** Até a task 22, o
 > `rails_helper` usava `ENV['RAILS_ENV'] ||= 'test'`, que não sobrescreve — a suíte inteira
-> rodava contra o `chatwoot_dev`. Isso produzia falhas que variavam conforme o estado do banco de
-> desenvolvimento de cada máquina. Concretamente: `accounts_controller_spec` dava **8** falhas no
+> rodava contra o `chatwoot_dev`. Concretamente: `accounts_controller_spec` dava **8** falhas no
 > dev e **7** no test.
 
-## Inventário — 18 exemplos, 5 arquivos
+---
 
-### Grupo A — dependem de variável de ambiente (9 exemplos) · 🟡 Média
-
-Todos usam o helper `with_modified_env` (`spec/spec_helper.rb:16`), que é um wrapper de
-`ClimateControl.modify`.
-
-**O helper em si funciona** — testado isoladamente no container:
+## Grupo A — o spec seta ENV, o código lê de outro lugar (7 exemplos) · 🟡 Média
 
 ```
-gem carregada: 1.2.0
-dentro do bloco: "valor"
-depois do bloco: nil
+spec/controllers/api/v1/accounts_controller_spec.rb:17   expect(AccountBuilder).to have_received(:new)
+spec/controllers/api/v1/accounts_controller_spec.rb:34   expect(ChatwootCaptcha).to have_received(:new).with('123')
+spec/controllers/api/v1/accounts_controller_spec.rb:54   esperava 403, veio 404
+spec/controllers/api/v1/accounts_controller_spec.rb:74   esperava 2xx, veio 404
+spec/controllers/api/v1/accounts_controller_spec.rb:149  esperava 2xx, veio 404
+spec/models/integrations/app_spec.rb:32                  client_id saiu vazio na URL do Slack
+spec/models/integrations/app_spec.rb:47                  app.active?(account) deu false
 ```
 
-Então a causa não é a gem nem o helper. Hipótese seguinte, a confirmar: algo lê o valor **antes**
-do bloco e cacheia (`InstallationConfig`/`GlobalConfig` são semeados no boot e memoizados), ou as
-expectativas dos specs divergiram do código. Em todo caso, 9 exemplos com a mesma assinatura
-provavelmente têm uma causa única.
+**Diagnóstico.** Os specs envolvem a chamada em `with_modified_env ENABLE_ACCOUNT_SIGNUP: 'true'`
+(ou `SLACK_CLIENT_ID`), que altera a **variável de ambiente**. Mas o código não lê do ambiente:
 
-```
-spec/controllers/api/v1/accounts_controller_spec.rb:17    # calls account builder
-spec/controllers/api/v1/accounts_controller_spec.rb:34    # calls ChatwootCaptcha
-spec/controllers/api/v1/accounts_controller_spec.rb:54    # renders error response on invalid params
-spec/controllers/api/v1/accounts_controller_spec.rb:74    # creates a second account
-spec/controllers/api/v1/accounts_controller_spec.rb:149   # CW_API_ONLY_SERVER
-spec/controllers/platform/api/v1/accounts_controller_spec.rb:48    # feature flags
-spec/controllers/platform/api/v1/accounts_controller_spec.rb:178   # permissible object
-spec/models/integrations/app_spec.rb:32   # SLACK_CLIENT_ID na action URL
-spec/models/integrations/app_spec.rb:47   # SLACK_CLIENT_SECRET em #active?
+```ruby
+# app/controllers/api/v1/accounts_controller.rb:125-127
+def check_signup_enabled
+  raise ActionController::RoutingError, 'Not Found' unless GlobalConfigService.account_signup_enabled?
+end
 ```
 
-Os de `accounts_controller` giram em torno de `ENABLE_ACCOUNT_SIGNUP` e `CW_API_ONLY_SERVER`;
-os de `integrations/app` em torno das credenciais do Slack.
+`GlobalConfigService` resolve a flag pelo `InstallationConfig` (tabela no banco), não pelo ENV. O
+próprio arquivo tem um comentário explicando por quê, logo abaixo:
 
-### Grupo B — cálculo de tempo de resposta (4 exemplos) · 🟡 Média
-
-```
-spec/models/conversation_spec.rb:1025   # tracks waiting_since / first response time events
-spec/models/conversation_spec.rb:1053
-spec/models/conversation_spec.rb:1105   # reply time a partir da mensagem mais recente após o bot
-spec/models/conversation_spec.rb:1128
+```ruby
+# Read ENABLE_ACCOUNT_SIGNUP raw from InstallationConfig because GlobalConfig.get
+# typecasts it to boolean, coercing 'api_only' to true.
 ```
 
-Usam tempos relativos (`4.hours.ago`, `10.hours.ago`) com `be_within`. Candidatos naturais a
-fragilidade por fuso horário ou por ordem de criação das mensagens.
+Com o cadastro desabilitado, o `check_signup_enabled` levanta `RoutingError` → **404**. Daí a
+cascata: o `AccountBuilder` e o `ChatwootCaptcha` nunca são chamados (as duas primeiras falhas),
+porque a request morre antes.
 
-### Grupo C — mailers (4 exemplos) · 🟢 Baixa
-
-```
-spec/mailers/confirmation_instructions_spec.rb:41   # default confirmation state
-spec/mailers/confirmation_instructions_spec.rb:56   # refers to the inviter and their account
-spec/mailers/conversation_reply_mailer_spec.rb:642  # custom domain e email desabilitado
-spec/mailers/conversation_reply_mailer_spec.rb:661  # reply-to do inbox
-```
-
-### Grupo D — configuração de instalação (1 exemplo) · 🟢 Baixa
+O helper em si está íntegro — testei isoladamente:
 
 ```
-spec/models/concerns/account_email_rate_limitable_spec.rb:12   # global config quando não há override
+ClimateControl 1.2.0 | dentro do bloco: "valor" | depois do bloco: nil
 ```
 
-Usa `InstallationConfig.where(name: 'ACCOUNT_EMAILS_LIMIT').first_or_create(value: 200)`.
-Depende do estado da tabela `installation_configs`, que é semeada no boot.
+Os dois de `Integrations::App` são a mesma família: a URL saiu com `client_id=` **vazio**, ou
+seja, o valor foi lido num momento em que o bloco do `with_modified_env` já não valia (config
+carregada no boot).
 
-## Prova de que são pré-existentes
+**Correção provável:** os specs devem semear `InstallationConfig`, não o ENV. É mudança só de
+spec; o código está certo e tem justificativa escrita.
 
-**Grupos A (parte de `accounts_controller`)** — medido duas vezes, por caminhos independentes:
+---
+
+## Grupo B — specs sensíveis à velocidade da máquina (4 exemplos) · 🟡 Média
+
+```
+spec/models/conversation_spec.rb:1025   expected 3698.0 to be within 1 of 1 hour
+spec/models/conversation_spec.rb:1053   expected 3670.0 to be within 1 of 1 hour
+spec/models/conversation_spec.rb:1105   expected 3669.0 to be within 60 of 3600
+spec/models/conversation_spec.rb:1128   expected 3685.0 to be within 60 of 3600
+```
+
+**Diagnóstico.** Os quatro erram **para mais**, por 69 a 98 segundos. Não é coincidência: é o
+tempo de parede que o exemplo leva para rodar.
+
+O valor do evento é a diferença entre dois `created_at` (`reporting_event_listener.rb:30`):
+
+```ruby
+first_response_time = message.created_at.to_i - last_non_human_activity(conversation).to_i
+```
+
+E o spec monta os dois instantes em **momentos diferentes da execução**:
+
+```ruby
+let(:conversation_start_time) { 5.hours.ago }   # linha 984, avaliado no primeiro uso (linha 990)
+...
+agent_reply1_time = 4.hours.ago                 # avaliado bem depois, dentro do exemplo
+```
+
+Se passam Δ segundos entre as duas avaliações, a diferença vira `1 hora + Δ` em vez de 1 hora
+exata. Com `be_within(1.second)`, qualquer máquina que leve mais de um segundo entre as linhas
+reprova. Este container é lento o bastante para somar ~1,5 minuto.
+
+**Isso não é bug de produção** — o cálculo está correto. São specs que assumem execução
+instantânea. Correção: congelar o tempo com `travel_to` em vez de recalcular `.ago` em pontos
+diferentes.
+
+---
+
+## Grupo C — white-label: os specs ainda esperam a marca "Chatwoot" (2 exemplos) · 🟢 Baixa
+
+```
+spec/mailers/confirmation_instructions_spec.rb:41
+  expect(mail_body).to include('Welcome to Chatwoot. We just need to verify your email address...')
+spec/mailers/confirmation_instructions_spec.rb:56
+  expect(mail_body).to include("#{inviter.name} invited you to join the #{account.name} workspace on Chatwoot.")
+```
+
+**Diagnóstico.** O template já foi white-labeled e interpola a marca:
+
+```erb
+<%# app/views/devise/mailer/confirmation_instructions.html.erb:12 e :39 %>
+"Welcome to #{brand_name}. We just need to verify your email address before you can start using your account."
+"#{inviter.name} invited you to join the #{account_name} workspace on #{brand_name}."
+```
+
+Os specs ficaram com a string literal `Chatwoot`. São **specs obsoletos para este fork**, não
+defeito: o e-mail está certo, com a marca da Noble. Correção: usar `brand_name` na expectativa.
+
+---
+
+## Grupo D — a confirmar (5 exemplos) · 🟢 Baixa
+
+Causa não investigada; só a asserção que falhou está registrada.
+
+```
+spec/controllers/platform/api/v1/accounts_controller_spec.rb:48
+spec/controllers/platform/api/v1/accounts_controller_spec.rb:178
+  expect(...enabled_features.keys).to match_array(%w[inbox_management ip_lookup help_center])
+  → provável drift entre o spec e os defaults de config/features.yml
+
+spec/models/concerns/account_email_rate_limitable_spec.rb:12
+  expect(account.email_rate_limit).to eq(200)
+  → depende do valor semeado de ACCOUNT_EMAILS_LIMIT em installation_configs
+
+spec/mailers/conversation_reply_mailer_spec.rb:642   expect(mail.reply_to).to eq([...assignee&.email])
+spec/mailers/conversation_reply_mailer_spec.rb:661   expect(mail.from).to eq([inbox.email_address])
+```
+
+---
+
+## Prova de que nenhum deles é nosso
+
+**Parte do grupo A (`accounts_controller`)** — medido por dois caminhos independentes:
 
 1. Na task 21, restaurei o `swagger/swagger.json` do `HEAD` via `git show` e rodei os mesmos dois
-   arquivos: resultado idêntico, descartando o rebuild do Swagger como causa.
+   arquivos: resultado idêntico, descartando o rebuild do Swagger.
 2. Na task 22, repetido com `RAILS_ENV=test`: 8 falhas viraram 7 — uma era artefato do banco de
    dev, as outras 7 são reais e pré-existentes.
 
-**Grupos A (parte de `integrations`), B, C e D** — revertí as quatro configurações da task 24 com
-`git checkout e45c5c2c3^ --` e rodei exatamente os mesmos 11 exemplos:
+**Os 11 exemplos de `models/` e `mailers/`** — revertí as quatro configurações da task 24 com
+`git checkout e45c5c2c3^ --` e rodei exatamente os mesmos exemplos:
 
 ```
-grep da linha da task 24 em application.rb -> 0   (confirma que a reversão estava ativa)
+grep da linha da task 24 em application.rb -> 0   (confirma a reversão ativa)
 11 examples, 11 failures
 ```
 
-Com a task 24 aplicada, os mesmos 11 falham. **11 de 11 nos dois cenários** — a mudança de i18n
-não tem relação com eles. (O grupo C também foi testado isoladamente antes, com o mesmo
-resultado: 4 falhas com e sem a mudança.)
+Com a task 24 aplicada, os mesmos 11 falham. **11 de 11 nos dois cenários.** O grupo C também foi
+testado isoladamente antes, com o mesmo resultado nos dois sentidos.
 
 ## Nota sobre a contagem
 
-A execução de `spec/mailers/ spec/models/` reporta **15 failures** para **11** linhas de rerun
-(`rspec ./spec/...`). A diferença são exemplos com mais de uma expectativa falhando no mesmo
-bloco. A lista de 11 é a autoritativa, porque é a que o RSpec manda rodar de novo.
+A execução de `spec/mailers/ spec/models/` reporta **15 failures** para **11** linhas de rerun.
+A diferença são exemplos com mais de uma expectativa falhando no mesmo bloco. A lista de 11 é a
+autoritativa, porque é a que o RSpec manda rodar de novo. Rodando os 18 isoladamente:
+`18 examples, 18 failures`.
 
 ## O que está verde
 
-Vale registrar o contraponto, porque é a área que o épico CRM tocou:
-`spec/jobs/notification/`, `spec/models/concerns/switch_locale_spec.rb`,
-`spec/models/notification_spec.rb`, `spec/drops/`, `spec/policies/pipeline_item_policy_spec.rb`,
-`spec/models/pipeline_item_spec.rb`, `spec/swagger/openapi_spec.rb`,
-`spec/controllers/api/v1/accounts/pipelines_controller_spec.rb` e
-`spec/controllers/api/v1/accounts/pipeline_items_controller_spec.rb` — todos passando.
+O contraponto, que é a área tocada pelo épico CRM: `spec/jobs/notification/`,
+`spec/models/concerns/switch_locale_spec.rb`, `spec/models/notification_spec.rb`, `spec/drops/`,
+`spec/policies/pipeline_item_policy_spec.rb`, `spec/models/pipeline_item_spec.rb`,
+`spec/swagger/openapi_spec.rb` e os dois specs de request de pipeline — todos passando.
 
-## Próximo passo sugerido
+## Ordem sugerida para atacar
 
-Capturar a mensagem de erro de cada grupo e, a partir dela, decidir se o defeito está no spec
-(frágil) ou no código.
-
-Comece pelo **grupo A**: são 9 dos 18 exemplos, com a mesma assinatura, e o helper já foi
-descartado como causa — o que resta é um ponto de cache ou expectativas desatualizadas, e
-qualquer dos dois provavelmente resolve os 9 de uma vez.
-
-```bash
-docker exec chatwoot-noble-rails-1 bundle exec rspec \
-  spec/models/integrations/app_spec.rb:32 \
-  spec/controllers/api/v1/accounts_controller_spec.rb:17
-```
-
-Dois exemplos de arquivos diferentes, o menor par que representa o grupo — bem mais rápido que
-rodar os 18.
+1. **Grupo C** (2 exemplos) — a correção é trocar uma string literal por `brand_name`. Mais
+   rápido e sem risco.
+2. **Grupo A** (7 exemplos) — uma causa só: trocar `with_modified_env` por semear
+   `InstallationConfig`. Começar pelo par mais barato, um de cada arquivo:
+   ```bash
+   docker exec chatwoot-noble-rails-1 bundle exec rspec \
+     spec/models/integrations/app_spec.rb:32 \
+     spec/controllers/api/v1/accounts_controller_spec.rb:17
+   ```
+3. **Grupo B** (4 exemplos) — envolver os exemplos em `travel_to`.
+4. **Grupo D** (5 exemplos) — investigar a causa primeiro.
