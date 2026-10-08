@@ -156,7 +156,7 @@ class Api::V1::Accounts::PipelineItemsController < Api::V1::Accounts::BaseContro
   def create_params
     params.require(:pipeline_item).permit(
       :pipeline_stage_id, :contact_id, :conversation_id,
-      :title, :value, :notes, :position, :assignee_id, :team_id,
+      :title, :value, :notes, :position, :assignee_id, :team_id, :pipeline_lost_reason_id,
       custom_attributes: {}
     )
   end

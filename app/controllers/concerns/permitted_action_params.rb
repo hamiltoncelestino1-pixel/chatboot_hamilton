@@ -9,7 +9,7 @@ module PermittedActionParams
 
   HASH_ACTION_PARAM_FILTER = [
     :pipeline_id, :pipeline_stage_id, :target_stage_id, :target_pipeline_id,
-    :assignee_mode, :team_mode, :title, :value, :notes, :message,
+    :assignee_mode, :team_mode, :title, :value, :notes, :message, :pipeline_lost_reason_id,
     { labels: [], team_ids: [] }
   ].freeze
 

@@ -60,8 +60,10 @@ Rails.application.configure do
   # config.active_job.queue_name_prefix = "Chatwoot_#{Rails.env}"
 
   # Enable locale fallbacks for I18n (makes lookups for any locale fall back to
-  # the I18n.default_locale when a translation cannot be found).
-  config.i18n.fallbacks = [I18n.default_locale]
+  # the I18n.default_locale when a translation cannot be found). The hash carries the
+  # underscore -> hyphen hop the Fallbacks class cannot derive on its own; assigning here would
+  # otherwise discard the one set in config/application.rb, so keep the two in sync.
+  config.i18n.fallbacks = [I18n.default_locale, { pt_BR: :'pt-BR', zh_TW: :'zh-TW', zh_CN: :'zh-CN' }]
 
   # Send deprecation notices to registered listeners.
   config.active_support.deprecation = :notify

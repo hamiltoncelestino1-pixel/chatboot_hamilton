@@ -103,6 +103,7 @@
       "PIPELINE": {
         "PIPELINE_PLACEHOLDER": "Selecione a pipeline",
         "STAGE_PLACEHOLDER": "Selecione a etapa",
+        "LOST_REASON_PLACEHOLDER": "Selecione o motivo da perda",
         "TARGET_PIPELINE_PLACEHOLDER": "Selecione a pipeline de destino",
         "ASSIGNEE_MODE_PLACEHOLDER": "Selecione o responsável",
         "TEAM_MODE_PLACEHOLDER": "Selecione o time",
@@ -147,7 +148,8 @@
       "VALUE_MUST_BE_BETWEEN_1_AND_998": "O valor deve ser entre 1 e 998",
       "ACTION_PARAMETERS_REQUIRED": "Os parâmetros de ação são necessários",
       "ATLEAST_ONE_CONDITION_REQUIRED": "Pelo menos uma condição é necessária",
-      "ATLEAST_ONE_ACTION_REQUIRED": "Pelo menos uma ação é necessária"
+      "ATLEAST_ONE_ACTION_REQUIRED": "Pelo menos uma ação é necessária",
+      "TASK_TITLE_REQUIRED": "O título da tarefa é obrigatório"
     },
     "NONE_OPTION": "Nenhuma",
     "EVENTS": {

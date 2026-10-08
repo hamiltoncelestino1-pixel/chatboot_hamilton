@@ -646,5 +646,24 @@
     "AVG_REPLY_TIME": "Tempo Médio de Espera do Cliente",
     "RESOLUTION_COUNT": "Contagem de Resolução",
     "CONVERSATIONS": "Nº de Conversas"
+  },
+  "FUNNEL_REPORTS": {
+    "HEADER": "Funil",
+    "DESCRIPTION": "Veja o valor em aberto, a distribuição por estágio e o tempo médio em estágio de um pipeline.",
+    "PIPELINE_PLACEHOLDER": "Selecione um pipeline",
+    "NO_PIPELINE_SELECTED": "Selecione um pipeline para ver o relatório de funil.",
+    "SNAPSHOT_NOTE": "A distribuição por estágio e o tempo médio em estágio refletem apenas os cards que estão em cada estágio agora — não é o histórico completo de todos os cards que já passaram pelo funil.",
+    "OPEN_VALUE": {
+      "LABEL": "Valor em aberto",
+      "INFO_TEXT": "Soma do valor de todos os cards em aberto (nem ganhos nem perdidos) deste pipeline"
+    },
+    "STAGE_DISTRIBUTION": {
+      "TITLE": "Cards por estágio",
+      "DATASET_LABEL": "Cards"
+    },
+    "AVG_TIME": {
+      "TITLE": "Tempo médio em estágio (dias)",
+      "DATASET_LABEL": "Dias"
+    }
   }
 }

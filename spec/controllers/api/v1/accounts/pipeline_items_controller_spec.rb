@@ -61,6 +61,7 @@ RSpec.describe 'Pipeline Items API', type: :request do
              as: :json
 
         expect(response).to have_http_status(:success)
+        expect(response).to conform_schema(200)
         expect(item.reload.pipeline_stage_id).to eq(target_stage.id)
         expect(response.parsed_body['id']).to eq(item.id)
       end

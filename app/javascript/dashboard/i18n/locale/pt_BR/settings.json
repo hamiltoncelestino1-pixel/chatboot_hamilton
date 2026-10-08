@@ -161,7 +161,8 @@
           "SLA_MISSED_FIRST_RESPONSE": "Uma conversa perde o SLA de primeira resposta",
           "SLA_MISSED_NEXT_RESPONSE": "Uma conversa perde o SLA da próxima resposta",
           "SLA_MISSED_RESOLUTION": "Uma conversa perde o SLA de resolução",
-          "TASK_DUE": "Uma tarefa está vencendo"
+          "TASK_DUE": "Uma tarefa está vencendo",
+          "PIPELINE_ITEM_STALE": "Um card do pipeline está parado"
         },
         "BROWSER_PERMISSION": "Ative notificações push em seu navegador para poder recebê-las"
       },
@@ -361,6 +362,7 @@
     "REPORTS_LABEL": "Etiquetas",
     "REPORTS_INBOX": "Caixa de Entrada",
     "REPORTS_TEAM": "Time",
+    "REPORTS_FUNNEL": "Funil",
     "AGENT_ASSIGNMENT": "Atribuição de Agentes",
     "SET_AVAILABILITY_TITLE": "Defina como",
     "SET_YOUR_AVAILABILITY": "Disponibilidade",

@@ -6,6 +6,7 @@ export const VALUE_MUST_BE_BETWEEN_1_AND_998 =
 export const ACTION_PARAMETERS_REQUIRED = 'ACTION_PARAMETERS_REQUIRED';
 export const ATLEAST_ONE_CONDITION_REQUIRED = 'ATLEAST_ONE_CONDITION_REQUIRED';
 export const ATLEAST_ONE_ACTION_REQUIRED = 'ATLEAST_ONE_ACTION_REQUIRED';
+export const TASK_TITLE_REQUIRED = 'TASK_TITLE_REQUIRED';
 
 const isEmptyValue = value => {
   if (!value) {
@@ -136,6 +137,20 @@ const validateSingleAction = action => {
     (!action.action_params || action.action_params.length === 0)
   ) {
     return ACTION_PARAMETERS_REQUIRED;
+  }
+
+  // The guard above only catches arrays. This action's params are an object
+  // ({ title, due_in_days }), and `{}.length` is undefined, so a completely blank form sails
+  // through it - the title has to be asserted by name. Without this the rule saves fine and
+  // then never creates a task, because Task validates presence of title server-side.
+  // Trimmed to match that server-side check: Rails' `presence` uses blank?, which counts a
+  // whitespace-only title as absent, so accepting one here would just move the silent failure
+  // from the form to runtime.
+  if (
+    action.action_name === 'create_pipeline_item_task' &&
+    !action.action_params?.title?.trim()
+  ) {
+    return TASK_TITLE_REQUIRED;
   }
 
   return null;

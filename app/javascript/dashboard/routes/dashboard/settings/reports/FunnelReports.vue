@@ -1,6 +1,7 @@
 <script setup>
-import { ref, computed, watch } from 'vue';
+import { ref, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { useAlert } from 'dashboard/composables';
 import { usePipelineSelector } from 'dashboard/composables/usePipelineSelector';
 import { useNumberFormatter } from 'shared/composables/useNumberFormatter';
 import PipelineReportsAPI from 'dashboard/api/pipelineReports';
@@ -20,28 +21,38 @@ const { pipelineId, pipelineOptions, onAutoSelect } = usePipelineSelector();
 const isFetching = ref(false);
 const report = ref(null);
 
-const selectedPipeline = computed({
-  get: () =>
-    pipelineOptions.value.find(option => option.id === pipelineId.value) ||
-    null,
-  set: option => {
-    pipelineId.value = option?.id || null;
-  },
-});
-
 const fetchReport = async () => {
   if (!pipelineId.value) return;
   isFetching.value = true;
   try {
     const { data } = await PipelineReportsAPI.getFunnelReport(pipelineId.value);
     report.value = data;
+  } catch {
+    // Dropping the previous report matters when the failure happened while switching
+    // pipelines: the select already shows the new pipeline, so keeping the old data would
+    // attribute one pipeline's numbers to another. Empty state plus the alert is honest.
+    report.value = null;
+    useAlert(t('REPORT.DATA_FETCHING_FAILED'));
   } finally {
     isFetching.value = false;
   }
 };
 
+const selectedPipeline = computed({
+  get: () =>
+    pipelineOptions.value.find(option => option.id === pipelineId.value) ||
+    null,
+  set: option => {
+    pipelineId.value = option?.id || null;
+    // Manual pipeline change refetches here, matching how every other usePipelineSelector
+    // consumer wires it (e.g. AutomationActionPipelineStageInput). Watching pipelineId
+    // instead would double-fetch on the initial auto-select, since defaultToFirstPipeline
+    // sets the ref and synchronously calls the onAutoSelect callback before the watch runs.
+    fetchReport();
+  },
+});
+
 onAutoSelect(fetchReport);
-watch(pipelineId, fetchReport);
 
 const openValueFormatted = computed(() =>
   formatCurrency(report.value?.open_value || 0)

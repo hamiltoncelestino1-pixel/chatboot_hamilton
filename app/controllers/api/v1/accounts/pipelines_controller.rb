@@ -29,6 +29,13 @@ class Api::V1::Accounts::PipelinesController < Api::V1::Accounts::BaseController
 
   private
 
+  # Without this, the base controller authorizes the Pipeline *class* and PipelinePolicy#show?
+  # (`assigned_pipelines.include?(record)`) can never be true - show returned 401 to everyone,
+  # administrators included. Same shape as TasksController and PipelineItemsController.
+  def check_authorization
+    authorize(@pipeline || Pipeline)
+  end
+
   def fetch_pipeline
     @pipeline = policy_scope(Current.account.pipelines).includes(:pipeline_stages).find(params[:id])
   end

@@ -6,11 +6,13 @@
 # remove_label (conversation-level actions) - including this module in a class that inherits
 # from ActionService would otherwise silently shadow those with incompatible signatures.
 module PipelineItemActions
-  def move_stage(pipeline_item, target_stage_id)
+  def move_stage(pipeline_item, target_stage_id, lost_reason_id = nil)
     target_stage = PipelineStage.find_by(id: target_stage_id, pipeline_id: pipeline_item.pipeline_id)
     return nil if target_stage.blank?
 
-    pipeline_item.update!(pipeline_stage_id: target_stage.id, position: target_stage.next_position)
+    attrs = { pipeline_stage_id: target_stage.id, position: target_stage.next_position }
+    attrs[:pipeline_lost_reason_id] = lost_reason_id if lost_reason_id.present?
+    pipeline_item.update!(attrs)
     target_stage
   end
 
@@ -46,6 +48,7 @@ module PipelineItemActions
   def create_task_for_pipeline_item(pipeline_item, attrs)
     assignee_id = attrs[:assignee_id].presence || pipeline_item.assignee_id
     log_missing_task_assignee(pipeline_item) if assignee_id.blank?
+    log_missing_task_title(pipeline_item) if attrs[:title].blank?
 
     pipeline_item.account.tasks.create!(
       title: attrs[:title],
@@ -114,6 +117,16 @@ module PipelineItemActions
     Rails.logger.info(
       '[PipelineItemActions] create_task_for_pipeline_item: no assignee_id given and ' \
       "pipeline_item##{pipeline_item.id} has none either - task creation will fail validation"
+    )
+  end
+
+  # The form now blocks saving a rule with a blank title, but rules saved before that fix are
+  # still out there failing inside the callers' generic rescue. This is the only trace of why.
+  def log_missing_task_title(pipeline_item)
+    Rails.logger.info(
+      '[PipelineItemActions] create_task_for_pipeline_item: blank title for ' \
+      "pipeline_item##{pipeline_item.id} - task creation will fail validation " \
+      '(automation/macro saved before the title became required?)'
     )
   end
 end

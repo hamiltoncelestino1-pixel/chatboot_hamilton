@@ -46,4 +46,13 @@ LANGUAGES_CONFIG = {
   41 => { name: 'Eesti keel (et)', iso_639_3_code: 'est', iso_639_1_code: 'et', enabled: true }
 }.filter { |_key, val| val[:enabled] }.freeze
 
-Rails.configuration.i18n.available_locales = LANGUAGES_CONFIG.map { |_index, lang| lang[:iso_639_1_code].to_sym }
+# Locale codes above use underscores (pt_BR), while rails-i18n ships the IETF spelling
+# (pt-BR). I18n::Backend::Simple#store_translations silently drops data for any locale outside
+# available_locales when enforce_available_locales is on, so without these aliases the gem's
+# pt-BR/zh-TW/zh-CN files are read and thrown away. They are aliases for lookup only - they are
+# deliberately NOT in LANGUAGES_CONFIG, so they never show up as a selectable language.
+# config.i18n.fallbacks (config/application.rb) is what routes pt_BR -> pt-BR.
+LOCALE_ALIASES_FOR_RAILS_I18N = %i[pt-BR zh-TW zh-CN].freeze
+
+Rails.configuration.i18n.available_locales =
+  LANGUAGES_CONFIG.map { |_index, lang| lang[:iso_639_1_code].to_sym } + LOCALE_ALIASES_FOR_RAILS_I18N

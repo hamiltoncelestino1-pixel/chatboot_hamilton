@@ -1,0 +1,21 @@
+type: object
+properties:
+  pipeline_item:
+    type: object
+    description: >
+      The controller reads these through params.require(:pipeline_item), so the body is
+      wrapped in this key - unlike the reorder payload, which is read unwrapped.
+    properties:
+      target_pipeline_id:
+        type: number
+        description: The ID of the pipeline the card is being moved to
+      target_stage_id:
+        type: number
+        description: >
+          The ID of the stage within the target pipeline to drop the card in. Must belong to
+          target_pipeline_id, otherwise the request is rejected with 422.
+    required:
+      - target_pipeline_id
+      - target_stage_id
+required:
+  - pipeline_item

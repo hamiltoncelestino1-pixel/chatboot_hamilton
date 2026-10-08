@@ -33,7 +33,7 @@ class Macros::PipelineExecutionService
 
   def move_pipeline_item_stage(pipeline_item, params)
     params = params[0]
-    target_stage = move_stage(pipeline_item, params[:target_stage_id])
+    target_stage = move_stage(pipeline_item, params[:target_stage_id], params[:pipeline_lost_reason_id])
     log_invalid_target_stage(pipeline_item, params[:target_stage_id]) if target_stage.blank?
   end
 

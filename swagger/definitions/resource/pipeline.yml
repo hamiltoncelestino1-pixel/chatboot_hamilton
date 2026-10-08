@@ -20,6 +20,27 @@ properties:
   stages_count:
     type: number
     description: Number of stages in this pipeline
+  enable_auto_assignment:
+    type: boolean
+    description: Whether new items in this pipeline are auto-assigned to its members
+  max_assignment_limit:
+    type: number
+    description: Maximum open items per member considered by auto-assignment (0 means no limit)
+  sync_assignments:
+    type: boolean
+    description: Whether changing an item's assignee also assigns the linked conversation
+  stale_alert_days:
+    type:
+      - number
+      - 'null'
+    description: Days without a stage change before an item is flagged as stale. Null disables the alert
+  stages:
+    type: array
+    description: >
+      The pipeline's stages, ordered by position. Added by the index/show/create/update views
+      (not by the shared partial), so every endpoint that returns a pipeline includes it.
+    items:
+      $ref: '#/components/schemas/pipeline_stage'
   created_at:
     type: string
     format: date-time
@@ -28,3 +49,4 @@ properties:
     type: string
     format: date-time
     description: The date and time when the pipeline was last updated
+additionalProperties: false

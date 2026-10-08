@@ -9,8 +9,13 @@ properties:
       - 'null'
     description: The title of the item (card)
   value:
-    type: number
-    description: The monetary value associated with this deal
+    type:
+      - string
+      - 'null'
+    description: >
+      The monetary value associated with this deal. Serialized as a string, not a number: the
+      column is decimal(15,2) and Jbuilder renders BigDecimal as a string to avoid the float
+      rounding a JSON number would introduce.
   notes:
     type:
       - string
@@ -22,6 +27,15 @@ properties:
   pipeline_stage_id:
     type: number
     description: The ID of the stage this item belongs to
+  pipeline_stage_name:
+    type: string
+    description: The name of the stage this item belongs to
+  pipeline_id:
+    type: number
+    description: The ID of the pipeline this item belongs to, resolved through its stage
+  pipeline_name:
+    type: string
+    description: The name of the pipeline this item belongs to
   pipeline_lost_reason_id:
     type:
       - number
@@ -49,27 +63,39 @@ properties:
           - 'null'
       avatar_url:
         type: string
-  assignee_id:
-    type:
-      - integer
-      - 'null'
-    description: The ID of the agent assigned to this item
-  team_id:
-    type:
-      - integer
-      - 'null'
-    description: The ID of the team assigned to this item
+  # The partial emits an explicit null for each of these when the association is absent, so the
+  # plain $ref (which forbids null) never matched an unassigned card - the common case.
   assignee:
-    $ref: '#/components/schemas/agent'
+    oneOf:
+      - $ref: '#/components/schemas/agent'
+      - type: 'null'
   team:
-    $ref: '#/components/schemas/team'
+    oneOf:
+      - $ref: '#/components/schemas/team'
+      - type: 'null'
   pipeline_lost_reason:
-    $ref: '#/components/schemas/pipeline_lost_reason'
+    oneOf:
+      - $ref: '#/components/schemas/pipeline_lost_reason'
+      - type: 'null'
+  label_list:
+    type: array
+    items:
+      type: string
+    description: The labels applied to this item
+  custom_attributes:
+    type: object
+    description: Custom attribute values set on this item, keyed by attribute key
+  overdue_tasks_count:
+    type: number
+    description: Number of pending tasks on this item whose due date has passed. Drives the overdue badge on the card
   created_at:
-    type: string
-    format: date-time
-    description: The date and time when the item was created
+    type: number
+    description: >-
+      When the item was created, as a Unix timestamp in seconds. Note this is an integer, not an
+      ISO-8601 string - the serializer emits `created_at.to_i`
   updated_at:
-    type: string
-    format: date-time
-    description: The date and time when the item was last updated
+    type: number
+    description: >-
+      When the item was last updated, as a Unix timestamp in seconds. Note this is an integer, not
+      an ISO-8601 string - the serializer emits `updated_at.to_i`
+additionalProperties: false

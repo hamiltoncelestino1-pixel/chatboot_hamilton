@@ -103,6 +103,7 @@
       "PIPELINE": {
         "PIPELINE_PLACEHOLDER": "Select pipeline",
         "STAGE_PLACEHOLDER": "Select stage",
+        "LOST_REASON_PLACEHOLDER": "Select lost reason",
         "TARGET_PIPELINE_PLACEHOLDER": "Select target pipeline",
         "ASSIGNEE_MODE_PLACEHOLDER": "Select assignee",
         "TEAM_MODE_PLACEHOLDER": "Select team",
@@ -147,7 +148,8 @@
       "VALUE_MUST_BE_BETWEEN_1_AND_998": "Value must be between 1 and 998",
       "ACTION_PARAMETERS_REQUIRED": "Action parameters are required",
       "ATLEAST_ONE_CONDITION_REQUIRED": "At least one condition is required",
-      "ATLEAST_ONE_ACTION_REQUIRED": "At least one action is required"
+      "ATLEAST_ONE_ACTION_REQUIRED": "At least one action is required",
+      "TASK_TITLE_REQUIRED": "Task title is required"
     },
     "NONE_OPTION": "None",
     "LAST_RESPONDING_AGENT": "Last Responding Agent",

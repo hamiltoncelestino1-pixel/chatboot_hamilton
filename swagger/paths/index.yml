@@ -562,7 +562,7 @@
     - $ref: '#/components/parameters/pipeline_id'
     - $ref: '#/components/parameters/pipeline_stage_id'
   get:
-    $ref: ./application/pipelines/stages/index.yml
+    $ref: ./application/pipelines/stages/show.yml
   patch:
     $ref: ./application/pipelines/stages/update.yml
   delete:
@@ -589,11 +589,17 @@
     - $ref: '#/components/parameters/account_id'
     - $ref: '#/components/parameters/pipeline_item_id'
   get:
-    $ref: ./application/pipelines/items/index.yml
+    $ref: ./application/pipelines/items/show.yml
   patch:
     $ref: ./application/pipelines/items/update.yml
   delete:
     $ref: ./application/pipelines/items/delete.yml
+/api/v1/accounts/{account_id}/pipeline_items/{pipeline_item_id}/export:
+  parameters:
+    - $ref: '#/components/parameters/account_id'
+    - $ref: '#/components/parameters/pipeline_item_id'
+  post:
+    $ref: ./application/pipelines/items/export.yml
 /api/v1/accounts/{account_id}/pipeline_items/reorder:
   parameters:
     - $ref: '#/components/parameters/account_id'
